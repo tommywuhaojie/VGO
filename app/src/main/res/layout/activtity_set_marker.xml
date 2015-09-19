@@ -1,0 +1,66 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MapActivity" >
+
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        class="com.google.android.gms.maps.SupportMapFragment"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SET"
+        android:id="@+id/set"
+        android:layout_gravity="center_horizontal|bottom"
+        android:onClick="setIsClicked"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/marker"
+        android:layout_gravity="center"
+        android:src="@drawable/a_marker"
+        android:layout_marginBottom="20dp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DONE"
+        android:id="@+id/done"
+        android:layout_gravity="center_horizontal|bottom"
+        android:onClick="doneIsClicked"
+        android:layout_marginBottom="48dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
+
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchAddress"
+        android:layout_gravity="center_horizontal|top"
+        android:iconifiedByDefault="true"
+        android:queryHint="Enter the address here..."
+        android:background="@android:color/darker_gray" />
+
+    <ImageButton
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/imageButton"
+        android:layout_gravity="right|center_vertical"
+        android:background="@drawable/my_location_button"
+        android:layout_marginTop="140dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:onClick="myLocationIsClicked" />
+
+
+</FrameLayout>
+

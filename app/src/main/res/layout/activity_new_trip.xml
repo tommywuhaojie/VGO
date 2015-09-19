@@ -1,0 +1,209 @@
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linearLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        xmlns:android="http://schemas.android.com/apk/res/android" />
+
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin" tools:context="v_go.version10.NewTrip"
+            android:background="#6495ED"
+            android:id="@+id/newTripRel">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="From"
+                android:id="@+id/textView14"
+                android:layout_marginTop="10dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="To"
+                android:id="@+id/textView15"
+                android:layout_below="@+id/textView14"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="190dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/from"
+                android:text=" please set the pickup location and destination"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_gravity="right"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_alignBottom="@+id/textView14"
+                android:layout_toRightOf="@+id/textView16"
+                android:layout_alignRight="@+id/when"
+                android:layout_alignEnd="@+id/when" />
+
+            <TextView
+                android:layout_width="190dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/to"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_alignBottom="@+id/textView15"
+                android:layout_toRightOf="@+id/textView16"
+                android:layout_toEndOf="@+id/textView16" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="When "
+                android:id="@+id/textView16"
+                android:layout_below="@+id/textView15"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/when"
+                android:text=" please set the time &amp; date"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_alignBottom="@+id/textView16"
+                android:layout_toRightOf="@+id/textView16"
+                android:layout_toEndOf="@+id/textView16" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Approx. Distance"
+                android:id="@+id/textView17"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="20dp"
+                android:layout_below="@+id/imageView2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Approx. Commute Time"
+                android:id="@+id/textView18"
+                android:textColor="#FFFFFF"
+                android:layout_below="@+id/textView17"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Suggested Price"
+                android:id="@+id/textView19"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="20dp"
+                android:layout_below="@+id/textView18"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/distance"
+                android:text="0 km"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_above="@+id/textView18"
+                android:layout_alignRight="@+id/time"
+                android:layout_alignEnd="@+id/time" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/time"
+                android:text="0 min"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_alignBottom="@+id/textView18"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/price"
+                android:text="$ 0"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_alignBottom="@+id/textView19"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/imageView"
+                android:clickable="true"
+                android:onClick="setTripIsClicked"
+                android:layout_above="@+id/to"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/set_trip_button2"
+                android:focusableInTouchMode="false"
+                android:focusable="false" />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/imageView2"
+                android:src="@drawable/schedule_button"
+                android:clickable="true"
+                android:onClick="scheduleIsClicked"
+                android:nestedScrollingEnabled="false"
+                android:layout_below="@+id/to"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SCHEDULE THIS RIDE"
+                android:textAllCaps="false"
+                android:id="@+id/button"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+        </RelativeLayout>
+    </LinearLayout>
