@@ -1,11 +1,20 @@
 package v_go.version10;
 
-import java.lang.String;
+import android.util.Log;
 
-import javax.security.auth.login.LoginContext;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
- * Created by xxx on 2015/9/25.
+ * Created by Michael on 2015/9/26.
  */
 public class User {
     /*
@@ -23,7 +32,7 @@ public class User {
     public String Register(String email,String password,String phone,String lastname,String firstname){
         String text = null;
         String url_string = this.Rootpath()+"/login/register.php";
-        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+password;
+        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
         HttpURLConnection urlconnet = null;
         URL url = null;
         CookieManager cookieManager = new CookieManager();
@@ -54,10 +63,10 @@ public class User {
             }
             text = response.toString().trim();
         } catch (MalformedURLException e) {
-            Log.i("michaellog","error0");
+            Log.i("DEBUG", "error0");
             e.printStackTrace();
         } catch (IOException e) {
-            Log.i("michaellog","error1");
+            Log.i("DEBUG","error1");
             e.printStackTrace();
         }finally {
             if (urlconnet!=null){
@@ -72,7 +81,7 @@ public class User {
     * -1    : fail to login
     *1      : sucessfully login as passanger
     * */
-    public Login(String email,String password){
+    public String Login(String email,String password){
         String text = null;
         String url_string = this.Rootpath()+"/login/logIn.php";
         String data="email="+email+"&password="+password;
@@ -106,12 +115,12 @@ public class User {
             }
             text = response.toString().trim();
         } catch (MalformedURLException e) {
-            Log.i("michaellog","error0");
+            Log.i("DEBUG","error0");
             e.printStackTrace();
         } catch (IOException e) {
-            Log.i("michaellog","error1");
+            Log.i("DEBUG","error1");
             e.printStackTrace();
-        }finally {
+        } finally {
             if (urlconnet!=null){
                 urlconnet.disconnect();
 

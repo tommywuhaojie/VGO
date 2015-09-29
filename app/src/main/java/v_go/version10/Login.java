@@ -15,6 +15,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -46,6 +47,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import v_go.version10.User;
 
 public class Login extends AppCompatActivity {
 
@@ -140,51 +143,49 @@ public class Login extends AppCompatActivity {
         final String[] content = new String[1];
 
         //AsyncTask-------------------------------------------------------------
-        class MyAsyncTask extends AsyncTask<Void, Void, String>
+        class LoginAsyncTask extends AsyncTask<Void, Void, String>
         {
             private ProgressDialog pDialog;
+            private String email, pwd;
+            private int result;
+            private final int SUCCESS = 1;
+            private final int FAIL = -1;
+
+            public LoginAsyncTask(String email, String pwd) {
+                super();
+                this.email = email;
+                this.pwd = pwd;
+            }
+
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
 
                 pDialog = new ProgressDialog(Login.this);
-                pDialog.setMessage("LOGGING IN...");
+                pDialog.setMessage("Logging in...");
                 pDialog.show();
             }
             @Override
             protected String doInBackground(Void... params)
             {
                 try {
-                    URL url = new URL("http://10.0.2.2:8888/");
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    Log.d("DEBUG", con.getResponseCode() + "");
-                    StringBuilder sb = new StringBuilder();
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(con.getInputStream()));
-                    String line = "";
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    content[0] = sb.toString();
-                    reader.close();
+                    User user = new User();
+                    result = Integer.parseInt(user.Login(email, pwd).trim());
                 }catch (Exception e){
-                    Log.d("DEBUG", e.toString());
                     e.printStackTrace();
-                    content[0] = "";
-                    return content[0];
                 }
-                return content[0];
+                return null;
             }
             @Override
-            protected void onPostExecute (String result){
+            protected void onPostExecute (String res){
 
                 pDialog.dismiss();
 
-                if(content[0] == "") {
+                if(result == FAIL) {
                     //Dialog----------------------------------------------------------
                     AlertDialog alertDialog = new AlertDialog.Builder(Login.this).create();
-                    alertDialog.setTitle("CONNECTION TIMED OUT...");
-                    alertDialog.setMessage("Please try again later.");
+                    alertDialog.setTitle("LOGIN FAILED");
+                    alertDialog.setMessage("Incorrect email or password");
                     alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // here you can add functions
@@ -192,17 +193,9 @@ public class Login extends AppCompatActivity {
                     });
                     alertDialog.show();
 
-                }else{
-                    AlertDialog alertDialog = new AlertDialog.Builder(Login.this).create();
-                    alertDialog.setTitle("SUCCESS");
-                    alertDialog.setMessage("You are logged in.");
-                    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // here you can add functions
-                        }
-                    });
-                    alertDialog.show();
-                    Log.d("DEBUG", content[0]);
+                }else if(result == SUCCESS){
+                    Intent intent = new Intent(Login.this, MainMenu.class);
+                    startActivity(intent);
                 }
             }
         }
@@ -212,8 +205,11 @@ public class Login extends AppCompatActivity {
                     public void onClick(View v) {
 
 
-                        EditText email = (EditText) findViewById(R.id.email);
-                        EditText pwd = (EditText) findViewById(R.id.pwd);
+                        EditText emailET = (EditText) findViewById(R.id.email);
+                        EditText pwdET = (EditText) findViewById(R.id.pwd);
+
+                        String email = emailET.getText().toString();
+                        String pwd = pwdET.getText().toString();
 
                         boolean ok = true;
 
@@ -231,29 +227,25 @@ public class Login extends AppCompatActivity {
                             ok = false;
                         }
 
-                        if (email.getText().toString().trim().length() == 0) {
-                            email.setError("Email cannot be empty.");
+                        if(!isValidEmail(email)){
+                            emailET.setError("Invalid email address");
                             ok = false;
                         }
 
-                        if (pwd.getText().toString().trim().length() == 0) {
-                            pwd.setError("Password cannot be empty.");
+                        if (pwd.trim().length() == 0) {
+                            pwdET.setError("Password cannot be empty");
                             ok = false;
                         }
-                        //test server connectivity
-                        if (email.getText().toString().trim().matches("test")) {
-                            new MyAsyncTask().execute();
-                            return;
-                        }
+
                         if (ok) {
                             //Remember user's email
                             CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
                             SharedPreferences settings = getApplicationContext().getSharedPreferences("loginInfo", 0);
                             SharedPreferences.Editor editor = settings.edit();
-                            editor.putString("email", email.getText().toString().trim());
+                            editor.putString("email", email.trim());
                             //Remember user's password
                             if(checkBox.isChecked()) {
-                                editor.putString("password", pwd.getText().toString().trim());
+                                editor.putString("password", pwd);
                                 editor.putBoolean("rememberPwd", true);
                             }else{
                                 editor.putString("password", "");
@@ -261,13 +253,19 @@ public class Login extends AppCompatActivity {
                             }
                             // Apply the edits!
                             editor.apply();
-
-                            Intent intent = new Intent(Login.this, MainMenu.class);
-                            startActivity(intent);
+                            // run Login thread
+                            new LoginAsyncTask(email, pwd).execute();
                         }
                     }
                 }
         );
+    }
+    public static boolean isValidEmail(CharSequence target) {
+        if (TextUtils.isEmpty(target)) {
+            return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+        }
     }
 
     @Override
@@ -299,22 +297,8 @@ public class Login extends AppCompatActivity {
 
     //When Register Button is clicked
     public void registerIsClicked(View view){
-
-        //CHECK INTERNET CONNECTION
-        if(!isNetworkAvailable()) {
-            AlertDialog alertDialog = new AlertDialog.Builder(Login.this).create();
-            alertDialog.setTitle("NO INTERNET CONNECTION");
-            alertDialog.setMessage("Please check your network connection and try again.");
-            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    // here you can add functions
-                }
-            });
-            alertDialog.show();
-        }else {
-            Intent intent = new Intent(this, Register.class);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(this, Register.class);
+        startActivity(intent);
     }
 
     // Check Internet connection

@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/driveInfo"
+                android:text="User Information"
                 android:layout_gravity="center"
                 android:id="@+id/textView"
                 android:textColor="#ffffff" />
@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
                     android:ems="10"
-                    android:id="@+id/editText1"
+                    android:id="@+id/email"
                     android:singleLine="true"
                     android:layout_marginTop="10sp"
                     />
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:ems="10"
-                    android:id="@+id/editText2"
+                    android:id="@+id/pwd"
                     android:singleLine="true"
                     />
             </LinearLayout>
@@ -116,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:ems="10"
-                    android:id="@+id/editText3"
+                    android:id="@+id/pwdCon"
                     android:singleLine="true"
                     />
             </LinearLayout>
@@ -140,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
                     android:ems="10"
-                    android:id="@+id/editText4"
+                    android:id="@+id/firstName"
                     android:singleLine="true"
                     />
             </LinearLayout>
@@ -164,7 +164,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
                     android:ems="10"
-                    android:id="@+id/editText5"
+                    android:id="@+id/lastName"
                     android:singleLine="true"
                     />
             </LinearLayout>
@@ -188,7 +188,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="phone"
                     android:ems="10"
-                    android:id="@+id/editText6"
+                    android:id="@+id/phoneNum"
                     android:singleLine="true"
                     />
             </LinearLayout>
