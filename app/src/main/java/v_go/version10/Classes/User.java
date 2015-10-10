@@ -31,7 +31,7 @@ public class User {
     * */
     public String Register(String email,String password,String phone,String lastname,String firstname){
         String text = null;
-        String url_string = this.Rootpath()+"/login/register.php";
+        String url_string = this.Rootpath()+"/create/register.php";
         String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
         HttpURLConnection urlconnet = null;
         URL url = null;
