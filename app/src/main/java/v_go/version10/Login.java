@@ -116,32 +116,6 @@ public class Login extends AppCompatActivity {
             }
         });
 
-
-        Intent intent = getIntent();
-        Boolean isLogout = intent.getBooleanExtra("logout", false);
-
-        // Get login information from the SharedPreferences
-        SharedPreferences settings = getApplicationContext().getSharedPreferences("loginInfo", 0);
-        String email = settings.getString("email", "");
-        String pwd = settings.getString("password", "");
-        Boolean rememberPwd = settings.getBoolean("rememberPwd", false);
-
-        if(!isLogout) {
-            EditText emailField = (EditText) findViewById(R.id.email);
-            emailField.setText(email);
-        }
-        if(rememberPwd) {
-            if(!isLogout) {
-                EditText pwdField = (EditText) findViewById(R.id.pwd);
-                pwdField.setText(pwd);
-            }
-            CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
-            checkBox.setChecked(true);
-        }
-
-        Button button = (Button)findViewById(R.id.loginButton);
-        final String[] content = new String[1];
-
         //AsyncTask-------------------------------------------------------------
         class LoginAsyncTask extends AsyncTask<Void, Void, String>
         {
@@ -200,6 +174,41 @@ public class Login extends AppCompatActivity {
             }
         }
 
+
+        Intent intent = getIntent();
+        Boolean isLogout = intent.getBooleanExtra("logout", false);
+
+        // Get login information from the SharedPreferences
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("loginInfo", 0);
+        String email = settings.getString("email", "");
+        String pwd = settings.getString("password", "");
+        Boolean keepMeLoggedIn = settings.getBoolean("KeepMeLoggedIn", false);
+
+        //Recover email
+        EditText emailField = (EditText) findViewById(R.id.email);
+        emailField.setText(email);
+
+        if(keepMeLoggedIn){
+            CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+            checkBox.setChecked(true);
+        }
+
+        if(keepMeLoggedIn && !isLogout) {
+
+            EditText pwdField = (EditText) findViewById(R.id.pwd);
+            pwdField.setText(pwd);
+
+            CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+            checkBox.setChecked(true);
+
+            String email_field = emailField.getText().toString();
+            String pwd_field = pwdField.getText().toString();
+
+            new LoginAsyncTask(email_field, pwd_field).execute();
+        }
+
+        Button button = (Button)findViewById(R.id.loginButton);
+
         button.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
@@ -227,7 +236,7 @@ public class Login extends AppCompatActivity {
                             ok = false;
                         }
 
-                        if(!isValidEmail(email)){
+                        if (!isValidEmail(email)) {
                             emailET.setError("Invalid email address");
                             ok = false;
                         }
@@ -244,12 +253,12 @@ public class Login extends AppCompatActivity {
                             SharedPreferences.Editor editor = settings.edit();
                             editor.putString("email", email.trim());
                             //Remember user's password
-                            if(checkBox.isChecked()) {
+                            if (checkBox.isChecked()) {
                                 editor.putString("password", pwd);
-                                editor.putBoolean("rememberPwd", true);
-                            }else{
+                                editor.putBoolean("KeepMeLoggedIn", true);
+                            } else {
                                 editor.putString("password", "");
-                                editor.putBoolean("rememberPwd", false);
+                                editor.putBoolean("KeepMeLoggedIn", false);
                             }
                             // Apply the edits!
                             editor.apply();
