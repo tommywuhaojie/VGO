@@ -12,16 +12,19 @@ import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import v_go.version10.User;
+
 /**
- * Created by wu on 09/10/2015.
+ * Created by Michael on 09/10/2015.
  */
 /*
-    time format: YYYY-MM-DD
-    estimate time in mintues;
-    restimate distance in km;
-    type:       (string) register as driver or passanger
+    time format: YYYY-MM-DD HH:mm
+    estimate time in minutes;
+    estimate distance in km;
+    type:       (string) register as driver or passenger
                 1->driver
-                2->passanger;
+                2->passenger;
     return:
         -1: fail to register a new trip;
         -2: a trip with a similar time already exist
@@ -30,10 +33,16 @@ import java.net.URL;
         1:  register successful
 */
 public class Trip {
-    public String RegisterTrip (String time,double start_latitude, double start_longtitude, String start_location, double end_latitude, double end_longtitude, String end_location, int estimate_time, double estimate_distance,String type){
+
+    public String RegisterTrip (String time, double start_latitude, double start_longitude, String start_location,
+                                double end_latitude, double end_longitude, String end_location, int estimate_time,
+                                double estimate_distance,int type){
         String text = null;
         String url_string = new User().Rootpath()+"/create/tripRegister.php";
-        String data="date_id="+time+"&start_lat="+start_latitude+"&start_lng="+start_longtitude+"&start_location="+start_location+"&end_lat="+end_latitude+"&end_lng="+end_longtitude+"&end_location="+end_location+"&est_time="+estimate_time+"&est_distance="+estimate_distance+"&reg_as="+type;
+        String data="date_id="+time+"&start_lat="+start_latitude+"&start_lng="+start_longitude
+                +"&start_location="+start_location+"&end_lat="+end_latitude+"&end_lng="+end_longitude
+                +"&end_location="+end_location+"&est_time="+estimate_time+"&est_distance="
+                +estimate_distance+"&reg_as="+type;
         HttpURLConnection urlconnet = null;
         URL url = null;
         try {

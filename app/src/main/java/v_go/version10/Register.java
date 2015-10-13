@@ -214,7 +214,6 @@ public class Register extends AppCompatActivity {
                     if(result == FAIL) {
                         //Dialog----------------------------------------------------------
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
-                        alertDialog.setTitle("REGISTER FAILED");
                         alertDialog.setMessage("Unable to register at this time");
                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -227,7 +226,6 @@ public class Register extends AppCompatActivity {
                     if(result == INVALID_INPUT) {
                         //Dialog----------------------------------------------------------
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
-                        alertDialog.setTitle("REGISTER FAILED");
                         alertDialog.setMessage("Invalid user information");
                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -240,7 +238,6 @@ public class Register extends AppCompatActivity {
                     if(result == EMAIL_ALREADY_EXISTS) {
                         //Dialog----------------------------------------------------------
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
-                        alertDialog.setTitle("REGISTER FAILED");
                         alertDialog.setMessage("Email or phone number has already been taken");
                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -253,7 +250,6 @@ public class Register extends AppCompatActivity {
                     if(result == NOT_ACTIVATED) {
                         //Dialog----------------------------------------------------------
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
-                        alertDialog.setTitle("REGISTER FAILED");
                         alertDialog.setMessage("Not activated");
                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -265,7 +261,7 @@ public class Register extends AppCompatActivity {
                     }
                     if(result == SUCCESS) {
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
-                        alertDialog.setTitle("REGISTER SUCCEEDED");
+                        alertDialog.setTitle("SUCCEEDED");
                         alertDialog.setMessage("Returning to Login Page...");
                         alertDialog.show();
 

@@ -1,6 +1,8 @@
 package v_go.version10;
 
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,6 +48,7 @@ import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import org.json.JSONObject;
 
+import v_go.version10.Classes.Trip;
 import v_go.version10.googleMapServices.DirectionsJSONParser;
 
 public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, DialogInterface.OnCancelListener {
@@ -53,6 +57,18 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
     private TextView when;
     private Button pickWhen;
     private int defaultTextColor;
+
+    //Global variables for post trip
+    private String time = "";
+    private String locaA = "";
+    private String locaB = "";
+    private int tripType = 0;
+    private double latA = 0;
+    private double lngA = 0;
+    private double latB = 0;
+    private double lngB = 0;
+    private double estDist = 0;
+    private int estTime = 0;
 
 
     @Override
@@ -69,6 +85,34 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
                     String lng_a = data.getStringExtra("lng_a");
                     String lat_b = data.getStringExtra("lat_b");
                     String lng_b = data.getStringExtra("lng_b");
+
+                    locaA = address_a;
+                    locaB = address_b;
+
+                    if(time.matches("(.*)mins")){
+                        String min = time.substring(0, time.indexOf('m')).trim();
+                        estTime = Integer.parseInt(min);
+                    }else{
+                        String hour = time.substring(0, time.indexOf('h')).trim();
+                        String min = time.substring(time.indexOf('h') + 4, time.indexOf('m')).trim();
+                        estTime = Integer.parseInt(hour) * 60 + Integer.parseInt(min);
+                    }
+
+                    if (distance.matches("(.*)km")) {
+                        String km = distance.substring(0, distance.indexOf('k')).trim();
+                        estDist = Double.parseDouble(km);
+                    } else if(distance.matches("(.*)mi")){
+                        String mi = distance.substring(0, distance.indexOf('m')).trim();
+                        estDist = Double.parseDouble(mi) * 1.60934;
+                    }else if(distance.matches("(.*)m")){
+                        String m = distance.substring(0, distance.indexOf('m')).trim();
+                        estDist = Double.parseDouble(m) / 1000;
+                    }
+
+                    latA = Double.parseDouble(lat_a);
+                    lngA = Double.parseDouble(lng_a);
+                    latB = Double.parseDouble(lat_b);
+                    lngB = Double.parseDouble(lng_b);
 
                     mMap.clear();
                     LatLng latLng_a = new LatLng(Double.parseDouble(lat_a), Double.parseDouble(lng_a));
@@ -224,6 +268,119 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
         view.startAnimation(AnimationUtils.loadAnimation(this, R.anim.image_click));
         scheduleTrip(view);
     }
+    // POST TRIP IS CLICKED
+    public void postTripIsClicked(View view){
+
+        tripType = 1;
+
+        Log.d("DEBUG", "" + time +" "+ latA +" "+ lngA +" "+ locaA +" "+
+                latB+" " + lngB +" "+ locaB +" "+ estTime +" "+ estDist +" "+ tripType);
+
+        if(allFieldsOk()) {
+
+            Thread thread = new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try {
+                        final ProgressDialog[] pDialog = new ProgressDialog[1];
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                pDialog[0] = new ProgressDialog(NewTrip.this);
+                                pDialog[0].setMessage("Posting...");
+                                pDialog[0].show();
+                            }
+                        });
+
+                        String result = "-5";
+                        Trip trip = new Trip();
+                        result = trip.RegisterTrip(time, latA, lngA, locaA, latB, lngB, locaB, estTime, estDist, tripType);
+                        final int res = Integer.parseInt(result);
+
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                AlertDialog alertDialog = new AlertDialog.Builder(NewTrip.this).create();
+                                pDialog[0].dismiss();
+                                switch (res) {
+                                    case 1:
+                                        alertDialog.setMessage("Trip posted");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // here you can add functions
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                    case -1:
+                                        alertDialog.setMessage("fail to register a new trip");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // here you can add functions
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                    case -2:
+                                        alertDialog.setMessage("a trip with a similar time already exist");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // here you can add functions
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                    case -3:
+                                        alertDialog.setMessage("fill in all fields");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // here you can add functions
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                    case -4:
+                                        alertDialog.setMessage("need to login first");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // here you can add functions
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                }
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.start();
+
+
+        }else{
+            AlertDialog alertDialog = new AlertDialog.Builder(NewTrip.this).create();
+            alertDialog.setMessage("Some fields are missing");
+            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // here you can add functions
+                }
+            });
+            alertDialog.show();
+        }
+    }
+
+    // check all fields for before posting trip
+    private boolean allFieldsOk(){
+
+        if(time.matches("") || locaA.matches("") || locaB.matches("") ||
+           tripType == 0 || latA == 0 || lngA == 0 || latB == 0 ||
+           lngB == 0 || estDist == 0 || estTime == 0){
+            return false;
+        }else{
+            return true;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -352,13 +509,20 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
         hour = i;
         minute = i1;
 
-        //YYYY-MM-DD FORMAT
+        //YYYY-MM-DD at HH:mm
         when.setText("    " + year + "-" +
                 (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
                 (day < 10 ? "0" + day : "" + day) + " at " +
                 (hour < 10 ? "0" + hour : hour) + ":" +
                 (minute < 10 ? "0" + minute : minute));
         when.setTextColor(Color.BLACK);
+
+        //YYYY-MM-DD HH:mm
+        this.time = (year + "-" +
+                (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
+                (day < 10 ? "0" + day : "" + day) + " " +
+                (hour < 10 ? "0" + hour : hour) + ":" +
+                (minute < 10 ? "0" + minute : minute));
     }
 
     //GOOGLE FIND ROUTE SERVICES START HERE--------------------------------------------------------------------------------

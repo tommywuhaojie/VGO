@@ -54,8 +54,9 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC1MpFIiIdH3zeWZsEWPLtGiZ3L6369HWQ" />
-        <!-- //DEBUG: android:value="AIzaSyC1MpFIiIdH3zeWZsEWPLtGiZ3L6369HWQ" -->
+            android:value="AIzaSyAQHPMb9t1XXZY8LlwcUBjXur2zid4pdm0" />
+        <!-- //DEBUG_DESKTOP: android:value="AIzaSyC1MpFIiIdH3zeWZsEWPLtGiZ3L6369HWQ" -->
+        <!-- //DEBUG__LAPTOP: android:value="AIzaSyAQHPMb9t1XXZY8LlwcUBjXur2zid4pdm0" -->
         <!-- //RELEASE: android:value="AIzaSyDj8QJWSQCrlf8moDPdJbYqf_po6yNY7aE" -->
 
         <activity
