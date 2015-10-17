@@ -85,4 +85,80 @@ public class Trip {
         Log.i("michaellog b:",text);
         return text;
     }
+    /*
+    * Description: return a speicfy month's trips;
+    * Input:
+    *       yearmonth:          Fortmat:YYYY-MM
+    * output
+    *       Json array          Format:
+    *           ['trip_id']			trip id
+                ['starting_date']	starting date of the trip; 	format YYYY-MM-DD;
+                ['starting_time']	starting time of the trip;	format HH:mm;
+                ['starting']		starting location of the trip (english)
+                ['destination']		destination of the trip (english)
+                ['est_time']		estimate travel time;
+                ['est_distance']	estimate distance;
+                ['driver_flag']		if the session user is a driver or a passanger in this trip; 1: driver; 0: passanger;
+                ['match_flag']		if this trip is already matched with other user. 1: yes; 0: no;(not implement yet)
+    * */
+    public JSONArray ThisMonthTrip (String yearmonth){
+        HttpURLConnection urlconnet = null;
+        JSONArray json = null;
+        String jsonarray_string = null;
+        String url_string = "http://www.v-go.ca"+"/search/byMonth.php";
+        String data="yearMonth="+yearmonth;
+        URL url = null;
+        try {
+            url = new URL(url_string);
+            urlconnet = (HttpURLConnection) url.openConnection();
+            urlconnet.setRequestMethod("POST");
+            //urlconnet.setRequestProperty("Content-Type", "application/x-www.urlencoded");
+            //urlconnet.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
+            //urlconnet.setRequestProperty("Content-Language", "en-US");
+            urlconnet.setUseCaches(false);
+            urlconnet.setDoInput(true);
+            urlconnet.setDoOutput(true);
+            // Log.i("michalelog input:",data);
+            DataOutputStream writer = new DataOutputStream(urlconnet.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = urlconnet.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            jsonarray_string = response.toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.i("michaellog", "thimonth error0");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("michaellog", "thimonth error1");
+        }finally {
+            if (urlconnet!=null){
+                urlconnet.disconnect();
+            }
+
+        }
+        //test return output
+        //Log.i("michaellog",jsonarray_string);
+        if (jsonarray_string==null){
+            Log.i("michaellog","thimonth error2");
+            return null;
+        }else {
+            try {
+                json = new JSONArray(jsonarray_string);
+                return json;
+            } catch (JSONException e) {
+                Log.i("michaellog","thimonth error3");
+                e.printStackTrace();
+                return json;
+            }
+        }
+    }
 }
