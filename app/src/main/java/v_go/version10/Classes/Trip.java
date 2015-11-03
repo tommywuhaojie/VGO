@@ -105,7 +105,7 @@ public class Trip {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
-        String url_string = "http://www.v-go.ca"+"/search/byMonth.php";
+        String url_string = new User().Rootpath()+"/search/byMonth.php";
         String data="yearMonth="+yearmonth;
         URL url = null;
         try {
@@ -160,5 +160,90 @@ public class Trip {
                 return json;
             }
         }
+    }
+    /*
+    * 'start_lat'			(double)starting latitude
+		'start_lng'			(double)starting longtitude
+		'end_lat'			(double)ending latitude
+		'end_lng'			(double)ending longtitude
+		'time'				(string)format: YYYY-MM-DD HH:mm  starting time
+		'register_as'		(int)
+							0 -> passanger
+							1 -> driver
+		'multi_allow'		(int)allow multiple passangers;
+							0 -> no;
+							1 -> yes;
+	Output:
+	    Json array:
+		'trip_id'
+		'start_location'	(string)
+		'end_location'		(string)
+		'time'				(string) format: YYYY-MM-DD HH:mm
+		'start_dif'			(double) starting location distance difference unit km
+		'end_dif'			(double) ending location  distance difference unit km
+		'register_as' 		(int)
+							0 -> passanger
+							1 -> driver
+	Error:
+	    ouput null pointer
+    * */
+    public JSONArray MatchTrpsBy (float start_lat,float start_lng,float end_lat,float end_lng,String start_time,int reg_as,int mult_allow) {
+        HttpURLConnection urlconnet = null;
+        JSONArray json = null;
+        String jsonarray_string = null;
+        String url_string =  new User().Rootpath()+ "/match/matchTrip.php";
+        String data = "start_lat="+start_lat+"&start_lng="+start_lng+"&end_lat="+end_lat+"&end_lng="+end_lng+"&time="+start_time+"&reg_as="+reg_as+"&multi_allow="+mult_allow;
+        try {
+            url_string+="?"+"start_lat="+start_lat+"&start_lng="+start_lng+"&end_lat="+end_lat+"&end_lng="+end_lng+"&time="+URLEncoder.encode(start_time,"utf-8")+"&reg_as="+reg_as+"&multi_allow="+mult_allow;
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            url_string+="?"+data.replaceAll(" ", "%20");
+        }
+        Log.i("michaellog",url_string);
+        URL url = null;
+        try {
+            url = new URL(url_string);
+            urlconnet = (HttpURLConnection) url.openConnection();
+            urlconnet = (HttpURLConnection) url.openConnection();
+            urlconnet.setRequestMethod("GET");
+            InputStream is = urlconnet.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append("\r");
+            }
+            jsonarray_string = response.toString();
+           // Log.i("michaellog",jsonarray_string);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.i("michaellog", " error0");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("michaellog", " error1");
+        } finally {
+            if (urlconnet != null) {
+                urlconnet.disconnect();
+            }
+
+        }
+        //test return output
+        //Log.i("michaellog",jsonarray_string);
+        if (jsonarray_string == null) {
+            Log.i("michaellog", " error2");
+            return null;
+        } else {
+            try {
+                json = new JSONArray(jsonarray_string);
+                return json;
+            } catch (JSONException e) {
+                Log.i("michaellog", " error3");
+                e.printStackTrace();
+                return json;
+            }
+        }
+
     }
 }
