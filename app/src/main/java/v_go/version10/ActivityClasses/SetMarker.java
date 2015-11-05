@@ -1,4 +1,4 @@
-package v_go.version10;
+package v_go.version10.ActivityClasses;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import v_go.version10.R;
 import v_go.version10.googleMapServices.DirectionsJSONParser;
 import v_go.version10.googleMapServices.DirectionsJSONParser2;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
@@ -92,7 +93,7 @@ public class SetMarker extends AppCompatActivity{
         final String inner_type = intent.getStringExtra("type");
 
         type = inner_type;
-        getSupportActionBar().setTitle("Set Pickup Location");
+        //getSupportActionBar().setTitle("Set Pickup Location");
         Button button = (Button)findViewById(R.id.set);
         button.setBackgroundColor(Color.parseColor("#5DAB00"));//LIGHT GREEN
         button.setText("SET PICKUP");
@@ -323,7 +324,7 @@ public class SetMarker extends AppCompatActivity{
                 //markerAry[0].showInfoWindow();
 
             // switch to set destination mode
-            getSupportActionBar().setTitle("Set Destination");
+            // getSupportActionBar().setTitle("Set Destination");
             Button button = (Button)findViewById(R.id.set);
             button.setBackgroundColor(Color.parseColor("#E74C3C"));//LIGHT RED
             button.setText("SET DESTINATION");
@@ -397,7 +398,7 @@ public class SetMarker extends AppCompatActivity{
             image.setVisibility(View.GONE);
 
             // Switch confirm mode
-            getSupportActionBar().setTitle("Confirm");
+            //getSupportActionBar().setTitle("Confirm");
             Button doneButton = (Button)findViewById(R.id.done);
             doneButton.setVisibility(View.VISIBLE);
             Button button = (Button)findViewById(R.id.set);
@@ -418,7 +419,7 @@ public class SetMarker extends AppCompatActivity{
         }else{
             mMap.clear();// clear map
 
-            getSupportActionBar().setTitle("Set Pickup Location");
+            //getSupportActionBar().setTitle("Set Pickup Location");
 
             ImageView image = (ImageView) findViewById(R.id.marker);
             image.setVisibility(View.VISIBLE);
@@ -910,7 +911,6 @@ public class SetMarker extends AppCompatActivity{
             }
             distance = distance1;
             time = duration;
-            getSupportActionBar().setTitle("Confirm " + distance1 + " - " + duration);
         }
     }
     //FIND DISTANCE AND TRAVEL TIME BETWEEN A AND B END--------------------------------------------------------------------

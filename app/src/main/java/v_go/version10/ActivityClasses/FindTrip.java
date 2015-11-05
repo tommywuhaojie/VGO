@@ -1,4 +1,4 @@
-package v_go.version10;
+package v_go.version10.ActivityClasses;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -11,6 +11,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import v_go.version10.HelperClasses.RegisterInfoAdapter;
+import v_go.version10.R;
 
 
 public class FindTrip extends AppCompatActivity {

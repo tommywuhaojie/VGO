@@ -1,4 +1,4 @@
-package v_go.version10;
+package v_go.version10.ActivityClasses;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -6,48 +6,32 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.Profile;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+import v_go.version10.R;
 import v_go.version10.User;
 
 public class Login extends AppCompatActivity {
@@ -90,7 +74,7 @@ public class Login extends AppCompatActivity {
                                         String str_id = json.getString("id");
                                         String str_name = json.getString("name");
 
-                                        Intent intent = new Intent(Login.this, MainMenu.class);
+                                        Intent intent = new Intent(Login.this, Main.class);
                                         intent.putExtra("isFacebookLogin", true);
                                         intent.putExtra("id", str_id);
                                         intent.putExtra("name", str_name);
@@ -168,7 +152,7 @@ public class Login extends AppCompatActivity {
                     alertDialog.show();
 
                 }else if(result == SUCCESS){
-                    Intent intent = new Intent(Login.this, MainMenu.class);
+                    Intent intent = new Intent(Login.this, Main.class);
                     startActivity(intent);
                 }
             }
@@ -183,6 +167,7 @@ public class Login extends AppCompatActivity {
         String email = settings.getString("email", "");
         String pwd = settings.getString("password", "");
         Boolean keepMeLoggedIn = settings.getBoolean("KeepMeLoggedIn", false);
+        Boolean fromRegister = intent.getBooleanExtra("fromRegister", false);
 
         //Recover email
         EditText emailField = (EditText) findViewById(R.id.email);
@@ -192,8 +177,8 @@ public class Login extends AppCompatActivity {
             CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
             checkBox.setChecked(true);
         }
-
-        if(keepMeLoggedIn && !isLogout) {
+        // if keepMeLoggedIn is checked AND not from logout AND not from register page, then auto login
+        if(keepMeLoggedIn && !isLogout && !fromRegister) {
 
             EditText pwdField = (EditText) findViewById(R.id.pwd);
             pwdField.setText(pwd);

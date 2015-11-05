@@ -81,5 +81,8 @@
     <string name="title_activity_new_trip2">New Trip</string>
     <string name="title_activity_schedule">Schedule</string>
     <string name="title_activity_find_trip">FindTrip</string>
+    <string name="title_activity_tab">tabActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_main">Main</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package v_go.version10;
+package v_go.version10.ActivityClasses;
 
 
 import android.app.AlertDialog;
@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,7 +47,8 @@ import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import org.json.JSONObject;
 
-import v_go.version10.Classes.Trip;
+import v_go.version10.ApiClasses.Trip;
+import v_go.version10.R;
 import v_go.version10.googleMapServices.DirectionsJSONParser;
 
 public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, DialogInterface.OnCancelListener {

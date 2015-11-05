@@ -8,9 +8,9 @@
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:scrollbars="vertical"
-        class="com.google.android.gms.maps.SupportMapFragment"/>
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_marginBottom="0.0001dp" />
 
     <Button
         android:layout_width="match_parent"
@@ -20,7 +20,8 @@
         android:layout_gravity="center_horizontal|bottom"
         android:onClick="setIsClicked"
         android:textColor="#FFFFFF"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:layout_marginBottom="50dp" />
 
     <ImageView
         android:layout_width="40dp"
@@ -30,19 +31,8 @@
         android:src="@drawable/a_marker"
         android:layout_marginBottom="20dp" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="DONE"
-        android:id="@+id/done"
-        android:layout_gravity="center_horizontal|bottom"
-        android:onClick="doneIsClicked"
-        android:layout_marginBottom="48dp"
-        android:textColor="#FFFFFF"
-        android:textSize="20dp" />
-
     <SearchView
-        android:layout_width="match_parent"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:id="@+id/searchAddress"
         android:layout_gravity="center_horizontal|top"
@@ -54,12 +44,23 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:id="@+id/imageButton"
-        android:layout_gravity="right|center_vertical"
+        android:layout_gravity="right|top"
         android:background="@drawable/my_location_button"
-        android:layout_marginTop="140dp"
+        android:layout_marginTop="60dp"
         android:layout_marginRight="10dp"
         android:clickable="true"
         android:onClick="myLocationIsClicked" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DONE"
+        android:id="@+id/done"
+        android:layout_gravity="center_horizontal|bottom"
+        android:onClick="doneIsClicked"
+        android:layout_marginBottom="100dp"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
 
 
 </FrameLayout>

@@ -1,7 +1,5 @@
-package v_go.version10;
+package v_go.version10.ActivityClasses;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -14,20 +12,12 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
+import v_go.version10.R;
 import v_go.version10.User;
 
 
@@ -270,6 +260,7 @@ public class Register extends AppCompatActivity {
                             public void run() {
                                 Intent intent = new Intent(Register.this, Login.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                intent.putExtra("fromRegister", true);
                                 startActivity(intent);
                             }
                         }, 2000);//delay for 2 seconds
