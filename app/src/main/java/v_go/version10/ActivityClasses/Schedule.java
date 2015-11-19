@@ -2,7 +2,6 @@ package v_go.version10.ActivityClasses;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
@@ -526,7 +525,7 @@ public class Schedule extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_schedule, menu);
+        getMenuInflater().inflate(R.menu.menu_calendar, menu);
         return true;
     }
 
@@ -542,9 +541,6 @@ public class Schedule extends AppCompatActivity {
             return true;
         }
         if(id == android.R.id.home){
-            Intent intent = new Intent(this, MainMenu.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
             return true;
         }
 

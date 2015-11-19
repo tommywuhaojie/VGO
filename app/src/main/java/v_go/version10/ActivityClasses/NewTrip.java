@@ -49,7 +49,7 @@ import org.json.JSONObject;
 
 import v_go.version10.ApiClasses.Trip;
 import v_go.version10.R;
-import v_go.version10.googleMapServices.DirectionsJSONParser;
+import v_go.version10.googleMapServices.DirectionsJSONParser1;
 
 public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, DialogInterface.OnCancelListener {
 
@@ -141,10 +141,10 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
                     DownloadTask downloadTask = new DownloadTask();
                     downloadTask.execute(url);
 
-                    TextView fromView = (TextView) findViewById(R.id.from);
-                    TextView toView = (TextView) findViewById(R.id.to);
+                    TextView fromView = (TextView) findViewById(R.id.point_a);
+                    TextView toView = (TextView) findViewById(R.id.point_b);
                     TextView distanceView = (TextView) findViewById(R.id.distance);
-                    TextView timeView = (TextView) findViewById(R.id.time);
+                    TextView timeView = (TextView) findViewById(R.id.depart_time);
                     TextView priceView = (TextView) findViewById(R.id.price);
 
                     fromView.setText(address_a);
@@ -251,7 +251,7 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(CENTRE_VANCOUVER, 9.0f);//the larger the number -> the closer it zooms in
         mMap.moveCamera(update);
 
-        when = (TextView) findViewById(R.id.when);
+        when = (TextView) findViewById(R.id.point_a);
         defaultTextColor = when.getTextColors().getDefaultColor();
     }
 
@@ -401,9 +401,6 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
             return true;
         }
         if(id == android.R.id.home){
-            Intent intent = new Intent(this, MainMenu.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
             return true;
         }
 
@@ -632,7 +629,7 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
 
             try{
                 jObject = new JSONObject(jsonData[0]);
-                DirectionsJSONParser parser = new DirectionsJSONParser();
+                DirectionsJSONParser1 parser = new DirectionsJSONParser1();
 
                 // Starts parsing data
                 routes = parser.parse(jObject);

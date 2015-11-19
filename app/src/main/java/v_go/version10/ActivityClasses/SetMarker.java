@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Locale;
 
 import v_go.version10.R;
-import v_go.version10.googleMapServices.DirectionsJSONParser;
+import v_go.version10.googleMapServices.DirectionsJSONParser1;
 import v_go.version10.googleMapServices.DirectionsJSONParser2;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
 
@@ -234,7 +234,7 @@ public class SetMarker extends AppCompatActivity{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_set_marker, menu);
+        getMenuInflater().inflate(R.menu.menu_map, menu);
         return true;
 
     }
@@ -666,7 +666,7 @@ public class SetMarker extends AppCompatActivity{
 
             try{
                 jObject = new JSONObject(jsonData[0]);
-                DirectionsJSONParser parser = new DirectionsJSONParser();
+                DirectionsJSONParser1 parser = new DirectionsJSONParser1();
 
                 // Starts parsing data
                 routes = parser.parse(jObject);

@@ -120,6 +120,8 @@ public class Login extends AppCompatActivity {
                 super.onPreExecute();
 
                 pDialog = new ProgressDialog(Login.this);
+                pDialog.setCanceledOnTouchOutside(false);
+                pDialog.setCancelable(false);
                 pDialog.setMessage("Logging in...");
                 pDialog.show();
             }
@@ -142,8 +144,7 @@ public class Login extends AppCompatActivity {
                 if(result == FAIL) {
                     //Dialog----------------------------------------------------------
                     AlertDialog alertDialog = new AlertDialog.Builder(Login.this).create();
-                    alertDialog.setTitle("LOGIN FAILED");
-                    alertDialog.setMessage("Incorrect email or password");
+                    alertDialog.setMessage("Incorrect email or password.");
                     alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // here you can add functions

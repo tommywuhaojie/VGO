@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context="v_go.version10.ActivityClasses.Schedule">
+
+    <item
+        android:id="@+id/notification"
+        android:icon="@drawable/notification"
+        android:title="See any updates"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/add_trip"
+        android:icon="@drawable/add_trip"
+        android:title="add a trip"
+        app:showAsAction="ifRoom"/>
+</menu>

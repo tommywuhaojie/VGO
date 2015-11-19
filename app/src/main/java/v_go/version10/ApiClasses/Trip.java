@@ -28,8 +28,8 @@ import v_go.version10.User;
     estimate time in minutes;
     estimate distance in km;
     type:       (string) register as driver or passenger
+                0->passenger;
                 1->driver
-                2->passenger;
     return:
         -1: fail to register a new trip;
         -2: a trip with a similar time already exist
@@ -192,7 +192,7 @@ public class Trip {
 	Error:
 	    ouput null pointer
     * */
-    public JSONArray MatchTrpsBy (float start_lat,float start_lng,float end_lat,float end_lng,String start_time,int reg_as,int mult_allow) {
+    public JSONArray MatchTripsBy (double start_lat,double start_lng,double end_lat,double end_lng,String start_time,int reg_as,int mult_allow) {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;

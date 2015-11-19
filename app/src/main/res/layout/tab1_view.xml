@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapActivity">
+    tools:context=".MapActivity"
+    android:background="#ffffff">
 
     <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/map"
@@ -14,12 +15,12 @@
 
     <Button
         android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="SET"
         android:id="@+id/set"
         android:layout_gravity="center_horizontal|bottom"
         android:textColor="#FFFFFF"
-        android:textSize="20dp"
+        android:textSize="15dp"
         android:layout_marginBottom="10dp" />
 
     <ImageView
@@ -37,7 +38,7 @@
         android:layout_gravity="center_horizontal|top"
         android:iconifiedByDefault="true"
         android:queryHint="Enter address here..."
-        android:background="#43a399" />
+        android:background="#cccccc" />
 
     <ImageButton
         android:layout_width="30dp"
@@ -51,13 +52,13 @@
 
     <Button
         android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="DONE"
         android:id="@+id/done"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="60dp"
         android:textColor="#FFFFFF"
-        android:textSize="20dp" />
+        android:textSize="15dp" />
 
 
 </FrameLayout>

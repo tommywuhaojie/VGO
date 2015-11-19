@@ -4,14 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".DeviceFragment" >
-
-    <ImageView android:id="@+id/ImageSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/setting_tab"
-        android:layout_above="@+id/textView21"
-        android:layout_centerHorizontal="true" />
+    tools:context=".DeviceFragment"
+    android:background="#ffffff">
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,14 +13,17 @@
         android:text="Coming Soon..."
         android:id="@+id/textView21"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textSize="20dp" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
-        android:id="@+id/textView24"
-        android:layout_above="@+id/ImageSearch"
-        android:layout_centerHorizontal="true" />
+        android:text="Log Out"
+        android:id="@+id/logout"
+        android:layout_marginBottom="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

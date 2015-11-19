@@ -253,6 +253,8 @@ public class Register extends AppCompatActivity {
                         AlertDialog alertDialog = new AlertDialog.Builder(Register.this).create();
                         alertDialog.setTitle("SUCCEEDED");
                         alertDialog.setMessage("Returning to Login Page...");
+                        alertDialog.setCanceledOnTouchOutside(false);
+                        alertDialog.setCancelable(false);
                         alertDialog.show();
 
                         Handler mHandler = new Handler();

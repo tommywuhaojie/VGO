@@ -49,7 +49,7 @@
             <TextView
                 android:layout_width="190dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/from"
+                android:id="@+id/point_a"
                 android:text=" please set the pickup location and destination"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_gravity="right"
@@ -61,14 +61,14 @@
                 android:focusableInTouchMode="true"
                 android:layout_alignBottom="@+id/textView14"
                 android:layout_toRightOf="@+id/textView16"
-                android:layout_alignRight="@+id/when"
-                android:layout_alignEnd="@+id/when" />
+                android:layout_alignRight="@+id/point_a"
+                android:layout_alignEnd="@+id/point_a" />
 
             <TextView
                 android:layout_width="190dp"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:id="@+id/to"
+                android:id="@+id/point_b"
                 android:singleLine="true"
                 android:scrollHorizontally="true"
                 android:ellipsize="marquee"
@@ -94,7 +94,7 @@
             <TextView
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/when"
+                android:id="@+id/point_a"
                 android:text=" please set the time &amp; date"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_alignBottom="@+id/textView16"
@@ -145,13 +145,13 @@
                 android:text="0 km"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_above="@+id/textView18"
-                android:layout_alignRight="@+id/time"
-                android:layout_alignEnd="@+id/time" />
+                android:layout_alignRight="@+id/depart_time"
+                android:layout_alignEnd="@+id/depart_time" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/time"
+                android:id="@+id/depart_time"
                 android:text="0 min"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_alignBottom="@+id/textView18"
@@ -174,7 +174,7 @@
                 android:id="@+id/imageView"
                 android:clickable="true"
                 android:onClick="setTripIsClicked"
-                android:layout_above="@+id/to"
+                android:layout_above="@+id/point_b"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/set_trip_button2"
@@ -189,7 +189,7 @@
                 android:clickable="true"
                 android:onClick="scheduleIsClicked"
                 android:nestedScrollingEnabled="false"
-                android:layout_below="@+id/to"
+                android:layout_below="@+id/point_b"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 

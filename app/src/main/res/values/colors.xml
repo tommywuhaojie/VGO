@@ -4,4 +4,10 @@
     <item name="grey" type="color">#555555</item>
     <item name="green" type="color">#4499CC00</item>
     <item name="darkgreen" type="color">#FF669900</item>
+
+    // For caldroid calendar
+    <color name="green2">#8FCC85</color>
+    <color name="blue">#ff33b5e5</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
 </resources>

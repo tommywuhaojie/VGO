@@ -1,13 +1,17 @@
 package v_go.version10.FragmentClasses;
 
-import android.annotation.TargetApi;
+import android.app.SearchManager;
 import android.content.Context;
-import android.os.Build;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.Toolbar;
 import android.view.InflateException;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.app.AlertDialog;
@@ -19,14 +23,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -42,10 +44,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
@@ -62,24 +62,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import v_go.version10.ActivityClasses.Register;
+import v_go.version10.ActivityClasses.Main;
 import v_go.version10.R;
-import v_go.version10.googleMapServices.DirectionsJSONParser;
-import v_go.version10.googleMapServices.DirectionsJSONParser2;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
+import v_go.version10.googleMapServices.PlaceProvider;
 
-import v_go.version10.R;
 
-public class Tab1Fragment extends Fragment{
+public class Tab1Fragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private String type;
-    private String distance;
-    private String time;
+    private String distance = "";
+    private String duration = "";
     private Marker[] markerAry;
     private String[] addressAry;
     private boolean isRouteFound;
     private boolean isRouteReady;
+    private int firstTime = 0;
     private View view;
 
     @Override
@@ -103,6 +102,13 @@ public class Tab1Fragment extends Fragment{
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.BLACK);
 
+        // set up action bar
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        // turn on option menu
+        setHasOptionsMenu(true);
+
         // set up google map if needed
         setUpMapIfNeeded();
 
@@ -111,22 +117,27 @@ public class Tab1Fragment extends Fragment{
         addressAry = new String[2];
         type = "";
         distance = "";
-        time = "";
+        duration = "";
 
         // Action bar title and set button color
         Button doneButton = (Button) view.findViewById(R.id.done);
         doneButton.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
         doneButton.setVisibility(View.GONE);
-        final String inner_type = "A";
 
-        type = inner_type;
-        // getSupportActionBar().setTitle("Set Pickup Location");
+        // initialize type
+        type = "A";
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Set Pickup Location");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
         Button button = (Button)view.findViewById(R.id.set);
         button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
         button.setText("SET PICKUP");
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(type.matches("A")) {
+
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
 
                     // Add start_marker_resized to pick up location
                     LatLng centerOfMap = mMap.getCameraPosition().target;
@@ -138,8 +149,10 @@ public class Tab1Fragment extends Fragment{
                     markerAry[0] = mMap.addMarker(marker);
                     //markerAry[0].showInfoWindow();
 
-                    // switch to set destination mode
-                    // getSupportActionBar().setTitle("Set Destination");
+                    // change title
+                    ((Main)getActivity()).setActionBarTitle("Set Destination");
+                    ((Main)getActivity()).enableBackButton(true);
+
                     Button button = (Button)view.findViewById(R.id.set);
                     button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
                     button.setText("SET DESTINATION");
@@ -153,11 +166,10 @@ public class Tab1Fragment extends Fragment{
 
                     // Change type to "B"
                     type = "B";
-                }else if(type.matches("B")){
 
+                }else{
                     // Add end_marker_resized to destination
                     LatLng centerOfMap = mMap.getCameraPosition().target;
-
                     // Check distance
                     final int ONE_KM = 1;
                     if(distance(markerAry[0].getPosition().latitude,
@@ -171,90 +183,38 @@ public class Tab1Fragment extends Fragment{
                         return;
                     }
 
+                    // clear map
+                    //mMap.clear();
+
+                    // change title
+                    //((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Set Pickup Location");
+
+                    // change center marker to green
+                    ImageView image = (ImageView) view.findViewById(R.id.marker);
+                    image.setVisibility(View.GONE);
+
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("DESTINATION");
                     // Changing marker icon
                     marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_marker_resized));
-                    // adding marker
                     markerAry[1] = mMap.addMarker(marker);
 
-                    // Calculate Route
-                    isRouteFound = false;
-                    isRouteReady = false;
                     LatLng pickup = new LatLng(markerAry[0].getPosition().latitude , markerAry[0].getPosition().longitude);
                     LatLng dest = new LatLng(markerAry[1].getPosition().latitude , markerAry[1].getPosition().longitude);
 
-                    // getting URL to the Google Directions API
-                    String url = getDirectionsUrl(pickup, dest);
+                    // Pass data arguments to TripSummaryFragment
+                    Bundle args = new Bundle();
+                    args.putDouble("lat_a", pickup.latitude);
+                    args.putDouble("lng_a", pickup.longitude);
+                    args.putDouble("lat_b", dest.latitude);
+                    args.putDouble("lng_b", dest.longitude);
+                    args.putString("address_a", addressAry[0]);
+                    args.putString("address_b", addressAry[1]);
 
-                    // Start downloading json data from Google Directions API
-                    // drawing the route between A and B
-                    DownloadTask downloadTask = new DownloadTask();
-                    downloadTask.execute(url);
-
-                    // calculate time and distance
-                    DownloadTask3 downloadTask3 = new DownloadTask3();
-                    downloadTask3.execute(url);
-
-                    // zoom out to see all markers
-                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    builder.include(markerAry[0].getPosition());
-                    builder.include(markerAry[1].getPosition());
-                    LatLngBounds bounds = builder.build();
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-                    mMap.moveCamera(cu);
-                    float zoom = mMap.getCameraPosition().zoom;
-                    LatLng center = mMap.getCameraPosition().target;
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, zoom - 1.0f));
-
-
-                    // hide marker
-                    ImageView image = (ImageView) view.findViewById(R.id.marker);
-                    image.setVisibility(View.GONE);
-
-                    // Switch confirm mode
-                    // getSupportActionBar().setTitle("Confirm");
-                    Button doneButton = (Button)view.findViewById(R.id.done);
-                    doneButton.setVisibility(View.VISIBLE);
-                    Button button = (Button)view.findViewById(R.id.set);
-                    button.setText("RESET");
-
-                    //clear search view
-                    SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-                    searchView.setIconifiedByDefault(true);
-                    searchView.clearFocus();
-                    searchView.setQuery("", false);
-                    searchView.setBackgroundColor(Color.TRANSPARENT);
-                    searchView.setQueryHint("");
-                    searchView.setIconified(true);
-
-                    // change type to "C"
-                    type = "C";
-
-                }else{
-                    mMap.clear();// clear map
-
-                    //getSupportActionBar().setTitle("Set Pickup Location");
-
-                    ImageView image = (ImageView) view.findViewById(R.id.marker);
-                    image.setVisibility(View.VISIBLE);
-                    image.setImageResource(R.drawable.a_marker);
-
-                    Button doneButton = (Button)view.findViewById(R.id.done);
-                    doneButton.setVisibility(View.GONE);
-                    Button button = (Button)view.findViewById(R.id.set);
-                    button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
-                    button.setText("SET PICKUP");
-
-                    // clear search view
-                    SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-                    searchView.setBackgroundColor(Color.parseColor("#4DB6AC"));
-                    searchView.setQueryHint("Enter the address here...");
-                    searchView.setIconified(false);
-                    searchView.clearFocus();
-
-                    // Change type back to "A"
-                    type = "A";
+                    Fragment fragment = new TripSummaryFragment();
+                    fragment.setArguments(args);
+                    FragmentChangeListener fc = (FragmentChangeListener)getActivity();
+                    fc.replaceFragment(fragment);
                 }
             }
         });
@@ -290,7 +250,7 @@ public class Tab1Fragment extends Fragment{
         searchAddress.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchAddress.setBackgroundColor(Color.parseColor("#43a399"));
+                searchAddress.setBackgroundColor(Color.parseColor("#cccccc"));
             }
         });
         // transparent when collapse
@@ -402,15 +362,26 @@ public class Tab1Fragment extends Fragment{
                         addressAry[1] = addr.trim();
 
                     }
-                    //Log.d("DEBUG", addr);
+                    if(firstTime == 0){
+                        searchAddress.setQuery("",false);
+                        searchAddress.clearFocus();
+                        firstTime++;
+                    }
 
-                    // Update your Marker's position to the center of the Map.
-                    //mMap.clear();
-                    //mMap.addMarker(new MarkerOptions().position(centerOfMap).title("Marker"));
+                    //Log.d("DEBUG", centerOfMap.latitude +" "+ centerOfMap.longitude);
+
                 }
             }
         });
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
+        searchView.setQueryHint("Enter address here...");
     }
 
 
@@ -450,192 +421,72 @@ public class Tab1Fragment extends Fragment{
      */
     private void setUpMap() {
 
-        final LatLng CENTRE_VANCOUVER = new LatLng(49.29372070685224 ,-123.06420173496008);
+        final LatLng CENTRE_VANCOUVER = new LatLng(49.20741810800015, -123.00997015088797);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(CENTRE_VANCOUVER, 10);
         mMap.moveCamera(update);
 
     }
-    /*
-    public void setIsClicked(View view){
 
-        if(type.matches("A")) {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_map, menu);
+        super.onCreateOptionsMenu(menu, inflater);
 
-            // Add start_marker_resized to pick up location
-            LatLng centerOfMap = mMap.getCameraPosition().target;
-            // create marker
-            MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("PICKUP");
-            // Changing marker icon
-            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_marker_resized));
-            // adding marker
-            markerAry[0] = mMap.addMarker(marker);
-            //markerAry[0].showInfoWindow();
+        if(type.matches("B")){
+            ((Main)getActivity()).setActionBarTitle("Set Destination");
+            ((Main)getActivity()).enableBackButton(true);
+        }else{
+            ((Main)getActivity()).setActionBarTitle("Set Pickup Location");
+            ((Main)getActivity()).enableBackButton(false);
+        }
+    }
 
-            // switch to set destination mode
-            // getSupportActionBar().setTitle("Set Destination");
-            Button button = (Button)view.findViewById(R.id.set);
-            button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
-            button.setText("SET DESTINATION");
-            // Change marker color to red
-            ImageView image = (ImageView) view.findViewById(R.id.marker);
-            image.setImageResource(R.drawable.b_marker);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-            //clear search view
-            SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-            searchView.setQuery("", false);
+        int id = item.getItemId();
+        if(id == android.R.id.home){
+            if(type.matches("B")) {
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Set Pickup Location");
+                Button button = (Button)view.findViewById(R.id.set);
+                button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
+                button.setText("SET PICKUP");
+                mMap.clear();
+                ImageView image = (ImageView) view.findViewById(R.id.marker);
+                image.setVisibility(View.VISIBLE);
+                image.setImageResource(R.drawable.a_marker);
 
-            // Change type to "B"
-            type = "B";
-        }else if(type.matches("B")){
+                // clear search view
+                SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
+                searchView.setBackgroundColor(Color.parseColor("#cccccc"));
+                searchView.setQueryHint("Enter address here...");
+                searchView.setIconified(false);
+                searchView.clearFocus();
 
-            // Add end_marker_resized to destination
-            LatLng centerOfMap = mMap.getCameraPosition().target;
-
-            // Check distance
-            final int ONE_KM = 1;
-            if(distance(markerAry[0].getPosition().latitude,
-                    markerAry[0].getPosition().longitude,
-                    centerOfMap.latitude,
-                    centerOfMap.longitude) < ONE_KM) {
-
-                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "This ride is too short.", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                toast.show();
-                return;
+                // Change type back to "A"
+                type = "A";
             }
-
-            // create marker
-            MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("DESTINATION");
-            // Changing marker icon
-            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_marker_resized));
-            // adding marker
-            markerAry[1] = mMap.addMarker(marker);
-
-            // Calculate Route
-            isRouteFound = false;
-            isRouteReady = false;
-            LatLng pickup = new LatLng(markerAry[0].getPosition().latitude , markerAry[0].getPosition().longitude);
-            LatLng dest = new LatLng(markerAry[1].getPosition().latitude , markerAry[1].getPosition().longitude);
-
-            // Getting URL to the Google Directions API
-            String url = getDirectionsUrl(pickup, dest);
-
-            // Start downloading json data from Google Directions API
-            //drawing the route between A and B
-            DownloadTask downloadTask = new DownloadTask();
-            downloadTask.execute(url);
-
-            //calculate time and distance
-            DownloadTask3 downloadTask3 = new DownloadTask3();
-            downloadTask3.execute(url);
-
-            // Zoom out to see all markers
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            builder.include(markerAry[0].getPosition());
-            builder.include(markerAry[1].getPosition());
-            LatLngBounds bounds = builder.build();
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-            mMap.moveCamera(cu);
-            float zoom = mMap.getCameraPosition().zoom;
-            LatLng center = mMap.getCameraPosition().target;
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, zoom - 1.0f));
-
-
-            // hide marker
-            ImageView image = (ImageView) view.findViewById(R.id.marker);
-            image.setVisibility(View.GONE);
-
-            // Switch confirm mode
-            //getSupportActionBar().setTitle("Confirm");
-            Button doneButton = (Button)view.findViewById(R.id.done);
-            doneButton.setVisibility(View.VISIBLE);
-            Button button = (Button)view.findViewById(R.id.set);
-            button.setText("RESET");
-
-            //clear search view
-            SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-            searchView.setIconifiedByDefault(true);
-            searchView.clearFocus();
-            searchView.setQuery("", false);
-            searchView.setBackgroundColor(Color.TRANSPARENT);
-            searchView.setQueryHint("");
-            searchView.setIconified(true);
-
-            // Change type to "C"
-            type = "C";
-
-        }else{
-            mMap.clear();// clear map
-
-            //getSupportActionBar().setTitle("Set Pickup Location");
-
-            ImageView image = (ImageView) view.findViewById(R.id.marker);
-            image.setVisibility(View.VISIBLE);
-            image.setImageResource(R.drawable.a_marker);
-
-            Button doneButton = (Button)view.findViewById(R.id.done);
-            doneButton.setVisibility(View.GONE);
-            Button button = (Button)view.findViewById(R.id.set);
-            button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
-            button.setText("SET PICKUP");
-
-            //clear search view
-            SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-            searchView.setBackgroundColor(Color.parseColor("#4DB6AC"));
-            searchView.setQueryHint("Enter the address here...");
-            searchView.setIconified(false);
-            searchView.clearFocus();
-
-            // Change type back to "A"
-            type = "A";
         }
+        if(id == R.id.normal){
+            if (mMap != null){
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            }
+        }
+        if(id == R.id.satellite){
+            if (mMap != null){
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            }
+        }
+        if(id == R.id.hybrid){
+            if (mMap != null) {
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
-    */
-    /*
-    // DONE BUTTON IS CLICKED
-    public void doneIsClicked(View view){
-
-        if(isRouteFound && isRouteReady) {
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra("address_a", addressAry[0]);
-            returnIntent.putExtra("address_b", addressAry[1]);
-            returnIntent.putExtra("lat_a", markerAry[0].getPosition().latitude + "");
-            returnIntent.putExtra("lng_a", markerAry[0].getPosition().longitude + "");
-            returnIntent.putExtra("lat_b", markerAry[1].getPosition().latitude + "");
-            returnIntent.putExtra("lng_b", markerAry[1].getPosition().longitude + "");
-            returnIntent.putExtra("distance", distance);
-            returnIntent.putExtra("time", time);
-            setResult(RESULT_OK, returnIntent);
-            finish();
-        }else if(!isRouteReady){
-            Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Please Wait", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-            toast.show();
-        }else{
-            Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Invalid Ride Please Reset", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-            toast.show();
-        }
-    }
-    */
-
-    // CUSTOMIZED MYLOCATION IS CLICKED
-    /*
-    public void myLocationIsClicked(View view){
-        Location location = mMap.getMyLocation();
-
-        if(!isGpsEnable()){
-            showSettingsAlert();
-            return;
-        }
-
-        if( location != null ) {
-            CameraPosition position = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .zoom(14.0f).build();
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
-        }
-    }
-    */
 
     // CHECK GPA ENABLE
     private boolean isGpsEnable(){
@@ -676,8 +527,7 @@ public class Tab1Fragment extends Fragment{
         //On pressing cancel button
         alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
+            public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         });
@@ -707,33 +557,56 @@ public class Tab1Fragment extends Fragment{
         return (rad * 180 / Math.PI);
     }
 
-
-
-
-    //GOOGLE FIND ROUTE SERVICES START HERE--------------------------------------------------------------------------------
-
-    private String getDirectionsUrl(LatLng origin,LatLng dest){
-
-        // Origin of route
-        String str_origin = "origin="+origin.latitude+","+origin.longitude;
-
-        // Destination of route
-        String str_dest = "destination="+dest.latitude+","+dest.longitude;
-
-        // Sensor enabled
-        String sensor = "sensor=false";
-
-        // Building the parameters to the web service
-        String parameters = str_origin+"&"+str_dest+"&"+sensor;
-
-        // Output format
-        String output = "json";
-
-        // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
-
-        return url;
+    // setup address search suggestions
+    private void handleIntent(Intent intent){
+        if(intent.getAction().equals(Intent.ACTION_SEARCH)){
+            doSearch(intent.getStringExtra(SearchManager.QUERY));
+        }else if(intent.getAction().equals(Intent.ACTION_VIEW)){
+            getPlace(intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
+        }
     }
+    /*
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+    */
+
+    private void doSearch(String query){
+        Bundle data = new Bundle();
+        data.putString("query", query);
+        getActivity().getSupportLoaderManager().restartLoader(0, data, this);
+    }
+
+    private void getPlace(String query){
+        Bundle data = new Bundle();
+        data.putString("query", query);
+        getActivity().getSupportLoaderManager().restartLoader(1, data, this);
+    }
+    @Override
+    public Loader<Cursor> onCreateLoader(int arg0, Bundle query) {
+        CursorLoader cLoader = null;
+        if(arg0==0)
+            cLoader = new CursorLoader(getActivity().getBaseContext(), PlaceProvider.SEARCH_URI, null, null, new String[]{ query.getString("query") }, null);
+        else if(arg0==1)
+            cLoader = new CursorLoader(getActivity().getBaseContext(), PlaceProvider.DETAILS_URI, null, null, new String[]{ query.getString("query") }, null);
+        return cLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> arg0, Cursor c) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> arg0) {
+        // TODO Auto-generated method stub
+    }
+
+
+
     /** A method to download json data from url */
     private String downloadUrl(String strUrl) throws IOException{
         String data = "";
@@ -772,109 +645,6 @@ public class Tab1Fragment extends Fragment{
         }
         return data;
     }
-
-    // Fetches data from url passed
-    private class DownloadTask extends AsyncTask<String, Void, String>{
-
-        // Downloading data in non-ui thread
-        @Override
-        protected String doInBackground(String... url) {
-
-            // For storing data from web service
-            String data = "";
-
-            try{
-                // Fetching the data from web service
-                data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
-            }
-            return data;
-        }
-
-        // Executes in UI thread, after the execution of
-        // doInBackground()
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            ParserTask parserTask = new ParserTask();
-
-            // Invokes the thread for parsing the JSON data
-            parserTask.execute(result);
-        }
-    }
-
-    /** A class to parse the Google Places in JSON format */
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
-
-        // Parsing the data in non-ui thread
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try{
-                jObject = new JSONObject(jsonData[0]);
-                DirectionsJSONParser parser = new DirectionsJSONParser();
-
-                // Starts parsing data
-                routes = parser.parse(jObject);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        // Executes in UI thread, after the parsing process
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points = null;
-            PolylineOptions lineOptions = null;
-            MarkerOptions markerOptions = new MarkerOptions();
-
-            // Traversing through all the routes
-            for(int i=0;i<result.size();i++){
-                points = new ArrayList<LatLng>();
-                lineOptions = new PolylineOptions();
-
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);
-
-                // Fetching all the points in i-th route
-                for(int j=0;j<path.size();j++){
-                    HashMap<String,String> point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    points.add(position);
-                }
-
-                // Adding all the points in the route to LineOptions
-                lineOptions.addAll(points);
-                lineOptions.width(10);
-                lineOptions.color(Color.BLUE);
-                isRouteFound = true;
-                isRouteReady = true;
-            }
-
-            try {
-                // Drawing polyline in the Google Map for the i-th route
-                mMap.addPolyline(lineOptions);
-            }catch (Exception e){
-                e.printStackTrace();
-                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "No Route Found", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                toast.show();
-                isRouteFound = false;
-                isRouteReady = true;
-            }
-        }
-    }
-    //GOOGLE FIND ROUTE SERVICES END-----------------------------------------------------------------------------------------
 
     //GOOGLE ADDRESS SERVICES START HERE-------------------------------------------------------------------------------------
     /** A class, to download Places from Geocoding webservice */
@@ -970,100 +740,4 @@ public class Tab1Fragment extends Fragment{
             }
         }
     }
-    //GOOGLE ADDRESS SERVICES END-------------------------------------------------------------------------------------
-
-    //FIND DISTANCE AND TRAVEL TIME BETWEEN A AND B START HERE--------------------------------------------------------------------
-    // Fetches data from url passed
-    private class DownloadTask3 extends AsyncTask<String, Void, String>{
-
-        // Downloading data in non-ui thread
-        @Override
-        protected String doInBackground(String... url) {
-
-            // For storing data from web service
-            String data = "";
-
-            try{
-                // Fetching the data from web service
-                data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
-            }
-            return data;
-        }
-
-        // Executes in UI thread, after the execution of
-        // doInBackground()
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            ParserTask3 parserTask3 = new ParserTask3();
-
-            // Invokes the thread for parsing the JSON data
-            parserTask3.execute(result);
-        }
-    }
-
-    /** A class to parse the Google Places in JSON format */
-    private class ParserTask3 extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
-
-        // Parsing the data in non-ui thread
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try{
-                jObject = new JSONObject(jsonData[0]);
-                DirectionsJSONParser2 parser = new DirectionsJSONParser2();
-
-                // Starts parsing data
-                routes = parser.parse(jObject);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        // Executes in UI thread, after the parsing process
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-
-            String distance1 = "";
-            String duration = "";
-
-            if(result.size()<1){
-                return;
-            }
-
-            // Traversing through all the routes
-            for(int i=0;i<result.size();i++){
-
-
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);
-
-                // Fetching all the points in i-th route
-                for(int j=0;j<path.size();j++){
-                    HashMap<String,String> point = path.get(j);
-
-                    if(j==0){    // Get distance from the list
-                        distance1 = point.get("distance");
-                        continue;
-                    }else if(j==1){ // Get duration from the list
-                        duration = point.get("duration");
-                        continue;
-                    }
-
-                }
-
-            }
-            distance = distance1;
-            time = duration;
-        }
-    }
-    //FIND DISTANCE AND TRAVEL TIME BETWEEN A AND B END--------------------------------------------------------------------
-
 }

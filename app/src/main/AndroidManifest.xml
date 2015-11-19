@@ -43,12 +43,6 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" >
         </activity>
-        <activity
-            android:name=".ActivityClasses.MainMenu"
-            android:label="@string/title_activity_main_menu"
-            android:screenOrientation="portrait" >
-        </activity>
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -59,28 +53,10 @@
         <!-- //DEBUG_DESKTOP: android:value="AIzaSyBqab7N06GlpC6eaMSyY9NJzvySeqQjSP8" -->
         <!-- //DEBUG__LAPTOP: android:value="AIzaSyAQHPMb9t1XXZY8LlwcUBjXur2zid4pdm0" -->
         <!-- //RELEASE: android:value="AIzaSyDj8QJWSQCrlf8moDPdJbYqf_po6yNY7aE" -->
-
-        <activity
-            android:name=".ActivityClasses.SetMarker"
-            android:label="@string/title_activity_new_trip"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".ActivityClasses.NewTrip"
-            android:label="@string/title_activity_new_trip2"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".ActivityClasses.Schedule"
-            android:label="@string/title_activity_schedule" >
-        </activity>
-        <activity
-            android:name=".ActivityClasses.FindTrip"
-            android:label="@string/title_activity_find_trip" >
-        </activity>
         <activity
             android:name=".ActivityClasses.Main"
             android:label="@string/title_activity_main"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
     </application>
