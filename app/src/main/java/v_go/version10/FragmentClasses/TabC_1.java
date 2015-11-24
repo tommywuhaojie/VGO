@@ -97,10 +97,6 @@ public class TabC_1 extends Fragment  {
 
         setCustomResourceForDates();
 
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.calendar1, caldroidFragment);
-        transaction.commit();
-
         final TableLayout tableLay = (TableLayout)view.findViewById(R.id.trip_table);
         // Setup listener
         final CaldroidListener listener = new CaldroidListener() {
@@ -236,6 +232,14 @@ public class TabC_1 extends Fragment  {
         return view;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.calendar1, caldroidFragment);
+        transaction.commit();
+    }
+
     private void setCustomResourceForDates() {
         Calendar cal = Calendar.getInstance();
 
@@ -280,8 +284,9 @@ public class TabC_1 extends Fragment  {
                     JSONObject jsonObject = jsonArray[0].getJSONObject(i);
                     Date date = dateFormat.parse(jsonObject.getString("starting_date"));
                     //caldroidFragment.setBackgroundResourceForDate(R.color.green2, date);
-                    caldroidFragment.setBackgroundResourceForDate(R.color.blue, date);
-                    caldroidFragment.setTextColorForDate(R.color.white, date);
+                    //caldroidFragment.setBackgroundResourceForDate(R.color.blue, date);
+                    //caldroidFragment.setTextColorForDate(R.color.white, date);
+                    caldroidFragment.setBackgroundResourceForDate(R.drawable.red_mark, date);
                 }
             }
         }catch (Exception e){

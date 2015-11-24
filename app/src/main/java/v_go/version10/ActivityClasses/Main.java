@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -31,6 +32,8 @@ public class Main extends AppCompatActivity{
     private HashMap<String, Stack<Fragment>> mStacks;
     /*Save current tabs identifier in this..*/
     private String mCurrentTab;
+
+    private boolean allow = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -116,7 +119,22 @@ public class Main extends AppCompatActivity{
     /*Comes here when user switch tab, or we do programmatically*/
     TabHost.OnTabChangeListener listener    =   new TabHost.OnTabChangeListener() {
         public void onTabChanged(String tabId) {
-        /*Set current tab..*/
+
+            if(!allow){
+                mTabHost.setCurrentTabByTag(mCurrentTab);
+                return;
+            }
+            allow = false;
+
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    // Actions to do after 0.3 seconds
+                    allow = true;
+                }
+            }, 300);
+
+            /*Set current tab..*/
             mCurrentTab = tabId;
 
             if(mStacks.get(tabId).size() == 0){

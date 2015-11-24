@@ -312,6 +312,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
 
                 LatLng centerOfMap = mMap.getCameraPosition().target;
 
+                if(getActivity() == null) {
+                    return;
+                }
                 Geocoder geocoder = new Geocoder(getActivity().getApplicationContext(), Locale.ENGLISH);
                 try {
                     addresses = geocoder.getFromLocation(centerOfMap.latitude, centerOfMap.longitude, 1);
