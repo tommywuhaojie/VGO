@@ -1,4 +1,4 @@
-package v_go.version10;
+package v_go.version10.ApiClasses;
 
 import android.util.Log;
 
@@ -13,9 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by Michael on 2015/9/26.
- */
 public class User {
     /*
     * v-go url addrress

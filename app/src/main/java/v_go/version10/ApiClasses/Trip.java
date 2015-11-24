@@ -1,28 +1,19 @@
 package v_go.version10.ApiClasses;
 
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import v_go.version10.User;
-
-/**
- * Created by Michael on 09/10/2015.
- */
 /*
     time format: YYYY-MM-DD HH:mm
     estimate time in minutes;

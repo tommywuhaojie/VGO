@@ -18,7 +18,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import v_go.version10.R;
-import v_go.version10.User;
+import v_go.version10.ApiClasses.User;
 
 
 public class Register extends AppCompatActivity {
@@ -64,6 +64,7 @@ public class Register extends AppCompatActivity {
         if(id == android.R.id.home){
             Intent intent = new Intent(this, Login.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("logout", true);
             startActivity(intent);
             return true;
         }

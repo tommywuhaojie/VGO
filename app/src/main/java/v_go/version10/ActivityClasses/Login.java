@@ -32,7 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import v_go.version10.R;
-import v_go.version10.User;
+import v_go.version10.ApiClasses.User;
 
 public class Login extends AppCompatActivity {
 
@@ -304,4 +304,9 @@ public class Login extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+        System.exit(0);
+    }
 }

@@ -4,6 +4,5 @@ import android.support.v4.app.Fragment;
 
 public interface FragmentChangeListener
 {
-    void replaceFragment(Fragment fragment);
-    void goBackToFragment(Fragment fragment);
+    public void replaceFragment(Fragment fragment);
 }

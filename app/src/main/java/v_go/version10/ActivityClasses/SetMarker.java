@@ -68,7 +68,7 @@ public class SetMarker extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activtity_set_marker);
+        setContentView(R.layout.activity_schedule);
         setUpMapIfNeeded();
 
         // Initialization
