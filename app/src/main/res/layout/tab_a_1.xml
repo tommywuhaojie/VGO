@@ -49,7 +49,7 @@
         android:id="@+id/marker"
         android:layout_gravity="center"
         android:src="@drawable/a_m"
-        android:layout_marginBottom="18dp" />
+        android:layout_marginBottom="16dp" />
 
     <SearchView
         android:layout_width="match_parent"
