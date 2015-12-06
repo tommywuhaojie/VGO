@@ -136,8 +136,6 @@ public class NewTrip extends AppCompatActivity implements DatePickerDialog.OnDat
 
                     // Draw Route
                     String url = getDirectionsUrl(latLng_a, latLng_b);
-                    // Start downloading json data from Google Directions API
-                    //drawing the route between A and B
                     DownloadTask downloadTask = new DownloadTask();
                     downloadTask.execute(url);
 

@@ -1,216 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6495ED">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Starting Location"
-        android:id="@+id/textView34"
-        android:layout_marginTop="20dp"
-        android:textColor="#000000"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+    <fragment
+        android:id="@+id/map"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="address_a"
-        android:id="@+id/addr_a"
-        android:layout_below="@+id/textView34"
-        android:textColor="#000000"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp"
-        android:layout_alignParentEnd="true"
-        android:singleLine="true" />
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#6495ED">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Ending Location"
-        android:id="@+id/textView36"
-        android:layout_marginTop="30dp"
-        android:textColor="#000000"
-        android:layout_below="@+id/addr_a"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Starting Location"
+                android:id="@+id/textView34"
+                android:layout_marginTop="20dp"
+                android:textColor="#000000"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="address_b"
-        android:id="@+id/addr_b"
-        android:textColor="#000000"
-        android:layout_below="@+id/textView36"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp"
-        android:layout_alignParentEnd="true"
-        android:singleLine="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="address_a"
+                android:id="@+id/addr_a"
+                android:layout_below="@+id/textView34"
+                android:textColor="#000000"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp"
+                android:layout_alignParentEnd="true"
+                android:singleLine="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Starting time"
-        android:id="@+id/textView38"
-        android:layout_marginTop="30dp"
-        android:textColor="#000000"
-        android:layout_below="@+id/addr_b"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Ending Location"
+                android:id="@+id/textView36"
+                android:layout_marginTop="30dp"
+                android:textColor="#000000"
+                android:layout_below="@+id/addr_a"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Driver/Passenger Info"
-        android:id="@+id/textView39"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_below="@+id/time"
-        android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="address_b"
+                android:id="@+id/addr_b"
+                android:textColor="#000000"
+                android:layout_below="@+id/textView36"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp"
+                android:layout_alignParentEnd="true"
+                android:singleLine="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Michael Lee"
-        android:id="@+id/textView41"
-        android:textColor="#000000"
-        android:layout_below="@+id/textView39"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Starting time"
+                android:id="@+id/textView38"
+                android:layout_marginTop="30dp"
+                android:textColor="#000000"
+                android:layout_below="@+id/addr_b"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="3 common friends"
-        android:id="@+id/textView42"
-        android:textColor="#000000"
-        android:layout_below="@+id/textView41"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Driver/Passenger Info"
+                android:id="@+id/textView39"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_below="@+id/time"
+                android:layout_alignParentStart="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="BMW X3"
-        android:id="@+id/textView43"
-        android:textColor="#000000"
-        android:layout_alignTop="@+id/textView41"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="50dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Michael Lee"
+                android:id="@+id/textView41"
+                android:textColor="#000000"
+                android:layout_below="@+id/textView39"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Passangers"
-        android:id="@+id/textView44"
-        android:textColor="#000000"
-        android:layout_marginTop="30dp"
-        android:layout_below="@+id/textView42"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="3 common friends"
+                android:id="@+id/textView42"
+                android:textColor="#000000"
+                android:layout_below="@+id/textView41"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="12:30"
-        android:id="@+id/time"
-        android:textColor="#000000"
-        android:layout_below="@+id/textView38"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="20dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="BMW X3"
+                android:id="@+id/textView43"
+                android:textColor="#000000"
+                android:layout_alignTop="@+id/textView41"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="50dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="km diff"
-        android:id="@+id/a_diff"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_alignTop="@+id/textView34"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="50dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Passangers"
+                android:id="@+id/textView44"
+                android:textColor="#000000"
+                android:layout_marginTop="30dp"
+                android:layout_below="@+id/textView42"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="km diff"
-        android:id="@+id/b_diff"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_alignTop="@+id/textView36"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="50dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="12:30"
+                android:id="@+id/time"
+                android:textColor="#000000"
+                android:layout_below="@+id/textView38"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="time diff"
-        android:id="@+id/time_diff"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_alignTop="@+id/textView38"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="50dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="km diff"
+                android:id="@+id/a_diff"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_alignTop="@+id/textView34"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="50dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="REQUEST"
-        android:id="@+id/button3"
-        android:layout_marginTop="45dp"
-        android:layout_below="@+id/textView35"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="km diff"
+                android:id="@+id/b_diff"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_alignTop="@+id/textView36"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="50dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Thomas"
-        android:id="@+id/textView35"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_below="@+id/textView44"
-        android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="time diff"
+                android:id="@+id/time_diff"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_alignTop="@+id/textView38"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="50dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Tommy"
-        android:id="@+id/textView37"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_below="@+id/textView44"
-        android:layout_centerHorizontal="true" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REQUEST"
+                android:id="@+id/button3"
+                android:layout_marginTop="45dp"
+                android:layout_below="@+id/textView35"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="James"
-        android:id="@+id/textView45"
-        android:textColor="#000000"
-        android:layout_marginLeft="20dp"
-        android:layout_alignTop="@+id/textView37"
-        android:layout_alignEnd="@+id/textView43" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Thomas"
+                android:id="@+id/textView35"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_below="@+id/textView44"
+                android:layout_alignParentStart="true" />
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Tommy"
+                android:id="@+id/textView37"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_below="@+id/textView44"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="James"
+                android:id="@+id/textView45"
+                android:textColor="#000000"
+                android:layout_marginLeft="20dp"
+                android:layout_alignTop="@+id/textView37"
+                android:layout_alignEnd="@+id/textView43" />
+
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>

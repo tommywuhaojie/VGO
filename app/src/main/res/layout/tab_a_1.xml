@@ -3,14 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MapActivity"
-    android:background="#ffffff">
+    android:background="#ffffff"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
-    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+    <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         class="com.google.android.gms.maps.SupportMapFragment" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#ffffff">
+
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Enter address here..."
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            android:layout_gravity="center_horizontal|top">
+        </AutoCompleteTextView>
+    </LinearLayout>
 
     <Button
         android:layout_width="300dp"
@@ -23,12 +44,12 @@
         android:layout_marginBottom="10dp" />
 
     <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/marker"
         android:layout_gravity="center"
-        android:src="@drawable/a_marker"
-        android:layout_marginBottom="20dp" />
+        android:src="@drawable/a_m"
+        android:layout_marginBottom="18dp" />
 
     <SearchView
         android:layout_width="match_parent"
@@ -37,7 +58,8 @@
         android:layout_gravity="top|center_horizontal"
         android:iconifiedByDefault="true"
         android:queryHint="Enter address here..."
-        android:background="#cccccc" />
+        android:background="#cccccc"
+        android:visibility="gone" />
 
     <ImageButton
         android:layout_width="30dp"
@@ -45,7 +67,7 @@
         android:id="@+id/myLocation"
         android:layout_gravity="top|right"
         android:background="@drawable/my_location_button"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="50dp"
         android:layout_marginRight="10dp"
         android:clickable="true" />
 
@@ -58,7 +80,6 @@
         android:layout_marginBottom="60dp"
         android:textColor="#FFFFFF"
         android:textSize="15dp" />
-
 
 </FrameLayout>
 

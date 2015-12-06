@@ -1,5 +1,18 @@
 package v_go.version10.FragmentClasses;
 
+import java.net.MalformedURLException;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.app.SearchManager;
 import android.content.Context;
 import android.database.Cursor;
@@ -33,6 +46,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -66,19 +80,145 @@ import v_go.version10.R;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
 import v_go.version10.googleMapServices.PlaceProvider;
 
+import static com.google.android.gms.internal.zzid.runOnUiThread;
 
-public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, OnItemClickListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private String type;
-    private String distance = "";
-    private String duration = "";
     private Marker[] markerAry;
     private String[] addressAry;
-    private boolean isRouteFound;
-    private boolean isRouteReady;
-    private int firstTime = 0;
     private View view;
+    private int firstTime = 0; // first time of camera changing
+
+    // variables for places auto complete
+    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
+    private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
+    private static final String OUT_JSON = "/json";
+    private static final String API_KEY = "AIzaSyB8RTulLwXTIBphsG9E8fDwWYxsl41xMVM";
+    private AutoCompleteTextView autoCompView;
+
+    public void onItemClick(AdapterView adapterView, View view, int position, long id) {
+        String location = (String) adapterView.getItemAtPosition(position);
+        String url = "https://maps.googleapis.com/maps/api/geocode/json?";
+        try {
+            location = URLEncoder.encode(location, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String address = "address=" + location;
+        String sensor = "sensor=false";
+        url = url + address + "&" + sensor;
+        DownloadTask2 downloadTask = new DownloadTask2();
+        downloadTask.execute(url);
+        // hide keyboard
+        InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        in.hideSoftInputFromWindow(autoCompView.getApplicationWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        autoCompView.clearFocus();
+    }
+
+    public static ArrayList<String> autocomplete(String input) {
+        ArrayList<String> resultList = null;
+
+        HttpURLConnection conn = null;
+        StringBuilder jsonResults = new StringBuilder();
+        try {
+            StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
+            sb.append("?key=" + API_KEY);
+            sb.append("&components=country:ca");
+            sb.append("&input=" + URLEncoder.encode(input, "utf8"));
+
+            URL url = new URL(sb.toString());
+
+            //System.out.println("URL: "+url);
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+
+            // Load the results into a StringBuilder
+            int read;
+            char[] buff = new char[1024];
+            while ((read = in.read(buff)) != -1) {
+                jsonResults.append(buff, 0, read);
+            }
+        } catch (MalformedURLException e) {
+            Log.d("DEBUG", "Error API URL");
+            return resultList;
+        } catch (IOException e) {
+            Log.d("DEBUG", "Error Places API");
+            return resultList;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObj = new JSONObject(jsonResults.toString());
+            JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
+            //System.out.println(jsonObj.getString("error_message"));
+            // Extract the Place descriptions from the results
+            resultList = new ArrayList<String>(predsJsonArray.length());
+            for (int i = 0; i < predsJsonArray.length(); i++) {
+                //System.out.println(predsJsonArray.getJSONObject(i).getString("description"));
+                //System.out.println("============================================================");
+                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
+            }
+        } catch (JSONException e) {
+            Log.d("DEBUG", "Cannot process JSON results");
+            e.printStackTrace();
+        }
+
+        return resultList;
+    }
+
+    class GooglePlacesAutocompleteAdapter extends ArrayAdapter<String> implements Filterable {
+        private ArrayList<String> resultList;
+
+        public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
+            super(context, textViewResourceId);
+        }
+
+        @Override
+        public int getCount() {
+            return resultList.size();
+        }
+
+        @Override
+        public String getItem(int index) {
+            return resultList.get(index);
+        }
+
+        @Override
+        public Filter getFilter() {
+            Filter filter = new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    FilterResults filterResults = new FilterResults();
+                    if (constraint != null) {
+                        // Retrieve the autocomplete results.
+                        resultList = autocomplete(constraint.toString());
+
+                        // Assign the data to the FilterResults
+                        filterResults.values = resultList;
+                        filterResults.count = resultList.size();
+                    }
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    if (results != null && results.count > 0) {
+                        notifyDataSetChanged();
+                    } else {
+                        notifyDataSetInvalidated();
+                    }
+                }
+            };
+            return filter;
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -107,12 +247,52 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         // set up google map if needed
         setUpMapIfNeeded();
 
+        // auto complete
+        autoCompView = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView);
+        autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.auto_complete_list));
+        autoCompView.setOnItemClickListener(this);
+        // search button return
+        autoCompView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    String location = autoCompView.getText().toString();
+                    String url = "https://maps.googleapis.com/maps/api/geocode/json?";
+                    try {
+                        location = URLEncoder.encode(location, "utf-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    String address = "address=" + location;
+                    String sensor = "sensor=false";
+                    url = url + address + "&" + sensor;
+                    DownloadTask2 downloadTask = new DownloadTask2();
+                    downloadTask.execute(url);
+                    // keyboard
+                    InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    in.hideSoftInputFromWindow(autoCompView.getApplicationWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    autoCompView.clearFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        // focus change
+        autoCompView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    autoCompView.setText("");
+                } //else {...loss the focus...}
+            }
+        });
+
+
         // Initialization
         markerAry = new Marker[2];
         addressAry = new String[2];
         type = "";
-        distance = "";
-        duration = "";
 
         // Action bar title and set button color
         Button doneButton = (Button) view.findViewById(R.id.done);
@@ -138,7 +318,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("PICKUP");
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_marker_resized));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_m));
                     // adding marker
                     markerAry[0] = mMap.addMarker(marker);
                     //markerAry[0].showInfoWindow();
@@ -148,11 +328,11 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     button.setText("SET DESTINATION");
                     // Change marker color to red
                     ImageView image = (ImageView) view.findViewById(R.id.marker);
-                    image.setImageResource(R.drawable.b_marker);
+                    image.setImageResource(R.drawable.b_m);
 
                     //clear search view
-                    SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-                    searchView.setQuery("", false);
+                    //SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
+                    //searchView.setQuery("", false);
 
                     // Change type to "B"
                     type = "B";
@@ -167,7 +347,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                             centerOfMap.latitude,
                             centerOfMap.longitude) < ONE_KM) {
 
-                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "This ride is too short.", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Sorry, this ride is too short.", Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
                         toast.show();
                         return;
@@ -180,7 +360,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("DESTINATION");
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_marker_resized));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_m));
                     markerAry[1] = mMap.addMarker(marker);
 
                     LatLng pickup = new LatLng(markerAry[0].getPosition().latitude , markerAry[0].getPosition().longitude);
@@ -224,7 +404,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         });
 
 
-        // set uniconfied and unfocus all the time
+        /* set uniconfied and unfocus all the time
         final SearchView searchAddress = (SearchView) view.findViewById(R.id.searchAddress);
         searchAddress.setIconified(false);
         searchAddress.clearFocus();
@@ -292,6 +472,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
 
         });
+        */
 
 
         //GOOGLE MAP-----------------------------------------------------------------
@@ -337,25 +518,23 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     for (int i = 0; i < addressFragments.size(); i++) {
                         addr = addr +" "+ addressFragments.get(i);
                     }
+                    // fill search text
+                    //searchAddress.setQuery(addr, false);
+                    //searchAddress.clearFocus();
 
-                    if(type.matches("A")){
-                        searchAddress.setQuery(addr, false);
-                        searchAddress.clearFocus();
-                        addressAry[0] = addr.trim();
-                    }else if(type.matches("B")){
-                        searchAddress.setQuery(addr, false);
-                        searchAddress.clearFocus();
-                        addressAry[1] = addr.trim();
+                    autoCompView.setText(addr);
+                    autoCompView.clearFocus();
 
-                    }
-                    if(firstTime == 0){
-                        searchAddress.setQuery("",false);
-                        searchAddress.clearFocus();
+                    if(firstTime==0){
+                        autoCompView.setText("");
                         firstTime++;
                     }
 
-                    //Log.d("DEBUG", centerOfMap.latitude +" "+ centerOfMap.longitude);
-
+                    if(type.matches("A")){
+                        addressAry[0] = addr.trim();
+                    }else if(type.matches("B")){
+                        addressAry[1] = addr.trim();
+                    }
                 }
             }
         });
@@ -366,8 +545,10 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-        searchView.setQueryHint("Enter address here...");
+        //SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
+        //searchView.setQueryHint("Enter address here...");
+        autoCompView.setHint("Enter address here...");
+        autoCompView.clearFocus();
     }
 
 
@@ -434,14 +615,15 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 mMap.clear();
                 ImageView image = (ImageView) view.findViewById(R.id.marker);
                 image.setVisibility(View.VISIBLE);
-                image.setImageResource(R.drawable.a_marker);
+                image.setImageResource(R.drawable.a_m);
 
-                // clear search view
+                /* clear search view
                 SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
                 searchView.setBackgroundColor(Color.parseColor("#cccccc"));
                 searchView.setQueryHint("Enter address here...");
                 searchView.setIconified(false);
                 searchView.clearFocus();
+                */
 
                 // Change type back to "A"
                 type = "A";
@@ -591,29 +773,20 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         HttpURLConnection urlConnection = null;
         try{
             URL url = new URL(strUrl);
-
             // Creating an http connection to communicate with url
             urlConnection = (HttpURLConnection) url.openConnection();
-
             // Connecting to url
             urlConnection.connect();
-
             // Reading data from url
             iStream = urlConnection.getInputStream();
-
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
             StringBuffer sb = new StringBuffer();
-
             String line = "";
             while( ( line = br.readLine()) != null){
                 sb.append(line);
             }
-
             data = sb.toString();
-
             br.close();
-
         }catch(Exception e){
             Log.d("Exception download url", e.toString());
         }finally{
@@ -623,7 +796,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         return data;
     }
 
-    //GOOGLE ADDRESS SERVICES START HERE-------------------------------------------------------------------------------------
     /** A class, to download Places from Geocoding webservice */
     private class DownloadTask2 extends AsyncTask<String, Integer, String>{
 
