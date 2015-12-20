@@ -12,13 +12,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        class="v_go.version10.HelperClasses.TouchableMapFragment" />
+    <!--
+    <fragment
+        android:id="@+id/custom_map_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" /> -->
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="#ffffff">
+        android:layout_height="50dp"
+        android:background="#ffffff"
+        android:id="@+id/linear_lay">
 
         <AutoCompleteTextView
             android:id="@+id/autoCompleteTextView"
@@ -29,8 +36,8 @@
             android:inputType="text"
             android:imeOptions="actionSearch"
             android:singleLine="true"
-            android:layout_gravity="center_horizontal|top">
-        </AutoCompleteTextView>
+            android:layout_gravity="center_horizontal|top"/>
+
     </LinearLayout>
 
     <Button
@@ -67,7 +74,7 @@
         android:id="@+id/myLocation"
         android:layout_gravity="top|right"
         android:background="@drawable/my_location_button"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="60dp"
         android:layout_marginRight="10dp"
         android:clickable="true" />
 

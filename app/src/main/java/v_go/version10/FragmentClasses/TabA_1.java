@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.animation.ObjectAnimator;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -45,7 +47,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SearchView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,11 +78,11 @@ import java.util.Locale;
 
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.HelperClasses.Global;
+import v_go.version10.HelperClasses.MapStateListener;
+import v_go.version10.HelperClasses.TouchableMapFragment;
 import v_go.version10.R;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
 import v_go.version10.googleMapServices.PlaceProvider;
-
-import static com.google.android.gms.internal.zzid.runOnUiThread;
 
 
 public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, OnItemClickListener {
@@ -90,7 +92,11 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     private Marker[] markerAry;
     private String[] addressAry;
     private View view;
-    private int firstTime = 0; // first time of camera changing
+    private int firstTime; // first time of camera changing
+    private boolean mapIsDragged = false;
+    private boolean mapIsDragging = false;
+    private boolean fromAutoComplete = false;
+    private LatLng oldLatLng = new LatLng(0,0);
 
     // variables for places auto complete
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
@@ -99,8 +105,14 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     private static final String API_KEY = "AIzaSyB8RTulLwXTIBphsG9E8fDwWYxsl41xMVM";
     private AutoCompleteTextView autoCompView;
 
+    // address update handler and thread
+    Handler updateHandler = new Handler();
+    Runnable updateRunnable;
+
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {
+        fromAutoComplete = true;
         String location = (String) adapterView.getItemAtPosition(position);
+        String addr = (String) adapterView.getItemAtPosition(position);
         String url = "https://maps.googleapis.com/maps/api/geocode/json?";
         try {
             location = URLEncoder.encode(location, "utf-8");
@@ -116,6 +128,15 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         in.hideSoftInputFromWindow(autoCompView.getApplicationWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         autoCompView.clearFocus();
+
+        // trim the address and put it back
+        autoCompView.setText(addr.trim());
+        // store address to local
+        if(type.matches("A")){
+            addressAry[0] = addr.trim();
+        }else if(type.matches("B")){
+            addressAry[1] = addr.trim();
+        }
     }
 
     public static ArrayList<String> autocomplete(String input) {
@@ -163,7 +184,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             for (int i = 0; i < predsJsonArray.length(); i++) {
                 //System.out.println(predsJsonArray.getJSONObject(i).getString("description"));
                 //System.out.println("============================================================");
-                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
+                resultList.add(predsJsonArray.getJSONObject(i).getString("description")
+                        + "                                                          "); // add empty space after location name
             }
         } catch (JSONException e) {
             Log.d("DEBUG", "Cannot process JSON results");
@@ -234,6 +256,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         } catch (InflateException e) {
         /* map is already there, just return view as it is */
         }
+        // reset
+        firstTime=0;
 
         // set status bar color to black
         Window window = getActivity().getWindow();
@@ -316,7 +340,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // Add start_marker_resized to pick up location
                     LatLng centerOfMap = mMap.getCameraPosition().target;
                     // create marker
-                    MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("PICKUP");
+                    MarkerOptions marker = new MarkerOptions().position(centerOfMap).title(addressAry[0]);
                     // Changing marker icon
                     marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_m));
                     // adding marker
@@ -329,10 +353,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // Change marker color to red
                     ImageView image = (ImageView) view.findViewById(R.id.marker);
                     image.setImageResource(R.drawable.b_m);
-
-                    //clear search view
-                    //SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-                    //searchView.setQuery("", false);
 
                     // Change type to "B"
                     type = "B";
@@ -403,139 +423,39 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
         });
 
-
-        /* set uniconfied and unfocus all the time
-        final SearchView searchAddress = (SearchView) view.findViewById(R.id.searchAddress);
-        searchAddress.setIconified(false);
-        searchAddress.clearFocus();
-
-        // change SearchView background color when re-expand
-        searchAddress.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchAddress.setBackgroundColor(Color.parseColor("#cccccc"));
-            }
-        });
-        // transparent when collapse
-        searchAddress.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                searchAddress.setBackgroundColor(Color.TRANSPARENT);
-                return false;
-            }
-        });
-
-
-
-        //search address and change camera position
-        searchAddress.setOnQueryTextListener( new SearchView.OnQueryTextListener(){
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                String location = searchAddress.getQuery().toString().trim();
-
-                if(location==null || location.equals("")){
-                    Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Address cannot be empty.", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                    toast.show();
-                    return false;
-                }
-
-                String url = "https://maps.googleapis.com/maps/api/geocode/json?";
-
-                try {
-                    // encoding special characters like space in the user input place
-                    location = URLEncoder.encode(location, "utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
-                String address = "address=" + location;
-
-                String sensor = "sensor=false";
-
-                // url , from where the geocoding data is fetched
-                url = url + address + "&" + sensor;
-
-                // Instantiating DownloadTask to get places from Google Geocoding service
-                // in a non-ui thread
-                DownloadTask2 downloadTask = new DownloadTask2();
-
-                // Start downloading the geocoding places
-                downloadTask.execute(url);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-
-        });
-        */
-
-
-        //GOOGLE MAP-----------------------------------------------------------------
+        // google map
         // enable my location button/ zoom button/ repositioning the button
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         /*mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.setPadding(0,1200,0,0);
+            mMap.setPadding(0,1200,0,0);
         */
 
         //put marker in the centre of the map
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition position) {
-
-                // Get the center of the Map.
-                List<Address> addresses = null;
-
-                LatLng centerOfMap = mMap.getCameraPosition().target;
-
-                if(getActivity() == null) {
+                // do something when camera finishes moving
+                if(fromAutoComplete){
+                    fromAutoComplete = false;
                     return;
                 }
-                Geocoder geocoder = new Geocoder(getActivity().getApplicationContext(), Locale.ENGLISH);
-                try {
-                    addresses = geocoder.getFromLocation(centerOfMap.latitude, centerOfMap.longitude, 1);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(mapIsDragging){
+                    return;
                 }
-
-                if (addresses == null || addresses.size() == 0) {
-                    //Do something
-                } else {
-                    Address address = addresses.get(0);
-                    ArrayList<String> addressFragments = new ArrayList<String>();
-
-                    // Fetch the address lines using getAddressLine,
-                    // join them, and send them to the thread.
-                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                        addressFragments.add(address.getAddressLine(i));
-                    }
-                    String addr = "";
-                    for (int i = 0; i < addressFragments.size(); i++) {
-                        addr = addr +" "+ addressFragments.get(i);
-                    }
-                    // fill search text
-                    //searchAddress.setQuery(addr, false);
-                    //searchAddress.clearFocus();
-
-                    autoCompView.setText(addr);
-                    autoCompView.clearFocus();
-
-                    if(firstTime==0){
-                        autoCompView.setText("");
-                        firstTime++;
-                    }
-
-                    if(type.matches("A")){
-                        addressAry[0] = addr.trim();
-                    }else if(type.matches("B")){
-                        addressAry[1] = addr.trim();
-                    }
+                autoCompView.setText("Updating...");
+                // stop updating
+                if(updateRunnable != null) {
+                    updateHandler.removeCallbacks(updateRunnable);
                 }
+                // update now
+                updateRunnable = new Runnable() {
+                    public void run() {
+                        //what ever you do here will be done after 0.5 second delay.
+                        updateAddress();
+                    }
+                };
+                updateHandler.postDelayed(updateRunnable, 500);
             }
         });
 
@@ -545,36 +465,98 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-        //searchView.setQueryHint("Enter address here...");
         autoCompView.setHint("Enter address here...");
         autoCompView.clearFocus();
     }
 
-
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
     private void setUpMapIfNeeded() {
 
+        TouchableMapFragment mMapFragment = (TouchableMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         // Try to obtain the map from the SupportMapFragment.
-        mMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map))
-                .getMap();
+        mMap = mMapFragment.getMap();
         // Check if we were successful in obtaining the map.
         if (mMap != null) {
             setUpMap();
+        }
+
+        // Handle map touch events
+        new MapStateListener(mMapFragment) {
+            @Override
+            public void onMapDragged(){
+                // Map is dragged
+                if(mapIsDragging)
+                    return;
+
+                mapIsDragged = true;
+                mapIsDragging = true;
+                autoCompView.setText("Updating...");
+            }
+            @Override
+            public void onMapTouched() {
+                // Map is touched
+            }
+            @Override
+            public void onMapReleased() {
+                // Map is released
+                if(!mapIsDragged && oldLatLng.equals(mMap.getCameraPosition().target)) {
+                    return;
+                }
+
+                mapIsDragged = false;
+                mapIsDragging = false;
+                oldLatLng = mMap.getCameraPosition().target;
+
+                // update address after 500 ms
+                updateRunnable = new Runnable() {
+                    public void run() {
+                        //what ever you do here will be done after 0.5 second delay.
+                        updateAddress();
+                    }
+                };
+                updateHandler.postDelayed(updateRunnable, 500);
+            }
+        };
+    }
+
+    private void updateAddress(){
+        // Get the center of the Map.
+        List<Address> addresses = null;
+        LatLng centerOfMap = mMap.getCameraPosition().target;
+        if(getActivity() == null) {
+            return;
+        }
+        Geocoder geocoder = new Geocoder(getActivity().getApplicationContext(), Locale.ENGLISH);
+        try {
+            addresses = geocoder.getFromLocation(centerOfMap.latitude, centerOfMap.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (addresses == null || addresses.size() == 0) {
+            //Do something
+        } else {
+            Address address = addresses.get(0);
+            ArrayList<String> addressFragments = new ArrayList<String>();
+
+            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                addressFragments.add(address.getAddressLine(i));
+            }
+            String addr = "";
+            for (int i = 0; i < addressFragments.size(); i++) {
+                addr = addr +" "+ addressFragments.get(i);
+            }
+            autoCompView.setText(addr);
+            autoCompView.clearFocus();
+
+            if(firstTime==0){
+                autoCompView.setText("");
+                firstTime++;
+            }
+
+            if(type.matches("A")){
+                addressAry[0] = addr.trim();
+            }else if(type.matches("B")){
+                addressAry[1] = addr.trim();
+            }
         }
     }
 
@@ -585,12 +567,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-
         final LatLng CENTRE_VANCOUVER = new LatLng(49.20741810800015, -123.00997015088797);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(CENTRE_VANCOUVER, 10);
         mMap.moveCamera(update);
-        Log.d("DEBUG", "move camera");
-
     }
 
     @Override
@@ -616,14 +595,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 ImageView image = (ImageView) view.findViewById(R.id.marker);
                 image.setVisibility(View.VISIBLE);
                 image.setImageResource(R.drawable.a_m);
-
-                /* clear search view
-                SearchView searchView = (SearchView) view.findViewById(R.id.searchAddress);
-                searchView.setBackgroundColor(Color.parseColor("#cccccc"));
-                searchView.setQueryHint("Enter address here...");
-                searchView.setIconified(false);
-                searchView.clearFocus();
-                */
 
                 // Change type back to "A"
                 type = "A";
@@ -666,7 +637,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         }
         return true;
     }
-
 
     //  Show settings alert dialog
     public void showSettingsAlert() {
@@ -716,34 +686,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         return (rad * 180 / Math.PI);
     }
 
-    // setup address search suggestions
-    private void handleIntent(Intent intent){
-        if(intent.getAction().equals(Intent.ACTION_SEARCH)){
-            doSearch(intent.getStringExtra(SearchManager.QUERY));
-        }else if(intent.getAction().equals(Intent.ACTION_VIEW)){
-            getPlace(intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
-        }
-    }
-    /*
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        handleIntent(intent);
-    }
-    */
-
-    private void doSearch(String query){
-        Bundle data = new Bundle();
-        data.putString("query", query);
-        getActivity().getSupportLoaderManager().restartLoader(0, data, this);
-    }
-
-    private void getPlace(String query){
-        Bundle data = new Bundle();
-        data.putString("query", query);
-        getActivity().getSupportLoaderManager().restartLoader(1, data, this);
-    }
     @Override
     public Loader<Cursor> onCreateLoader(int arg0, Bundle query) {
         CursorLoader cLoader = null;
@@ -753,19 +695,13 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             cLoader = new CursorLoader(getActivity().getBaseContext(), PlaceProvider.DETAILS_URI, null, null, new String[]{ query.getString("query") }, null);
         return cLoader;
     }
-
     @Override
     public void onLoadFinished(Loader<Cursor> arg0, Cursor c) {
-
     }
-
     @Override
     public void onLoaderReset(Loader<Cursor> arg0) {
         // TODO Auto-generated method stub
     }
-
-
-
     /** A method to download json data from url */
     private String downloadUrl(String strUrl) throws IOException{
         String data = "";
@@ -798,9 +734,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
 
     /** A class, to download Places from Geocoding webservice */
     private class DownloadTask2 extends AsyncTask<String, Integer, String>{
-
         String data = null;
-
         // Invoked by execute() method of this object
         @Override
         protected String doInBackground(String... url) {
@@ -811,15 +745,12 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
             return data;
         }
-
         // Executed after the complete execution of doInBackground() method
         @Override
         protected void onPostExecute(String result){
-
             // Instantiating ParserTask which parses the json data from Geocoding webservice
             // in a non-ui thread
             ParserTask2 parserTask = new ParserTask2();
-
             // Start parsing the places in JSON format
             // Invokes the "doInBackground()" method of the class ParseTask
             parserTask.execute(result);
@@ -828,22 +759,17 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
 
     /** A class to parse the Geocoding Places in non-ui thread */
     class ParserTask2 extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
-
         JSONObject jObject;
-
         // Invoked by execute() method of this object
         @Override
         protected List<HashMap<String,String>> doInBackground(String... jsonData) {
 
             List<HashMap<String, String>> places = null;
             GeocodeJSONParser parser = new GeocodeJSONParser();
-
             try{
                 jObject = new JSONObject(jsonData[0]);
-
                 /** Getting the parsed data as a an ArrayList */
                 places = parser.parse(jObject);
-
             }catch(Exception e){
                 Log.d("Exception", e.toString());
             }
@@ -853,39 +779,27 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         // Executed after the complete execution of doInBackground() method
         @Override
         protected void onPostExecute(List<HashMap<String,String>> list){
-
-
             for(int i=0;i<list.size();i++){
-
                 // Creating a marker
                 //MarkerOptions markerOptions = new MarkerOptions();
-
                 // Getting a place from the places list
                 HashMap<String, String> hmPlace = list.get(i);
-
                 // Getting latitude of the place
                 double lat = Double.parseDouble(hmPlace.get("lat"));
-
                 // Getting longitude of the place
                 double lng = Double.parseDouble(hmPlace.get("lng"));
-
                 // Getting name
                 //String name = hmPlace.get("formatted_address");
-
                 LatLng latLng = new LatLng(lat, lng);
-
                 // Setting the position for the marker
                 //markerOptions.position(latLng);
-
                 // Setting the title for the marker
                 //markerOptions.title(name);
-
                 // Placing a marker on the touched position
                 //mMap.addMarker(markerOptions);
-
                 // Locate the first location
                 if(i==0)
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14.0f));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f));
             }
         }
     }
