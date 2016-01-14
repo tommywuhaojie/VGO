@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,9 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // change action bar title
+        getSupportActionBar().setTitle("Sign In");
 
         // Initialize Facebook SDK before setContentView(Layout ID)
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -91,12 +95,9 @@ public class Login extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-
             }
-
             @Override
             public void onError(FacebookException e) {
-
             }
         });
 
@@ -107,7 +108,7 @@ public class Login extends AppCompatActivity {
             private String email, pwd;
             private int result;
             private final int SUCCESS = 1;
-            private final int FAIL = -1;
+            private final int FAIL = 0;
 
             public LoginAsyncTask(String email, String pwd) {
                 super();

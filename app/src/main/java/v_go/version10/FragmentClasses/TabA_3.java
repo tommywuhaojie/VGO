@@ -86,6 +86,7 @@ public class TabA_3 extends Fragment{
                 Bundle args = new Bundle();
                 try {
                     JSONObject jsObject = jsonArray.getJSONObject(position);
+                    args.putString("trip_id",jsObject.getString("trip_id"));
                     args.putString("start_location", jsObject.getString("start_location"));
                     args.putString("end_location", jsObject.getString("end_location"));
                     args.putString("time", jsObject.getString("time"));
@@ -180,7 +181,7 @@ public class TabA_3 extends Fragment{
                         if(size == 0){
                             runOnUiThread(new Runnable() {
                                 public void run() {
-                                    Toast.makeText(getActivity(), "Unfortunately, No Trip Matched.", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), "Unfortunately, no trip matched.", Toast.LENGTH_LONG).show();
                                 }
                             });
                         }

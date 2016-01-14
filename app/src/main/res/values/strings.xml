@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">V-Go</string>
     <string name="app_id">1211801952169892</string>
-    <string name="SignIn">Sign In</string>
+    <string name="VGO">V-Go</string>
     <string name="Register">Register</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

@@ -1,8 +1,11 @@
 package v_go.version10.ApiClasses;
 
 import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,25 +17,143 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-/*
-    time format: YYYY-MM-DD HH:mm
-    estimate time in minutes;
-    estimate distance in km;
-    type:       (string) register as driver or passenger
-                0->passenger;
-                1->driver
-    return:
-        -1: fail to register a new trip;
-        -2: a trip with a similar time already exist
-        -3: fill in all fields
-        -4: need to login first
-        1:  register successful
-*/
-public class Trip {
+public class Trip implements TripInterface {
+    private String trip_id;
+    private String user_id;
+    private String starting_date;
+    private String starting_time;
+    private double start_lat;
+    private double start_lng;
+    private String starting;
+    private double end_lat;
+    private double end_lng;
+    private String destination;
+    private String est_time;
+    private String est_distance;
+    private String driver_flag;
+    private boolean active;
+    private boolean match_flag;
+    private String update;
 
-    public String RegisterTrip (String time, double start_latitude, double start_longitude, String start_location,
-                                double end_latitude, double end_longitude, String end_location, int estimate_time,
-                                double estimate_distance,int type){
+    // default constructor
+    public Trip(){}
+
+    public Trip(String trip_id) {
+        HttpURLConnection urlconnet = null;
+        JSONArray json = null;
+
+
+        String jsonarray_string = null;
+        Boolean flag = true;
+        try {
+            String url_string = new User().Rootpath() + "/trip/tripInfo.php?trip_id=" + trip_id;
+            URL url = new URL(url_string);
+            urlconnet = (HttpURLConnection) url.openConnection();
+            urlconnet.setRequestMethod("GET");
+            urlconnet.setUseCaches(true);
+            InputStream is = urlconnet.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+                response.append("\n");
+            }
+            jsonarray_string = response.toString();
+            Log.i("michaellog t:", jsonarray_string);
+        } catch (MalformedURLException e) {
+            flag = false;
+            e.printStackTrace();
+
+            Log.i("michaellog", "error0");
+        } catch (IOException e) {
+            flag = false;
+            e.printStackTrace();
+            Log.i("michaellog", "error1");
+        } finally {
+            if (urlconnet != null) {
+                urlconnet.disconnect();
+            }
+        }
+        if (jsonarray_string == null) {
+            flag = false;
+            Log.i("michaellog", "error2");
+        } else {
+            try {
+                json = new JSONArray(jsonarray_string);
+            } catch (JSONException e) {
+                flag = false;
+                Log.i("michaellog", "error3");
+                e.printStackTrace();
+            }
+        }
+        if (flag) {
+            try {
+                JSONObject one = json.getJSONObject(0);
+                this.trip_id = one.getString("trip_id");
+                this.user_id = one.getString("user_id");
+                this.starting_date = one.getString("starting_date");
+                this.starting_time = one.getString("starting_time");
+                this.start_lat = Double.parseDouble(one.getString("start_lat"));
+                this.start_lng = Double.parseDouble(one.getString("start_lng"));
+                this.starting = one.getString("starting");
+                this.end_lat = Double.parseDouble(one.getString("end_lat"));
+                this.end_lng = Double.parseDouble(one.getString("end_lng"));
+                this.destination = one.getString("destination");
+                this.est_distance = one.getString("est_distance");
+                this.driver_flag = one.getString("driver_flag");
+                if (one.getString("active").equals("1")){
+                    this.active = true;
+                }else {
+                    this.active = false;
+                }
+                if (one.getString("match_flag").equals("1")){
+                    this.match_flag = true;
+                }else {
+                    this.match_flag = false;
+                }
+                this.update = one.getString("update");
+            } catch (JSONException e) {
+                this.trip_id = "-1";
+                Log.i("michaellog", "error4");
+                e.printStackTrace();
+            }
+        } else {
+
+        }
+    }
+    @Override
+    public String getTrip_id(){return this.trip_id;}
+    @Override
+    public String getUser_id(){return this.user_id;};
+    @Override
+    public String getStarting_date(){return this.starting_date;}
+    @Override
+    public String getStarting_time(){return this.starting_time;}
+    @Override
+    public String getStarting(){return this.starting;}
+    @Override
+    public String getDestination(){return this.destination;}
+    @Override
+    public String getEst_time(){return  this.est_time;}
+    @Override
+    public String getEst_distance() {return  this.est_distance;}
+    @Override
+    public String getDriver_flag(){return  this.driver_flag;}
+    @Override
+    public String getUpdate(){return this.update;}
+    @Override
+    public double getStart_lat(){return this.start_lat;}
+    @Override
+    public double getStart_lng() {return this.start_lng;}
+    @Override
+    public double getEnd_lat(){return  this.end_lat;}
+    @Override
+    public double getEnd_lng() {return this.end_lng;}
+    @Override
+    public String RegisterTrip(String time, double start_latitude, double start_longitude, String start_location,
+                               double end_latitude, double end_longitude, String end_location, int estimate_time,
+                               double estimate_distance, int type){
         String text = null;
         String url_string = new User().Rootpath()+"/create/tripRegister.php";
         String data="date_id="+time+"&start_lat="+start_latitude+"&start_lng="+start_longitude
@@ -97,7 +218,8 @@ public class Trip {
                 ['driver_flag']		if the session user is a driver or a passanger in this trip; 1: driver; 0: passanger;
                 ['match_flag']		if this trip is already matched with other user. 1: yes; 0: no;(not implement yet)
     * */
-    public JSONArray ThisMonthTrip (String yearmonth){
+    @Override
+    public JSONArray ThisMonthTrip(String yearmonth){
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
@@ -183,7 +305,8 @@ public class Trip {
 	Error:
 	    ouput null pointer
     * */
-    public JSONArray MatchTripsBy (double start_lat,double start_lng,double end_lat,double end_lng,String start_time,int reg_as,int mult_allow) {
+    @Override
+    public JSONArray MatchTripsBy(double start_lat, double start_lng, double end_lat, double end_lng, String start_time, int reg_as, int mult_allow) {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;

@@ -1,5 +1,7 @@
 package v_go.version10.FragmentClasses;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -38,9 +41,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import v_go.version10.ActivityClasses.Main;
+import v_go.version10.ApiClasses.Request;
 import v_go.version10.R;
 import v_go.version10.googleMapServices.DirectionsJSONParser1;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
+
+import static com.google.android.gms.internal.zzid.runOnUiThread;
 
 public class TabA_4 extends Fragment{
 
@@ -48,6 +54,8 @@ public class TabA_4 extends Fragment{
     private MarkerOptions marker_a;
     private MarkerOptions marker_b;
     private int readyMarker = 0;
+    private String trip_id;
+    private String reg_as;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,6 +88,133 @@ public class TabA_4 extends Fragment{
 
         setMarker(getArguments().getString("start_location"));
         setMarker(getArguments().getString("end_location"));
+
+        trip_id = getArguments().getString("trip_id");
+        reg_as = getArguments().getString("type");
+
+        // on request clicked
+        Button button = (Button) view.findViewById(R.id.request);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // network thread
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Request request = new Request();
+                        final String[] result = new String[1];
+                        result[0] = "";
+
+                        if(reg_as.equals("Driver")){
+                            result[0] = request.TripRequest(trip_id, 1+"");
+                        }else if(reg_as.equals("Passenger")){
+                            result[0] = request.TripRequest(trip_id, 0+"");
+                        }
+
+                        Log.d("DEBUG", "RequestTrip() API return = " + result[0]);
+
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                                alertDialog.setCanceledOnTouchOutside(false);
+                                alertDialog.setCancelable(false);
+                                /**    Error:
+                                 0						failed
+                                 -1						no session
+                                 -3						can not sent request to a trip is create by the same user
+                                 -4						no such trip exist/ trip_id not match
+                                 -5						request already exist
+                                 -7						required field not set
+                                 **/
+                                switch (result[0]) {
+                                    case "1" :
+                                        alertDialog.setMessage("SUCCESS: You've requested this trip successfully, please wait for the other person's respond.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "0" :
+                                        alertDialog.setMessage("Request failed, please try again later.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "-1":
+                                        alertDialog.setMessage("Failed: no session.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "-3":
+                                        alertDialog.setMessage("Sorry, you cannot request your own trip.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "-4":
+                                        alertDialog.setMessage("Sorry, the trip that you request no longer exists");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "-5":
+                                        alertDialog.setMessage("Sorry, you've already requested this trip.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case "-7":
+                                        alertDialog.setMessage("Obs, something is wrong with this trip.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+
+                                    case ""  :
+                                        alertDialog.setMessage("Request failed.");
+                                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                alertDialog.dismiss();
+                                            }
+                                        });
+                                        alertDialog.show();
+                                        break;
+                                }
+                            }
+                        });
+                    }
+                });
+                thread.start();
+            }
+        });
 
         return view;
     }

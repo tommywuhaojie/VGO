@@ -333,6 +333,13 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(type.matches("A")) {
+                    // wait for address A to update
+                    if(autoCompView.getText().toString().equals("Updating...")){
+                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Please wait...", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
+                        toast.show();
+                        return;
+                    }
                     // change title
                     getActivity().setTitle("Set Destination");
                     ((Main) getActivity()).enableBackButton(true);
@@ -368,6 +375,13 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                             centerOfMap.longitude) < ONE_KM) {
 
                         Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Sorry, this ride is too short.", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
+                        toast.show();
+                        return;
+                    }
+                    // wait for address B to update
+                    if(autoCompView.getText().toString().equals("Updating...")){
+                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Please wait...", Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
                         toast.show();
                         return;

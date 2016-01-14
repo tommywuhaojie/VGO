@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -37,8 +39,10 @@ import v_go.version10.R;
 public class TabC_1 extends Fragment  {
 
     private CaldroidFragment caldroidFragment;
+    final private JSONArray[] jsonArray = new JSONArray[1];
     private DateTime oldDate;
     private int oldInteger;
+    private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -103,19 +107,11 @@ public class TabC_1 extends Fragment  {
 
             @Override
             public void onSelectDate(final Date date, View view) {
-                
-                final JSONArray[] jsonArray = new JSONArray[1];
+
+                // set selected date
+                setSelected(date);
+
                 try {
-                    Thread networkThread = new Thread(new Runnable(){
-                        @Override
-                        public void run() {
-                            SimpleDateFormat yearMonthFormat = new SimpleDateFormat("yyyy-MM");
-                            Trip trip = new Trip();
-                            jsonArray[0] = trip.ThisMonthTrip(yearMonthFormat.format(date));
-                        }
-                    });
-                    networkThread.start();
-                    networkThread.join();  // wait for thread to finish
                     // clean table
                     tableLay.removeAllViews();
 
@@ -156,8 +152,6 @@ public class TabC_1 extends Fragment  {
                             }
                         }
                     }
-                    // set selected date
-                    setSelected(date);
 
                 }catch (Exception e){
                     e.printStackTrace();
@@ -166,12 +160,60 @@ public class TabC_1 extends Fragment  {
 
             @Override
             public void onChangeMonth(int month, int year) {
-                //String text = "month: " + month + " year: " + year;
-                //Toast.makeText(getActivity().getApplicationContext(), text,
-                        //Toast.LENGTH_SHORT).show();
+
+                /** clear up top disable dates' background **/
+                // take care all possible cases
+                int yearBefore, yearAfter, monthBefore, monthAfter;
+                if(caldroidFragment.getMonth() == 1){
+                    yearBefore = caldroidFragment.getYear() - 1;
+                    yearAfter = caldroidFragment.getYear();
+                    monthBefore = 11;
+                    monthAfter = 1;
+                }else if(caldroidFragment.getMonth() == 12){
+                    yearBefore = caldroidFragment.getYear();
+                    yearAfter = caldroidFragment.getYear() + 1;
+                    monthBefore = 10;
+                    monthAfter = 0;
+                }else{
+                    yearBefore = caldroidFragment.getYear();
+                    yearAfter = caldroidFragment.getYear();
+                    // note that caldroid month starts at 1 NOT 0, so we have to minus 1 below
+                    monthBefore = caldroidFragment.getMonth() - 1 - 1;
+                    monthAfter = caldroidFragment.getMonth() + 1 - 1;
+                }
+
+                // clear top disable dates' background
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.YEAR, yearBefore);
+                cal.set(Calendar.MONTH, monthBefore);
+                cal.set(Calendar.DAY_OF_MONTH, 1);
+                int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+                for (int i = 1; i < maxDay; i++)
+                {
+                    cal.set(Calendar.DAY_OF_MONTH, i + 1);
+                    caldroidFragment.clearBackgroundResourceForDate(cal.getTime());
+                }
+                // clear bottom disable dates' background
+                Calendar cal2 = Calendar.getInstance();
+                cal2.set(Calendar.YEAR, yearAfter);
+                cal2.set(Calendar.MONTH, monthAfter);
+                cal2.set(Calendar.DAY_OF_MONTH, 1);
+                int maxDay2 = cal2.getActualMaximum(Calendar.DAY_OF_MONTH);
+                for (int i = 0; i < maxDay2; i++)
+                {
+                    cal2.set(Calendar.DAY_OF_MONTH, i + 1);
+                    caldroidFragment.clearBackgroundResourceForDate(cal2.getTime());
+                }
+
+                // clean table on swiping to change month
+                tableLay.removeAllViews();
 
                 // retrieve trips of this month from server
-                showTripsOnCalendar(year + "-" + month);
+                if(month < 10){
+                    showTripsOnCalendar(year + "-0" + month);
+                }else {
+                    showTripsOnCalendar(year + "-" + month);
+                }
             }
 
             @Override
@@ -228,7 +270,7 @@ public class TabC_1 extends Fragment  {
         caldroidFragment.refreshView();
         */
 
-
+        this.view = view;
         return view;
     }
 
@@ -262,38 +304,51 @@ public class TabC_1 extends Fragment  {
 
     private void showTripsOnCalendar(final String year_month){
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        int size;
-        final JSONArray[] jsonArray = new JSONArray[1];
-        try {
-            Thread networkThread = new Thread(new Runnable(){
-                @Override
-                public void run() {
-                        Trip trip = new Trip();
-                        jsonArray[0] = trip.ThisMonthTrip(year_month);
-                }
-            });
-            networkThread.start();
-            networkThread.join();  // wait for thread to finish
+        // show progress bar
+        final ProgressBar pbHeaderProgress = (ProgressBar) view.findViewById(R.id.pbHeaderProgress);
+        pbHeaderProgress.setVisibility(View.VISIBLE);
+        // set its height
+        pbHeaderProgress.setScaleY(2f);
 
-            size = jsonArray[0].length();
-            if(jsonArray[0] == null){
-                Toast.makeText(getActivity(), "Error:API return null object", Toast.LENGTH_SHORT).show();
-            }else {
-                for (int i = 0; i < size; i++) {
-                    JSONObject jsonObject = jsonArray[0].getJSONObject(i);
-                    Date date = dateFormat.parse(jsonObject.getString("starting_date"));
-                    //caldroidFragment.setBackgroundResourceForDate(R.color.green2, date);
-                    //caldroidFragment.setBackgroundResourceForDate(R.color.blue, date);
-                    //caldroidFragment.setTextColorForDate(R.color.white, date);
-                    caldroidFragment.setBackgroundResourceForDate(R.drawable.red_mark, date);
-                }
+        // disable tab when loading trips
+        ((Main)getActivity()).getTabWidget().setEnabled(false);
+
+        Thread networkThread = new Thread(new Runnable(){
+            @Override
+            public void run() {
+                    Trip trip = new Trip();
+                    jsonArray[0] = trip.ThisMonthTrip(year_month);
+                    int size = jsonArray[0].length();
+                    if(jsonArray[0] == null){
+                        Toast.makeText(getActivity(), "Error:API return null object", Toast.LENGTH_SHORT).show();
+                    }else {
+                        try {
+                            // mark all the dates that contains trip(s)
+                            for (int i = 0; i < size; i++) {
+                                JSONObject jsonObject = jsonArray[0].getJSONObject(i);
+                                Date date = new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getString("starting_date"));
+                                //caldroidFragment.setBackgroundResourceForDate(R.color.green2, date);
+                                //caldroidFragment.setBackgroundResourceForDate(R.color.blue, date);
+                                //caldroidFragment.setTextColorForDate(R.color.white, date);
+                                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_mark, date);
+                            }
+
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                // refresh calendar in UiThread after all trips are fully retrieved
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        caldroidFragment.refreshView();
+                        pbHeaderProgress.setVisibility(View.GONE);
+                        // enable tabs
+                        ((Main)getActivity()).getTabWidget().setEnabled(true);
+                    }
+                });
             }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        caldroidFragment.refreshView();
+        });
+        networkThread.start();
     }
 
     /**

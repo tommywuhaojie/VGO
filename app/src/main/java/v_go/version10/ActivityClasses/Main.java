@@ -1,28 +1,41 @@
 package v_go.version10.ActivityClasses;
 
 import android.app.AlertDialog;
+import android.app.Service;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TabHost;
+import android.widget.TabWidget;
+
+import org.json.JSONArray;
+
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import v_go.version10.ApiClasses.Request;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
 import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
+import v_go.version10.Service.BackgroundService;
 
 public class Main extends AppCompatActivity{
 
@@ -39,8 +52,12 @@ public class Main extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //------------------------------------------------------------------------------------
 
+        /**--------initialize background thread to check new notifications and messages--------**/
+
+        startService(new Intent(getBaseContext(), BackgroundService.class));
+
+        /**------------------------------------------------------------------------------------**/
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup();
 
@@ -57,7 +74,10 @@ public class Main extends AppCompatActivity{
         mTabHost = (TabHost)findViewById(android.R.id.tabhost);
         mTabHost.setOnTabChangedListener(listener);
         mTabHost.setup();
+        // remove the tab dividers
+        mTabHost.getTabWidget().setDividerDrawable(null);
 
+        // init
         initializeTabs();
 
         // prevent dialogs from closing by outside click
@@ -245,7 +265,7 @@ public class Main extends AppCompatActivity{
                     switch (which){
                         case DialogInterface.BUTTON_POSITIVE:
                             //Yes button clicked
-                            finish();
+                            moveTaskToBack(true);
                             break;
 
                         case DialogInterface.BUTTON_NEGATIVE:
@@ -257,7 +277,7 @@ public class Main extends AppCompatActivity{
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setCancelable(false);
-            builder.setMessage("Do you want to log out?").setPositiveButton("Yes", dialogClickListener)
+            builder.setMessage("Back to home screen?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
             return;
         }
@@ -305,4 +325,25 @@ public class Main extends AppCompatActivity{
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public TabWidget getTabWidget(){
+        return mTabHost.getTabWidget();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopService(new Intent(getBaseContext(), BackgroundService.class));
+
+        Log.d("DEBUG", "pause");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startService(new Intent(getBaseContext(), BackgroundService.class));
+
+        Log.d("DEBUG", "resume");
+    }
+
 }
