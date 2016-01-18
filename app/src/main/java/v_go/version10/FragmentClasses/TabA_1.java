@@ -263,7 +263,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         Window window = getActivity().getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.BLACK);
+        //window.setStatusBarColor(Color.BLACK);
 
         // turn on option menu
         setHasOptionsMenu(true);

@@ -3,12 +3,15 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-    <!--<item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>-->
+        <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>
     </style>
-    <!-- Custom Theme -->
-    <!--<style name="MyActionButtonStyle" parent="AppBaseTheme">
-        <item name="android:minWidth">60dip</item>
-    </style>-->
+
+    <!-- positioning menu item here-->
+    <style name="MyActionButtonStyle" parent="AppBaseTheme">
+        <item name="android:minWidth">30dip</item>
+        <item name="android:minHeight">30dip</item>
+        <item name="android:padding">20dip</item>
+    </style>
 
     <style name="TextAppearance.MyApp.Widget.ActionBar.Title"
         parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

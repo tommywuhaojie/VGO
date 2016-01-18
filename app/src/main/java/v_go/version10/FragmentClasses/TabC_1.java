@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TableLayout;
@@ -32,6 +34,7 @@ import java.util.Date;
 import hirondelle.date4j.DateTime;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.Trip;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 
@@ -43,6 +46,8 @@ public class TabC_1 extends Fragment  {
     private DateTime oldDate;
     private int oldInteger;
     private View view;
+    private MenuItem notification_icon_menu_item;
+    private TextView notifNumTextView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -99,6 +104,7 @@ public class TabC_1 extends Fragment  {
             caldroidFragment.setArguments(args);
         }
 
+
         setCustomResourceForDates();
 
         final TableLayout tableLay = (TableLayout)view.findViewById(R.id.trip_table);
@@ -133,7 +139,8 @@ public class TabC_1 extends Fragment  {
                                 TextView distance = (TextView) tableRow.findViewById(R.id.distance);
                                 TextView type = (TextView) tableRow.findViewById(R.id.type);
 
-                                Log.d("DEBUG", jsonObject.getString("trip_id"));
+                                Log.d("DEBUG", "trip_id: " + jsonObject.getString("trip_id"));
+
                                 addr_a.setText(jsonObject.getString("starting"));
                                 addr_b.setText(jsonObject.getString("destination"));
                                 start_date.setText(jsonObject.getString("starting_date"));
@@ -330,7 +337,14 @@ public class TabC_1 extends Fragment  {
                                 //caldroidFragment.setBackgroundResourceForDate(R.color.green2, date);
                                 //caldroidFragment.setBackgroundResourceForDate(R.color.blue, date);
                                 //caldroidFragment.setTextColorForDate(R.color.white, date);
-                                caldroidFragment.setBackgroundResourceForDate(R.drawable.red_mark, date);
+
+                                // if the date contains a request , show "envelop icon"
+                                if(((Main)getActivity()).isMatched(jsonObject.getInt("trip_id"))){
+                                    caldroidFragment.setBackgroundResourceForDate(R.drawable.request_envelope, date);
+                                    continue;
+                                }
+                                // else show "star icon"
+                                caldroidFragment.setBackgroundResourceForDate(R.drawable.star2, date);
                             }
 
                         }catch (Exception e){
@@ -374,6 +388,31 @@ public class TabC_1 extends Fragment  {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.menu_calendar, menu);
+
+        // setup red dot number for bell icon
+        notification_icon_menu_item = menu.findItem(R.id.notification);
+        MenuItemCompat.setActionView(notification_icon_menu_item, R.layout.new_notification_count);
+        notifNumTextView = (TextView) notification_icon_menu_item.getActionView().findViewById(R.id.notif_num);
+
+
+        // set onclick listener
+        View icon_view = notification_icon_menu_item.getActionView();
+        icon_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // dismiss number icon
+                notifNumTextView.setVisibility(View.GONE);
+
+                // update global display new notification number
+                Global.DISPLAYED_NOTIF_NUM = 0;
+
+                // bring up notification list page
+                Fragment fragment = new TabC_2();
+                // fragment.setArguments(args);
+                ((Main) getActivity()).pushFragmentsWithUpDownAnim(Global.TAB_C, fragment, true);
+            }
+        });
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -384,11 +423,58 @@ public class TabC_1 extends Fragment  {
         if(id == android.R.id.home) {
             //nothing
         }
+
+        /**
+        if(id == R.id.notification){
+            notifNumTextView.setVisibility(View.GONE);
+        }
         if(id == R.id.add_trip){
             ((Main) getActivity()).setCurrentTab(0);
         }
+        **/
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public void updateUi(){
+
+        // update notification icon / "bell"
+        int num = Global.DISPLAYED_NOTIF_NUM;
+        if(num != 0) {
+            if(num < 10) {
+                notifNumTextView.setText(" " + String.valueOf(num) + " ");
+            }else{
+                notifNumTextView.setText(String.valueOf(num));
+            }
+        }else{
+            notifNumTextView.setVisibility(View.GONE);
+        }
+        getActivity().invalidateOptionsMenu();
+
+        //update calendar
+        if(caldroidFragment.getMonth() < 10){
+            showTripsOnCalendar(caldroidFragment.getYear() + "-0" + caldroidFragment.getMonth());
+        }else {
+            showTripsOnCalendar(caldroidFragment.getYear() + "-" + caldroidFragment.getMonth());
+        }
+    }
+
+
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        int num = Global.DISPLAYED_NOTIF_NUM;
+        Log.d("DEBUG", "displayed notif number: " + Global.DISPLAYED_NOTIF_NUM);
+        if(num != 0) {
+            if(num < 10) {
+                notifNumTextView.setText(" " + String.valueOf(num) + " ");
+            }else{
+                notifNumTextView.setText(String.valueOf(num));
+            }
+        }else{
+            notifNumTextView.setVisibility(View.GONE);
+        }
     }
 
     private void setSelected(Date date){
@@ -418,4 +504,5 @@ public class TabC_1 extends Fragment  {
         }
         caldroidFragment.refreshView();
     }
+
 }

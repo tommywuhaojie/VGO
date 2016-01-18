@@ -16,6 +16,7 @@ import android.widget.Button;
 
 import v_go.version10.ActivityClasses.Login;
 import v_go.version10.ActivityClasses.Main;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 public class TabD_1 extends Fragment   {
@@ -30,12 +31,16 @@ public class TabD_1 extends Fragment   {
         Window window = getActivity().getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.BLACK);
+        //window.setStatusBarColor(Color.BLACK);
 
         Button logout = (Button) view.findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // reset all user global variables
+                Global.resetAll();
+
                 Intent intent = new Intent(getActivity(), Login.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("logout", true);

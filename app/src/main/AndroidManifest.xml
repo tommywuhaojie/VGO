@@ -62,7 +62,7 @@
             android:theme="@style/AppTheme" >
         </activity>
 
-        <service android:name=".Service.BackgroundService" />
+        <service android:name=".HelperClasses.BackgroundService" />
 
     </application>
 

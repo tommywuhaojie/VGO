@@ -3,6 +3,7 @@ package v_go.version10.FragmentClasses;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -79,7 +80,8 @@ public class TabA_3 extends Fragment{
         // set up list
         tripList  = (ListView) view.findViewById(R.id.listView);
         simpleArray();
-        // on listView clicked
+
+        // on listView item clicked
         tripList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -133,7 +135,7 @@ public class TabA_3 extends Fragment{
 
         });
 
-
+        // refresh only at the top of the ListView mechanism
         tripList.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -323,7 +325,7 @@ public class TabA_3 extends Fragment{
             builder.setMessage("Do you want to post this trip?\n\n" +
                     "FROM:  " + getArguments().getString("address_a") +"\n\n"+
                     "TO:  " + getArguments().getString("address_b") + "\n\n"+
-                    "@ " + getArguments().getString("time")).setPositiveButton("Yes", dialogClickListener)
+                    "WHEN: " + getArguments().getString("time")).setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
         }
         return super.onOptionsItemSelected(item);
@@ -394,6 +396,8 @@ public class TabA_3 extends Fragment{
                             pDialog[0].dismiss();
                             switch (res) {
                                 case 1:
+                                    alertDialog.setTitle("Done!");
+                                    alertDialog.setIcon(R.drawable.check);
                                     alertDialog.setMessage("Trip posted.");
                                     alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
@@ -413,6 +417,8 @@ public class TabA_3 extends Fragment{
                                     alertDialog.show();
                                     break;
                                 case -2:
+                                    alertDialog.setTitle("Ops!");
+                                    alertDialog.setIcon(R.drawable.fail);
                                     alertDialog.setMessage("A trip with a similar time already exist.");
                                     alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {

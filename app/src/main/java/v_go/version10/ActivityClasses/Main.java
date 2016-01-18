@@ -1,41 +1,42 @@
 package v_go.version10.ActivityClasses;
 
 import android.app.AlertDialog;
-import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.Toast;
 
-import org.json.JSONArray;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import v_go.version10.ApiClasses.Request;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
 import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
-import v_go.version10.Service.BackgroundService;
+import v_go.version10.HelperClasses.BackgroundService;
 
 public class Main extends AppCompatActivity{
 
@@ -45,19 +46,82 @@ public class Main extends AppCompatActivity{
     private HashMap<String, Stack<Fragment>> mStacks;
     /*Save current tabs identifier in this..*/
     private String mCurrentTab;
-
+    // boolean var for switching tab delay
     private boolean allow = true;
+    // local request trip id array
+    private ArrayList<Integer> requestTripIdList;
+    // local request id array
+    private ArrayList<Integer> requestIdList;
+    // local senders name array
+    private ArrayList<String> senderNameList;
+    // local notification type & result list
+    private ArrayList<Integer> notifTypeList;
+
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private BroadcastReceiver broadcastReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /**--------initialize background thread to check new notifications and messages--------**/
+        // lists initialization
+        requestTripIdList = new ArrayList<>();
+        requestIdList = new ArrayList<>();
+        senderNameList = new ArrayList<>();
+        notifTypeList = new ArrayList<>();
 
-        startService(new Intent(getBaseContext(), BackgroundService.class));
+        /**-------- Background Services and UI Updating for message and request notifications -----------------**/
 
-        /**------------------------------------------------------------------------------------**/
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().equals("new_request")) {
+
+                    // prepare new notification toast
+                    int numOfNewReq = intent.getIntExtra("num_of_new_req", 0);
+                    String notifToast = "You have " + numOfNewReq + " new notification";
+                    if(numOfNewReq == 1){
+                        notifToast += "!";
+                    }else{
+                        notifToast += "s!";
+                    }
+                    // make toast
+                    Toast toast = Toast.makeText(getApplicationContext(), notifToast, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
+                    toast.show();
+
+                    // if not currently not in 3rd tab change third tab icon
+                    if(mTabHost.getCurrentTab() != 2) {
+                        ImageView mImageView = (ImageView) mTabHost.getTabWidget().getChildAt(2).findViewById(android.R.id.icon);
+                        mImageView.setImageDrawable(getResources().getDrawable(R.drawable.tab3_b_no));
+                        Global.TAB3_NOTIFICATION = true;
+                    }
+
+                    // set local request trip list & req id list
+                    setLocalRequestTripIdList(intent.getIntArrayExtra("trip_id_array"));
+                    setRequestIdList(intent.getIntArrayExtra("req_id_array"));
+
+                    // if at calendar page update "bell icon"
+                    if(getCurrentFragment() instanceof TabC_1) {
+                        ((TabC_1)getCurrentFragment()).updateUi();
+                    }
+
+                    // store & setup the contents of all notifications
+                    addSenderNameToList(intent.getStringArrayExtra("sender_name_array"));
+                    addNotifTypeToList(intent.getIntArrayExtra("notif_type_array"));
+
+                }
+
+
+            }
+        };
+
+
+        /**---------------------------------------------------------------------------------------------------------------**/
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup();
 
@@ -77,11 +141,48 @@ public class Main extends AppCompatActivity{
         // remove the tab dividers
         mTabHost.getTabWidget().setDividerDrawable(null);
 
-        // init
+        // init tabs
         initializeTabs();
 
         // prevent dialogs from closing by outside click
         setFinishOnTouchOutside(false);
+    }
+
+    private void setLocalRequestTripIdList(int[] array){
+        for(int i : array){
+            requestTripIdList.add(i);
+        }
+    }
+    private void setRequestIdList(int[] array){
+        for(int i : array){
+            requestIdList.add(i);
+        }
+    }
+    public ArrayList<Integer> getAllReqList(){
+        return requestIdList;
+    }
+    public boolean isMatched(int trip_id){
+        for(int i : requestTripIdList){
+            if(trip_id == i){
+                return true;
+            }
+        }
+        return  false;
+    }
+
+    public ArrayList<String> getAllSenderName(){
+        return senderNameList;
+    }
+    private void addSenderNameToList(String[] nameList){
+        Collections.addAll(senderNameList, nameList);
+    }
+    public ArrayList<Integer> getALLNotificationType(){
+        return notifTypeList;
+    }
+    private void addNotifTypeToList(int[] typeArray){
+        for(int i : typeArray){
+            notifTypeList.add(i);
+        }
     }
 
     public void initializeTabs(){
@@ -114,7 +215,7 @@ public class Main extends AppCompatActivity{
                 return findViewById(R.id.realtabcontent);
             }
         });
-        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab3));
+        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab3_b));
         mTabHost.addTab(spec);
 
         // tab4
@@ -186,6 +287,15 @@ public class Main extends AppCompatActivity{
                 mTabHost.getTabWidget().getChildAt(i).setBackgroundColor(Color.parseColor("#cccccc"));
             }
             mTabHost.getTabWidget().getChildAt(mTabHost.getCurrentTab()).setBackgroundColor(Color.parseColor("#a6a6a6"));
+
+            // if there is a red dot, dismiss it after switch to 3rd tab
+            if(tabId.equals(Global.TAB_C) && Global.TAB3_NOTIFICATION){
+                if(Global.TAB3_NOTIFICATION){
+                    ImageView mImageView = (ImageView) mTabHost.getTabWidget().getChildAt(2).findViewById(android.R.id.icon);
+                    mImageView.setImageDrawable(getResources().getDrawable(R.drawable.tab3_b));
+                    Global.TAB3_NOTIFICATION = false;
+                }
+            }
         }
     };
 
@@ -211,6 +321,20 @@ public class Main extends AppCompatActivity{
         ft.commit();
     }
 
+    public void pushFragmentsWithUpDownAnim(String tag, Fragment fragment, boolean shouldAdd){
+        if(shouldAdd) {
+            mStacks.get(tag).push(fragment);
+        }
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+
+        ft.setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_top);
+
+        ft.replace(R.id.realtabcontent, fragment);
+        ft.commit();
+    }
+
+
 
     public void popFragments(){
       /*
@@ -227,7 +351,13 @@ public class Main extends AppCompatActivity{
       /* We have the target fragment in hand.. Just show it.. Show a standard navigation animation*/
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+
+        // different animation for different page
+        if((mStacks.get(mCurrentTab).elementAt(mStacks.get(mCurrentTab).size() - 1)) instanceof TabC_1) {
+            ft.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom);
+        }else {
+            ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+        }
         ft.replace(R.id.realtabcontent, fragment);
         ft.commit();
     }
@@ -252,6 +382,11 @@ public class Main extends AppCompatActivity{
         ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
         ft.replace(R.id.realtabcontent, fragment);
         ft.commit();
+    }
+
+    public Fragment getCurrentFragment(){
+        Fragment currentFragment = mStacks.get(mCurrentTab).elementAt(mStacks.get(mCurrentTab).size() - 1);
+        return  currentFragment;
     }
 
 
@@ -342,6 +477,10 @@ public class Main extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         startService(new Intent(getBaseContext(), BackgroundService.class));
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("new_request");
+        mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
 
         Log.d("DEBUG", "resume");
     }

@@ -4,13 +4,16 @@
 
     <item
         android:id="@+id/notification"
-        android:icon="@drawable/notification"
-        android:title="See any updates"
-        app:showAsAction="ifRoom"/>
+        android:actionLayout="@layout/new_notification_count"
+        android:icon="@drawable/shape_notification"
+        app:showAsAction="ifRoom"
+        android:title="See New Notifications" />
 
+    <!--
     <item
         android:id="@+id/add_trip"
-        android:icon="@drawable/add_trip"
+        android:icon="@drawable/add_trip3"
         android:title="add a trip"
         app:showAsAction="ifRoom"/>
+     -->
 </menu>
