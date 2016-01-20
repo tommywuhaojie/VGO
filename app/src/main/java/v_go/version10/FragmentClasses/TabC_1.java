@@ -1,6 +1,7 @@
 package v_go.version10.FragmentClasses;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public class TabC_1 extends Fragment  {
     private View view;
     private MenuItem notification_icon_menu_item;
     private TextView notifNumTextView;
+    private boolean finishLoading;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -319,6 +321,9 @@ public class TabC_1 extends Fragment  {
 
         // disable tab when loading trips
         ((Main)getActivity()).getTabWidget().setEnabled(false);
+        // disable notification icon when loading trips
+        finishLoading = false;
+
 
         Thread networkThread = new Thread(new Runnable(){
             @Override
@@ -356,8 +361,9 @@ public class TabC_1 extends Fragment  {
                     public void run() {
                         caldroidFragment.refreshView();
                         pbHeaderProgress.setVisibility(View.GONE);
-                        // enable tabs
-                        ((Main)getActivity()).getTabWidget().setEnabled(true);
+                        // enable tabs & notification icon
+                        ((Main) getActivity()).getTabWidget().setEnabled(true);
+                        finishLoading = true;
                     }
                 });
             }
@@ -400,6 +406,9 @@ public class TabC_1 extends Fragment  {
         icon_view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!finishLoading) {
+                    return;
+                }
                 // dismiss number icon
                 notifNumTextView.setVisibility(View.GONE);
 
@@ -465,7 +474,6 @@ public class TabC_1 extends Fragment  {
         super.onPrepareOptionsMenu(menu);
 
         int num = Global.DISPLAYED_NOTIF_NUM;
-        Log.d("DEBUG", "displayed notif number: " + Global.DISPLAYED_NOTIF_NUM);
         if(num != 0) {
             if(num < 10) {
                 notifNumTextView.setText(" " + String.valueOf(num) + " ");

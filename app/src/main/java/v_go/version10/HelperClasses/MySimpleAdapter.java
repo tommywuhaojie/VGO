@@ -9,6 +9,7 @@ import android.widget.SimpleAdapter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import v_go.version10.R;
 
@@ -32,6 +33,7 @@ public class MySimpleAdapter extends SimpleAdapter {
         super(context, data, resource, from, to);
     }
 
+    // this function gets called once each row is revealed
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
@@ -82,6 +84,7 @@ public class MySimpleAdapter extends SimpleAdapter {
                 R.drawable.fun37,
                 R.drawable.fun38,
                 R.drawable.fun39,
+                R.drawable.fun40,
                 R.drawable.fun41,
                 R.drawable.fun42,
                 R.drawable.fun43,
@@ -133,23 +136,21 @@ public class MySimpleAdapter extends SimpleAdapter {
                 R.drawable.fun89,
                 R.drawable.fun90,
                 R.drawable.fun91,
-                R.drawable.fun92
+                R.drawable.fun92,
+                R.drawable.fun93,
+                R.drawable.fun94
         };
 
         ImageView imageView = ((ImageView) view.findViewById(R.id.icon));
         if(imageView == null){
             return view;
         }else{
-            if(position == 0)
-                imageView.setImageResource(R.drawable.dummy);
-            else if(position == 1)
-                imageView.setImageResource(R.drawable.dummy2);
-            else
-                imageView.setImageResource(img[position]);
-
+            // nextInt is normally exclusive of the top value,so add 1 to make it inclusive
+            imageView.setImageResource(img[Global.getRandomInt(0, 94)]);
         }
-
 
         return view;
     }
+
+
 }

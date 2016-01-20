@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.app.SearchManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -54,7 +53,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -92,6 +90,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     private Marker[] markerAry;
     private String[] addressAry;
     private View view;
+    private Button button;
+    private ImageButton mImageButton;
     private int firstTime; // first time of camera changing
     private boolean mapIsDragged = false;
     private boolean mapIsDragging = false;
@@ -318,16 +318,11 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         addressAry = new String[2];
         type = "";
 
-        // Action bar title and set button color
-        Button doneButton = (Button) view.findViewById(R.id.done);
-        doneButton.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
-        doneButton.setVisibility(View.GONE);
-
         // initialize type
         type = "A";
         getActivity().setTitle("Set Pickup Location");
         ((Main) getActivity()).enableBackButton(false);
-        Button button = (Button)view.findViewById(R.id.set);
+        button = (Button)view.findViewById(R.id.set);
         button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
         button.setText("SET PICKUP");
         button.setOnClickListener(new View.OnClickListener() {
@@ -335,9 +330,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 if(type.matches("A")) {
                     // wait for address A to update
                     if(autoCompView.getText().toString().equals("Updating...")){
-                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Please wait...", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                        toast.show();
                         return;
                     }
                     // change title
@@ -354,7 +346,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     markerAry[0] = mMap.addMarker(marker);
                     //markerAry[0].showInfoWindow();
 
-                    Button button = (Button)view.findViewById(R.id.set);
                     button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
                     button.setText("SET DESTINATION");
                     // Change marker color to red
@@ -381,9 +372,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     }
                     // wait for address B to update
                     if(autoCompView.getText().toString().equals("Updating...")){
-                        Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Please wait...", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                        toast.show();
                         return;
                     }
 
@@ -417,7 +405,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         });
 
         // my location button
-        ImageButton mImageButton = (ImageButton) view.findViewById(R.id.myLocation);
+        mImageButton = (ImageButton) view.findViewById(R.id.myLocation);
         mImageButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -467,9 +455,10 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     public void run() {
                         //what ever you do here will be done after 0.5 second delay.
                         updateAddress();
+
                     }
                 };
-                updateHandler.postDelayed(updateRunnable, 500);
+                updateHandler.postDelayed(updateRunnable, 300);
             }
         });
 
@@ -497,6 +486,11 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         new MapStateListener(mMapFragment) {
             @Override
             public void onMapDragged(){
+                // set ui effects
+                view.findViewById(R.id.linear_lay).setAlpha(0.2f);
+                mImageButton.setAlpha(0.2f);
+                button.setAlpha(0.2f);
+
                 // Map is dragged
                 if(mapIsDragging)
                     return;
@@ -504,6 +498,12 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 mapIsDragged = true;
                 mapIsDragging = true;
                 autoCompView.setText("Updating...");
+
+
+                // move the button down
+                //ObjectAnimator transAnimation = ObjectAnimator.ofFloat(button, "translationY", 0f, 0.2f * 1000);
+                //transAnimation.setDuration(200);//set duration
+                //transAnimation.start();//start animation
             }
             @Override
             public void onMapTouched() {
@@ -511,6 +511,16 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
             @Override
             public void onMapReleased() {
+                // set ui effects
+                view.findViewById(R.id.linear_lay).setAlpha(1.0f);
+                mImageButton.setAlpha(1.0f);
+                button.setAlpha(1.0f);
+
+                // move the button up when finish updating
+                //ObjectAnimator transAnimation = ObjectAnimator.ofFloat(button, "translationY", 0.2f * 1000, 0f);
+                //transAnimation.setDuration(200);//set duration
+                //transAnimation.start();//start animation
+
                 // Map is released
                 if(!mapIsDragged && oldLatLng.equals(mMap.getCameraPosition().target)) {
                     return;
@@ -523,11 +533,12 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 // update address after 500 ms
                 updateRunnable = new Runnable() {
                     public void run() {
-                        //what ever you do here will be done after 0.5 second delay.
+                        // what ever you do here will be done after 0.5 second delay.
                         updateAddress();
+
                     }
                 };
-                updateHandler.postDelayed(updateRunnable, 500);
+                updateHandler.postDelayed(updateRunnable, 300);
             }
         };
     }
@@ -572,6 +583,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 addressAry[1] = addr.trim();
             }
         }
+
     }
 
     /**
@@ -602,7 +614,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                 getActivity().setTitle("Set Pickup Location");
                 ((Main)getActivity()).enableBackButton(false);
 
-                Button button = (Button)view.findViewById(R.id.set);
                 button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
                 button.setText("SET PICKUP");
                 mMap.clear();

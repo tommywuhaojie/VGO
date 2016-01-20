@@ -102,8 +102,14 @@ public class Main extends AppCompatActivity{
                     }
 
                     // set local request trip list & req id list
-                    setLocalRequestTripIdList(intent.getIntArrayExtra("trip_id_array"));
-                    setRequestIdList(intent.getIntArrayExtra("req_id_array"));
+                    addTripIdToList(intent.getIntArrayExtra("trip_id_array"));
+                    addRequestIdToList(intent.getIntArrayExtra("req_id_array"));
+
+                    String ridAry = "";
+                    for(int rid : intent.getIntArrayExtra("req_id_array")){
+                        ridAry += (rid+" ");
+                    }
+                    Log.d("DEBUG", ridAry);
 
                     // if at calendar page update "bell icon"
                     if(getCurrentFragment() instanceof TabC_1) {
@@ -148,12 +154,12 @@ public class Main extends AppCompatActivity{
         setFinishOnTouchOutside(false);
     }
 
-    private void setLocalRequestTripIdList(int[] array){
+    private void addTripIdToList(int[] array){
         for(int i : array){
             requestTripIdList.add(i);
         }
     }
-    private void setRequestIdList(int[] array){
+    private void addRequestIdToList(int[] array){
         for(int i : array){
             requestIdList.add(i);
         }
@@ -253,7 +259,7 @@ public class Main extends AppCompatActivity{
                     // Actions to do after 0.3 seconds
                     allow = true;
                 }
-            }, 300);
+            }, 200);
 
             /*Set current tab..*/
             mCurrentTab = tabId;
@@ -412,7 +418,7 @@ public class Main extends AppCompatActivity{
             };
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setCancelable(false);
-            builder.setMessage("Back to home screen?").setPositiveButton("Yes", dialogClickListener)
+            builder.setMessage("Go back to home screen?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
             return;
         }

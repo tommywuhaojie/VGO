@@ -73,6 +73,8 @@ public class TabC_2 extends Fragment   {
                     }
                 }, 3000);
 
+                // update list view ui
+                adapter.notifyDataSetChanged();
                 //simpleArray();
             }
         });

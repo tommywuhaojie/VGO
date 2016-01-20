@@ -149,4 +149,54 @@ public class Request implements RequestInterface {
             }
         }
     }
+
+    @Override
+    public JSONArray RequestList(String count) {
+        HttpURLConnection urlconnet = null;
+        JSONArray json = null;
+        String jsonarray_string = null;
+        String url_string = new User().Rootpath()+"/request/listRequest.php"+"?count="+count;
+
+        try {
+            URL url = new URL(url_string);
+            urlconnet = (HttpURLConnection) url.openConnection();
+            urlconnet.setRequestMethod("GET");
+            urlconnet.setUseCaches(true);
+            InputStream is = urlconnet.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\n");
+            }
+            jsonarray_string = response.toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.i("michaellog", "request list error0");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("michaellog", "request list error1");
+        }finally {
+            if (urlconnet!=null){
+                urlconnet.disconnect();
+            }
+
+        }
+        //test return output
+        Log.i("michaellog",jsonarray_string);
+        if (jsonarray_string==null){
+            Log.i("michaellog","request list error2");
+            return null;
+        }else {
+            try {
+                json = new JSONArray(jsonarray_string);
+                return json;
+            } catch (JSONException e) {
+                Log.i("michaellog","request list error3");
+                e.printStackTrace();
+                return json;
+            }
+        }
+    }
 }

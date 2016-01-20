@@ -9,6 +9,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -59,7 +60,13 @@ public class BackgroundService extends Service {
                         }
 
                         Request request = new Request();
-                        jsonArray = request.Notification(Global.LATEST_REQ_ID + "");
+                        if(!Global.IS_LOGED_IN){
+                            final String NUM_OF_NOTIF_RECEIVED_ALREADY = "0";
+                            jsonArray = request.RequestList(NUM_OF_NOTIF_RECEIVED_ALREADY);
+                            Global.IS_LOGED_IN = true;
+                        }else {
+                            jsonArray = request.Notification(Global.LATEST_REQ_ID + "");
+                        }
                         numOfNotification = jsonArray.length();
 
                         Log.d("DEBUG", numOfNotification + " REQUESTS RECEIVED");
@@ -96,6 +103,8 @@ public class BackgroundService extends Service {
                                         notifTypeArray[j] = 2;
                                     }else if(result == 1){
                                         notifTypeArray[j] = 3;
+                                    }else{
+                                        notifTypeArray[j] = 4;
                                     }
                                 }
                             }

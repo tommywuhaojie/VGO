@@ -85,14 +85,9 @@ public class SetMarker extends AppCompatActivity{
         }
 
 
-        //Action bar title and set button color
-        Button doneButton = (Button)findViewById(R.id.done);
-        doneButton.setBackgroundColor(Color.parseColor("#5DAB00"));//LIGHT GREEN
-        doneButton.setVisibility(View.GONE);
         Intent intent = getIntent(); // gets the previously created intent
-        final String inner_type = intent.getStringExtra("type");
+        type = intent.getStringExtra("type");
 
-        type = inner_type;
         //getSupportActionBar().setTitle("Set Pickup Location");
         Button button = (Button)findViewById(R.id.set);
         button.setBackgroundColor(Color.parseColor("#5DAB00"));//LIGHT GREEN
@@ -397,13 +392,6 @@ public class SetMarker extends AppCompatActivity{
             ImageView image = (ImageView) findViewById(R.id.marker);
             image.setVisibility(View.GONE);
 
-            // Switch confirm mode
-            //getSupportActionBar().setTitle("Confirm");
-            Button doneButton = (Button)findViewById(R.id.done);
-            doneButton.setVisibility(View.VISIBLE);
-            Button button = (Button)findViewById(R.id.set);
-            button.setText("RESET");
-
             //clear search view
             SearchView searchView = (SearchView) findViewById(R.id.searchAddress);
             searchView.setIconifiedByDefault(true);
@@ -425,8 +413,6 @@ public class SetMarker extends AppCompatActivity{
             image.setVisibility(View.VISIBLE);
             image.setImageResource(R.drawable.a_marker);
 
-            Button doneButton = (Button)findViewById(R.id.done);
-            doneButton.setVisibility(View.GONE);
             Button button = (Button)findViewById(R.id.set);
             button.setBackgroundColor(Color.parseColor("#5DAB00"));//LIGHT GREEN
             button.setText("SET PICKUP");
