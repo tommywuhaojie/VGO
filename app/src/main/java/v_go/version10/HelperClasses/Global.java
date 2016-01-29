@@ -20,6 +20,8 @@ public class Global {
     public static int LATEST_REQ_ID = 0;
     public static int DISPLAYED_NOTIF_NUM = 0;
 
+    public static boolean FB_LOGIN = false;
+
     // RESET ALL NOTIFICATION TRACKING VAR
     public static void resetAll(){
         DATE_TIME = "";

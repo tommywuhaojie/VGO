@@ -62,7 +62,7 @@ public class TabC_1 extends Fragment  {
         oldDate = null;
 
         // change toolbar title
-        getActivity().setTitle("Calendar");
+        getActivity().setTitle("Schedule");
         ((Main) getActivity()).enableBackButton(false);
         setHasOptionsMenu(true);
 
@@ -344,10 +344,12 @@ public class TabC_1 extends Fragment  {
                                 //caldroidFragment.setTextColorForDate(R.color.white, date);
 
                                 // if the date contains a request , show "envelop icon"
-                                if(((Main)getActivity()).isMatched(jsonObject.getInt("trip_id"))){
-                                    caldroidFragment.setBackgroundResourceForDate(R.drawable.request_envelope, date);
-                                    continue;
-                                }
+
+                                /**if(((Main)getActivity()).isMatched(jsonObject.getInt("trip_id"))){
+                                     caldroidFragment.setBackgroundResourceForDate(R.drawable.request_envelope, date);
+                                     continue;
+                                 }**/
+
                                 // else show "star icon"
                                 caldroidFragment.setBackgroundResourceForDate(R.drawable.star2, date);
                             }
@@ -401,7 +403,7 @@ public class TabC_1 extends Fragment  {
         notifNumTextView = (TextView) notification_icon_menu_item.getActionView().findViewById(R.id.notif_num);
 
 
-        // set onclick listener
+        /** Notifcation Icon clicked listener **/
         View icon_view = notification_icon_menu_item.getActionView();
         icon_view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -417,8 +419,8 @@ public class TabC_1 extends Fragment  {
 
                 // bring up notification list page
                 Fragment fragment = new TabC_2();
-                // fragment.setArguments(args);
-                ((Main) getActivity()).pushFragmentsWithUpDownAnim(Global.TAB_C, fragment, true);
+                /// fragment.setArguments(args);
+                ((Main) getActivity()).pushFragments(Global.TAB_C, fragment, false, true);
             }
         });
 

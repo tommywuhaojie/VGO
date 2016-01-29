@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -398,6 +399,7 @@ public class TabA_3 extends Fragment{
                                 case 1:
                                     alertDialog.setTitle("Done!");
                                     alertDialog.setIcon(R.drawable.check);
+                                    alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                     alertDialog.setMessage("Trip posted.");
                                     alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {

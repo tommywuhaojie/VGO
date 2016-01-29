@@ -23,18 +23,26 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.login.LoginManager;
+
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
+import v_go.version10.ApiClasses.Request;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
 import v_go.version10.FragmentClasses.TabC_1;
+import v_go.version10.FragmentClasses.TabC_2;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
+import v_go.version10.HelperClasses.Notification;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
 
@@ -48,15 +56,9 @@ public class Main extends AppCompatActivity{
     private String mCurrentTab;
     // boolean var for switching tab delay
     private boolean allow = true;
-    // local request trip id array
-    private ArrayList<Integer> requestTripIdList;
-    // local request id array
-    private ArrayList<Integer> requestIdList;
-    // local senders name array
-    private ArrayList<String> senderNameList;
-    // local notification type & result list
-    private ArrayList<Integer> notifTypeList;
-
+    // top object of this stack equals to top item of the listView
+    private Stack<Notification> notifStack;
+    // broadcast objects
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver broadcastReceiver;
 
@@ -67,10 +69,7 @@ public class Main extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         // lists initialization
-        requestTripIdList = new ArrayList<>();
-        requestIdList = new ArrayList<>();
-        senderNameList = new ArrayList<>();
-        notifTypeList = new ArrayList<>();
+        notifStack = new Stack<>();
 
         /**-------- Background Services and UI Updating for message and request notifications -----------------**/
 
@@ -101,28 +100,15 @@ public class Main extends AppCompatActivity{
                         Global.TAB3_NOTIFICATION = true;
                     }
 
-                    // set local request trip list & req id list
-                    addTripIdToList(intent.getIntArrayExtra("trip_id_array"));
-                    addRequestIdToList(intent.getIntArrayExtra("req_id_array"));
-
-                    String ridAry = "";
-                    for(int rid : intent.getIntArrayExtra("req_id_array")){
-                        ridAry += (rid+" ");
-                    }
-                    Log.d("DEBUG", ridAry);
-
                     // if at calendar page update "bell icon"
                     if(getCurrentFragment() instanceof TabC_1) {
                         ((TabC_1)getCurrentFragment()).updateUi();
                     }
 
-                    // store & setup the contents of all notifications
-                    addSenderNameToList(intent.getStringArrayExtra("sender_name_array"));
-                    addNotifTypeToList(intent.getIntArrayExtra("notif_type_array"));
+                    // push new notifications to notification stack
+                    pushToNotifStack(intent);
 
                 }
-
-
             }
         };
 
@@ -154,41 +140,92 @@ public class Main extends AppCompatActivity{
         setFinishOnTouchOutside(false);
     }
 
-    private void addTripIdToList(int[] array){
-        for(int i : array){
-            requestTripIdList.add(i);
-        }
-    }
-    private void addRequestIdToList(int[] array){
-        for(int i : array){
-            requestIdList.add(i);
-        }
-    }
-    public ArrayList<Integer> getAllReqList(){
-        return requestIdList;
-    }
-    public boolean isMatched(int trip_id){
-        for(int i : requestTripIdList){
-            if(trip_id == i){
-                return true;
-            }
-        }
-        return  false;
-    }
+    // push new notification to stack
+    private void pushToNotifStack(Intent intent){
+        int req_id[] = intent.getIntArrayExtra("req_id_array");
+        int trip_id[] = intent.getIntArrayExtra("trip_id_array");
+        int type[] = intent.getIntArrayExtra("notif_type_array");
+        int rec_flag[] = intent.getIntArrayExtra("receive_flag_array");
+        String start_loc[] = intent.getStringArrayExtra("start_loc_array");
+        String end_loc[] = intent.getStringArrayExtra("end_loc_array");
+        String name[] = intent.getStringArrayExtra("sender_name_array");
 
-    public ArrayList<String> getAllSenderName(){
-        return senderNameList;
-    }
-    private void addSenderNameToList(String[] nameList){
-        Collections.addAll(senderNameList, nameList);
-    }
-    public ArrayList<Integer> getALLNotificationType(){
-        return notifTypeList;
-    }
-    private void addNotifTypeToList(int[] typeArray){
-        for(int i : typeArray){
-            notifTypeList.add(i);
+        for(int i=req_id.length-1; i>=0; i--){
+            notifStack.push(new Notification(req_id[i], trip_id[i], type[i], rec_flag[i],
+                                             start_loc[i], end_loc[i], name[i]));
         }
+    }
+    // fetch the request list from server again
+    public void refreshNotifStack(){
+
+        // clear the stack
+        notifStack.clear();
+        // fetch the list again
+       Thread networkThread = new Thread(new Runnable() {
+          @Override
+           public void run() {
+                final String NUM_OF_NOTIF_RECEIVED_ALREADY = "1000";
+                Request request = new Request();
+                JSONArray jsonArray = request.RequestList(NUM_OF_NOTIF_RECEIVED_ALREADY);
+
+                try {
+                    for (int j = jsonArray.length() - 1; j >= 0; j--) {
+                        int type = -1;
+                        // notification type and results
+                        if (jsonArray.getJSONObject(j).has("accept") && jsonArray.getJSONObject(j).getInt("accept") != 2) {
+                            int result = jsonArray.getJSONObject(j).getInt("accept");
+                            // denied
+                            if (result == 0) {
+                                type = 2;
+                                // accepted
+                            } else if (result == 1) {
+                                type = 3;
+                                // pending
+                            } else if (result == 2) {
+                                type = 4;
+                            }
+                        } else if (jsonArray.getJSONObject(j).has("reg_as")) {
+                            type = jsonArray.getJSONObject(j).getInt("reg_as");
+                        }
+
+                        // handle type of -1
+                        if(type == -1)
+                            throw new Exception("notif type return -1");
+
+                        notifStack.push(new Notification(
+                                        jsonArray.getJSONObject(j).getInt("request_id"),
+                                        jsonArray.getJSONObject(j).getInt("trip_id"),
+                                        type,
+                                        jsonArray.getJSONObject(j).getInt("received_flag"),
+                                        jsonArray.getJSONObject(j).getString("start_location"),
+                                        jsonArray.getJSONObject(j).getString("end_location"),
+                                        jsonArray.getJSONObject(j).getString("name"))
+                        );
+                    }
+
+                    // when finish loading
+                    ((TabC_2)getCurrentFragment()).setupAdapter();
+
+                    Log.d("DEBUG", "Notif list refresh! # of notif: "+ notifStack.size());
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Log.d("DEBUG", "EXCEPTION!");
+                }
+
+            }
+        });
+       networkThread.start();
+        /*
+       try {
+           networkThread.join();
+       } catch (InterruptedException e) {
+            e.printStackTrace();
+       }
+       */
+
+    }
+    public Stack<Notification> getNotifStack(){
+        return notifStack;
     }
 
     public void initializeTabs(){
@@ -241,6 +278,10 @@ public class Main extends AppCompatActivity{
         }
         mTabHost.getTabWidget().setCurrentTab(0);
         mTabHost.getTabWidget().getChildAt(0).setBackgroundColor(Color.parseColor("#a6a6a6"));
+
+        // title
+        //TextView tv = (TextView) mTabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title);
+        //tv.setText("Trip");
     }
 
     /*Comes here when user switch tab, or we do programmatically*/
@@ -359,8 +400,8 @@ public class Main extends AppCompatActivity{
         FragmentTransaction ft = manager.beginTransaction();
 
         // different animation for different page
-        if((mStacks.get(mCurrentTab).elementAt(mStacks.get(mCurrentTab).size() - 1)) instanceof TabC_1) {
-            ft.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom);
+        if((mStacks.get(mCurrentTab).elementAt(mStacks.get(mCurrentTab).size() - 1)) instanceof TabC_2) {
+            //ft.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom);
         }else {
             ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
         }
@@ -472,23 +513,35 @@ public class Main extends AppCompatActivity{
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        stopService(new Intent(getBaseContext(), BackgroundService.class));
-
-        Log.d("DEBUG", "pause");
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
+        // temp solution
+        if(Global.FB_LOGIN){
+            return;
+        }
+        // start/resume long polling
         startService(new Intent(getBaseContext(), BackgroundService.class));
 
+        // receive broadcast from service
         IntentFilter filter = new IntentFilter();
         filter.addAction("new_request");
         mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
 
-        Log.d("DEBUG", "resume");
+        Log.d("DEBUG", "App Resume");
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // temp solution
+        if(Global.FB_LOGIN){
+            return;
+        }
+        // pause long polling
+        stopService(new Intent(getBaseContext(), BackgroundService.class));
+
+        Log.d("DEBUG", "App Pause");
+    }
+
 
 }

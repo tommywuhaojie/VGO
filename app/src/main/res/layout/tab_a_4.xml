@@ -4,7 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#ffffff">
 
     <fragment
         android:id="@+id/map"
@@ -18,8 +19,7 @@
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#6495ED">
+            android:layout_height="match_parent">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -40,11 +40,11 @@
                 android:text="address_a"
                 android:id="@+id/addr_a"
                 android:layout_below="@+id/textView34"
-                android:textColor="#000000"
                 android:layout_alignParentStart="true"
                 android:layout_marginLeft="20dp"
                 android:layout_alignParentEnd="true"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -52,7 +52,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Ending Location"
                 android:id="@+id/textView36"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:textColor="#000000"
                 android:layout_below="@+id/addr_a"
                 android:layout_alignParentStart="true"
@@ -64,12 +64,12 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="address_b"
                 android:id="@+id/addr_b"
-                android:textColor="#000000"
                 android:layout_below="@+id/textView36"
                 android:layout_alignParentStart="true"
                 android:layout_marginLeft="20dp"
                 android:layout_alignParentEnd="true"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -77,7 +77,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Starting time"
                 android:id="@+id/textView38"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:textColor="#000000"
                 android:layout_below="@+id/addr_b"
                 android:layout_alignParentStart="true"
@@ -91,7 +91,7 @@
                 android:id="@+id/textView39"
                 android:textColor="#000000"
                 android:layout_marginLeft="20dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:layout_below="@+id/time"
                 android:layout_alignParentStart="true" />
 
@@ -101,10 +101,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Michael Lee"
                 android:id="@+id/textView41"
-                android:textColor="#000000"
                 android:layout_below="@+id/textView39"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="20dp"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -112,10 +112,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="3 common friends"
                 android:id="@+id/textView42"
-                android:textColor="#000000"
                 android:layout_below="@+id/textView41"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="20dp"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -123,10 +123,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="BMW X3"
                 android:id="@+id/textView43"
-                android:textColor="#000000"
                 android:layout_alignTop="@+id/textView41"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="50dp" />
+                android:layout_marginRight="50dp"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,7 +135,7 @@
                 android:text="Passangers"
                 android:id="@+id/textView44"
                 android:textColor="#000000"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="10dp"
                 android:layout_below="@+id/textView42"
                 android:layout_alignParentStart="true"
                 android:layout_marginLeft="20dp" />
@@ -146,10 +146,10 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="12:30"
                 android:id="@+id/time"
-                android:textColor="#000000"
                 android:layout_below="@+id/textView38"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="20dp"
+                android:textSize="12dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -157,11 +157,11 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="km diff"
                 android:id="@+id/a_diff"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_alignTop="@+id/textView34"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="50dp" />
+                android:layout_marginRight="50dp"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -169,11 +169,11 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="km diff"
                 android:id="@+id/b_diff"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_alignTop="@+id/textView36"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="50dp" />
+                android:layout_marginRight="50dp"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -181,11 +181,11 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="time diff"
                 android:id="@+id/time_diff"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_alignTop="@+id/textView38"
                 android:layout_alignParentEnd="true"
-                android:layout_marginRight="50dp" />
+                android:layout_marginRight="50dp"
+                android:textSize="12sp" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -195,7 +195,9 @@
                 android:layout_marginTop="45dp"
                 android:layout_below="@+id/textView35"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true" />
+                android:layout_alignParentEnd="true"
+                android:background="#7CB342"
+                android:textColor="#FFFFFF" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -203,10 +205,11 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Thomas"
                 android:id="@+id/textView35"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_below="@+id/textView44"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                android:textIsSelectable="false"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -214,10 +217,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Tommy"
                 android:id="@+id/textView37"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_below="@+id/textView44"
-                android:layout_centerHorizontal="true" />
+                android:layout_centerHorizontal="true"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -225,10 +228,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="James"
                 android:id="@+id/textView45"
-                android:textColor="#000000"
                 android:layout_marginLeft="20dp"
                 android:layout_alignTop="@+id/textView37"
-                android:layout_alignEnd="@+id/textView43" />
+                android:layout_alignEnd="@+id/textView43"
+                android:textSize="12sp" />
 
         </RelativeLayout>
     </ScrollView>

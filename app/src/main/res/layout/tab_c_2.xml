@@ -18,10 +18,21 @@
         tools:context=".DeviceFragment"
         >
 
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:id="@+id/pbHeaderProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:indeterminate="true"
+            android:indeterminateOnly="true">
+        </ProgressBar>
+
 
         <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/listView"
             android:layout_centerHorizontal="true"
             android:cacheColorHint="@android:color/transparent"

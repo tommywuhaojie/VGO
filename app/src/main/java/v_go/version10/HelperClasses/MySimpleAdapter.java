@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,18 @@ public class MySimpleAdapter extends SimpleAdapter {
      * @param to       The views that should display column in the "from" parameter. These should all be
      *                 TextViews. The first N views in this list are given the values of the first N columns
      */
+
+    // for fun
+    int imgIndex[];
+
     public MySimpleAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {
         super(context, data, resource, from, to);
+
+            imgIndex = new int[95];
+            for(int i=0; i<95; i++){
+                    imgIndex[i] = Global.getRandomInt(0, 94);
+            }
+
     }
 
     // this function gets called once each row is revealed
@@ -41,6 +52,12 @@ public class MySimpleAdapter extends SimpleAdapter {
             view.setBackgroundColor(Color.parseColor("#6495ED"));
         } else {
             view.setBackgroundColor(Color.parseColor("#4884ea"));
+        }
+
+        TextView secondLine = (TextView)view.findViewById(R.id.secondLine);
+        if(secondLine != null) {
+            secondLine.setSelected(true);
+            secondLine.requestFocus();
         }
 
         // set up user avatar
@@ -146,11 +163,18 @@ public class MySimpleAdapter extends SimpleAdapter {
             return view;
         }else{
             // nextInt is normally exclusive of the top value,so add 1 to make it inclusive
-            imageView.setImageResource(img[Global.getRandomInt(0, 94)]);
+            imageView.setImageResource(img[imgIndex[position]]);
+            //imageView.setImageResource(img[0]);
         }
 
         return view;
     }
 
-
+        @Override
+        public void notifyDataSetChanged() {
+                for(int i=0; i<95; i++){
+                        imgIndex[i] = Global.getRandomInt(0, 94);
+                }
+                super.notifyDataSetChanged();
+        }
 }

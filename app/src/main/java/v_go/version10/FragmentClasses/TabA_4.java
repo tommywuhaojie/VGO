@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -130,6 +131,7 @@ public class TabA_4 extends Fragment{
                                 switch (result[0]) {
                                     case "1" :
                                         alertDialog.setIcon(R.drawable.check);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setTitle("Request Sent!");
                                         alertDialog.setMessage("Please wait for other person's respond.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
@@ -142,6 +144,7 @@ public class TabA_4 extends Fragment{
 
                                     case "0" :
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Request failed, please try again later.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -153,6 +156,7 @@ public class TabA_4 extends Fragment{
 
                                     case "-1":
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Failed: no session.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -164,6 +168,7 @@ public class TabA_4 extends Fragment{
 
                                     case "-3":
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Sorry, you cannot request your own trip.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -175,6 +180,7 @@ public class TabA_4 extends Fragment{
 
                                     case "-4":
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Sorry, the trip that you request no longer exists");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -187,6 +193,7 @@ public class TabA_4 extends Fragment{
                                     case "-5":
                                         alertDialog.setTitle("Ops!");
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("You've already requested this trip.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -198,6 +205,7 @@ public class TabA_4 extends Fragment{
 
                                     case "-7":
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Ops, something is wrong with this trip.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
@@ -209,6 +217,7 @@ public class TabA_4 extends Fragment{
 
                                     case ""  :
                                         alertDialog.setIcon(R.drawable.fail);
+                                        alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Request failed.");
                                         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {

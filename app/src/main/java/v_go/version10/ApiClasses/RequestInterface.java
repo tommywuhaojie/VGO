@@ -4,7 +4,7 @@ import org.json.JSONArray;
 
 public interface RequestInterface {
 	String TripRequest(String trip_id, String reg_as);
-	/*
+	/**
     *
     Description: user send a request for joining an existing trip. Also send notification to the phone.
 
@@ -25,7 +25,7 @@ public interface RequestInterface {
         -7						required field not set
     * */
 	String RequestResponse(String request_id, String state);
-	/*
+	/**
     * Description: User response to a trip request sent by other users;
 
     Input:
@@ -44,15 +44,15 @@ public interface RequestInterface {
         -7						required field not set
     * */
 	JSONArray Notification(String last_id);
-    /*
+    /**
     * Description:In the next 10 seconds. if session user received any trip request for other user,
 				instantly response the session with a message containing trip information and the other usr information.
 				Otherwise, wait and not reply with any response
-Path:	(hong decide)
-Input:
-	$_Get
-		['request_id']		last request id that received before.
-Output:
+    Path:	(hong decide)
+    Input:
+        $_Get
+            ['request_id']		last request id that received before.
+    Output:
 	if there is a request:
 		Json object:
 			'request_id'
@@ -66,13 +66,13 @@ Output:
 			'reg_as'			if its sent to you as a request to join trip
 			'accept'			if its sent to notify you about the decision they made
 
-Error:
+     Error:
 		-5 request not set
 		-7 input filed not set
     * */
 
     JSONArray RequestList (String count);
-    /*
+    /**
     *  description:
     list session user most recently received and sent requests
          Input
@@ -100,8 +100,5 @@ Error:
 
           Error:
                      -1
-    *
-    *
-    *
     * */
 }
