@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <attr format="reference" name="drawerArrowStyle"/>
     <attr format="dimension" name="height"/>
     <attr format="boolean" name="isLightTheme"/>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
     <eat-comment/>
     <attr format="reference" name="styleCaldroidGridView"/>
     <attr format="reference" name="styleCaldroidLeftArrow"/>
@@ -15,7 +15,7 @@
     <attr format="reference" name="styleCaldroidSquareCell"/>
     <attr format="reference" name="styleCaldroidViewLayout"/>
     <attr format="reference" name="styleCaldroidWeekdayView"/>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <attr format="string" name="title"/>
     <bool name="abc_action_bar_embed_tabs">true</bool>
@@ -36,10 +36,10 @@
     <color name="background_floating_material_light">@android:color/white</color>
     <color name="background_material_dark">@color/material_grey_850</color>
     <color name="background_material_light">@color/material_grey_50</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/color.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/color.xml -->
     <eat-comment/>
     <color name="blue">#ff33b5e5</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
     <color name="bright_foreground_disabled_material_light">#80000000</color>
@@ -49,7 +49,7 @@
     <color name="bright_foreground_material_light">@android:color/black</color>
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
     <eat-comment/>
     <color name="caldroid_333">#333</color>
     <color name="caldroid_555">#555</color>
@@ -64,7 +64,7 @@
     <color name="caldroid_sky_blue">#FFA3E8F7</color>
     <color name="caldroid_transparent">#00000000</color>
     <color name="caldroid_white">#FFFFFF</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <color name="dim_foreground_disabled_material_dark">#80bebebe</color>
     <color name="dim_foreground_disabled_material_light">#80323232</color>
@@ -72,10 +72,10 @@
     <color name="dim_foreground_material_light">#ff323232</color>
     <color name="foreground_material_dark">@android:color/white</color>
     <color name="foreground_material_light">@android:color/black</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/color.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/color.xml -->
     <eat-comment/>
     <color name="green">#8FCC85</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <color name="highlighted_text_material_dark">#6680cbc4</color>
     <color name="highlighted_text_material_light">#66009688</color>
@@ -111,7 +111,7 @@
     <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/color.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/color.xml -->
     <eat-comment/>
     <color name="white">#ffffff</color>
     <declare-styleable name="ActionBar"><attr name="navigationMode"><enum name="normal" value="0"/><enum name="listMode" value="1"/><enum name="tabMode" value="2"/></attr><attr name="displayOptions"><flag name="none" value="0"/><flag name="useLogo" value="0x1"/><flag name="showHome" value="0x2"/><flag name="homeAsUp" value="0x4"/><flag name="showTitle" value="0x8"/><flag name="showCustom" value="0x10"/><flag name="disableHome" value="0x20"/></attr><attr name="title"/><attr format="string" name="subtitle"/><attr format="reference" name="titleTextStyle"/><attr format="reference" name="subtitleTextStyle"/><attr format="reference" name="icon"/><attr format="reference" name="logo"/><attr format="reference" name="divider"/><attr format="reference" name="background"/><attr format="reference|color" name="backgroundStacked"/><attr format="reference|color" name="backgroundSplit"/><attr format="reference" name="customNavigationLayout"/><attr name="height"/><attr format="reference" name="homeLayout"/><attr format="reference" name="progressBarStyle"/><attr format="reference" name="indeterminateProgressStyle"/><attr format="dimension" name="progressBarPadding"/><attr name="homeAsUpIndicator"/><attr format="dimension" name="itemPadding"/><attr format="boolean" name="hideOnContentScroll"/><attr format="dimension" name="contentInsetStart"/><attr format="dimension" name="contentInsetEnd"/><attr format="dimension" name="contentInsetLeft"/><attr format="dimension" name="contentInsetRight"/><attr format="dimension" name="elevation"/><attr format="reference" name="popupTheme"/></declare-styleable>
@@ -144,7 +144,7 @@
     <declare-styleable name="View"><attr format="dimension" name="paddingStart"/><attr format="dimension" name="paddingEnd"/><attr name="android:focusable"/><attr format="reference" name="theme"/><attr name="android:theme"/></declare-styleable>
     <declare-styleable name="ViewBackgroundHelper"><attr name="android:background"/><attr format="color" name="backgroundTint"/><attr name="backgroundTintMode"><enum name="src_over" value="3"/><enum name="src_in" value="5"/><enum name="src_atop" value="9"/><enum name="multiply" value="14"/><enum name="screen" value="15"/></attr></declare-styleable>
     <declare-styleable name="ViewStubCompat"><attr name="android:layout"/><attr name="android:inflatedId"/><attr name="android:id"/></declare-styleable>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <dimen name="abc_action_bar_content_inset_material">16dp</dimen>
     <dimen name="abc_action_bar_default_height_material">56dp</dimen>
@@ -255,24 +255,24 @@
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/strings.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/strings.xml -->
     <eat-comment/>
     <string name="app_name">Caldroid Sample</string>
     <string name="customize">Customize</string>
     <string name="show_dialog">Show Dialog</string>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <string name="status_bar_notification_info_overflow">999+</string>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/strings.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/strings.xml -->
     <eat-comment/>
     <string name="undo">Undo</string>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
     <style name="AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat.Light"/>
     <style name="Animation.AppCompat.Dialog" parent="Base.Animation.AppCompat.Dialog"/>
     <style name="Animation.AppCompat.DropDownUp" parent="Base.Animation.AppCompat.DropDownUp"/>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/src/main/res/values/styles.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/src/main/res/values/styles.xml -->
     <eat-comment/>
     <style name="AppBaseTheme" parent="Theme.AppCompat">
         <!--
@@ -284,7 +284,7 @@
     <style name="AppTheme" parent="Theme.AppCompat">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <style name="Base.AlertDialog.AppCompat" parent="android:Widget">
         <item name="android:layout">@layout/abc_alert_dialog_material</item>
@@ -1221,7 +1221,7 @@
         <item name="android:minWidth">56dp</item>
         <item name="android:scaleType">center</item>
     </style>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/Vgo_android/caldroid/unspecified/res/values/values.xml -->
     <eat-comment/>
     <style name="CaldroidDefault">
         <item name="styleCaldroidViewLayout">@style/CaldroidDefaultCalendarViewLayout</item>
@@ -1310,7 +1310,7 @@
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingBottom">5dp</item>
     </style>
-    <!-- From: file:/C:/Users/user/Desktop/Vgo_android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
+    <!-- From: file:/G:/Android%20Dev/VGO_Android/caldroidSampleActivity/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/res/values/values.xml -->
     <eat-comment/>
     <style name="Platform.AppCompat" parent="android:Theme">
         <item name="android:windowNoTitle">true</item>
