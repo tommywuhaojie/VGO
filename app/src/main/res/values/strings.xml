@@ -3,6 +3,7 @@
     <string name="app_id">1211801952169892</string>
     <string name="VGO">V-Go</string>
     <string name="Register">Register</string>
+    <string name="SignUp1">SignUp1</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="Welcome">Welcome to V-Go</string>
@@ -85,7 +86,8 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_main">Main</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_sign_up_and_login_in">SignUpAndLoginIn</string>
 
 </resources>
