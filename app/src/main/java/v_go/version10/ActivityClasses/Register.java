@@ -91,7 +91,7 @@ public class Register extends AppCompatActivity {
             ok = false;
         }
 
-        EditText emailET = (EditText) findViewById(R.id.email);
+        EditText emailET = (EditText) findViewById(R.id.email_address);
         EditText pwdET = (EditText) findViewById(R.id.pwd);
         EditText pwdConET = (EditText) findViewById(R.id.pwdCon);
         EditText fnET = (EditText) findViewById(R.id.firstName);

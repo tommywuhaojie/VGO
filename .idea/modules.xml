@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/VGO_Android.iml" filepath="$PROJECT_DIR$/VGO_Android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Vgo_android.iml" filepath="$PROJECT_DIR$/Vgo_android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/caldroid/caldroid.iml" filepath="$PROJECT_DIR$/caldroid/caldroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/caldroidSampleActivity/caldroidSampleActivity.iml" filepath="$PROJECT_DIR$/caldroidSampleActivity/caldroidSampleActivity.iml" />

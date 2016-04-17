@@ -6,15 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,23 +21,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
-import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import android.content.pm.Signature;
 
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
@@ -201,7 +192,7 @@ public class Login extends AppCompatActivity {
         Boolean fromRegister = intent.getBooleanExtra("fromRegister", false);
 
         // recover email from history
-        EditText emailField = (EditText) findViewById(R.id.email);
+        EditText emailField = (EditText) findViewById(R.id.email_address);
         emailField.setText(email);
 
         // keep me login toggle listener
@@ -248,7 +239,7 @@ public class Login extends AppCompatActivity {
                     public void onClick(View v) {
 
 
-                        EditText emailET = (EditText) findViewById(R.id.email);
+                        EditText emailET = (EditText) findViewById(R.id.email_address);
                         EditText pwdET = (EditText) findViewById(R.id.pwd);
 
                         String email = emailET.getText().toString();

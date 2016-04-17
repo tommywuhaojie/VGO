@@ -4,39 +4,12 @@
     android:layout_height="match_parent"
     android:background="#50B9AC">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:background="#FFFFFF"
-        android:id="@+id/relativeLayout">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="SIGN UP"
-            android:id="@+id/textView12"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:textColor="#1B5F5F" />
-    </RelativeLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/progress_bar"
-        android:layout_below="@+id/relativeLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="31.66dp"
-        android:src="@drawable/step_one" />
-
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/imageView7"
-        android:layout_below="@+id/progress_bar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="31.66dp"
+        android:layout_marginTop="205dp"
         android:src="@drawable/white_field" />
 
     <ImageView
@@ -54,21 +27,8 @@
         android:id="@+id/imageView9"
         android:layout_below="@+id/imageView8"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="50.66dp"
-        android:src="@drawable/sign_up_button_black"
-        android:onClick="onSignUpClicked" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView10"
-        android:src="@drawable/send_code_button"
-        android:layout_alignTop="@+id/imageView7"
-        android:layout_alignEnd="@+id/imageView7"
-        android:layout_marginTop="12dp"
-        android:layout_marginRight="5dp"
-        android:clickable="true"
-        android:onClick="onSendCodeClicked" />
+        android:layout_marginTop="23.33dp"
+        android:src="@drawable/login_button_red" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -76,42 +36,43 @@
         android:inputType="phone"
         android:ems="10"
         android:id="@+id/phone"
-        android:layout_alignTop="@+id/imageView7"
-        android:layout_above="@+id/imageView8"
         android:singleLine="true"
         android:textColor="#35332E"
         android:hint="PHONE NUMBER"
-        android:layout_alignStart="@+id/progress_bar"
-        android:layout_alignEnd="@+id/imageView9"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="20dp"
         android:background="#00000000"
-        android:textSize="14dp" />
+        android:textSize="14dp"
+        android:layout_alignTop="@+id/imageView7"
+        android:layout_above="@+id/imageView8"
+        android:layout_alignEnd="@+id/imageView7"
+        android:layout_toEndOf="@+id/imageView11"
+        android:autoText="false" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="phone"
+        android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/passcode"
-        android:layout_alignBottom="@+id/imageView8"
         android:layout_alignStart="@+id/phone"
         android:layout_alignTop="@+id/imageView8"
         android:layout_alignEnd="@+id/imageView8"
         android:singleLine="true"
         android:textColor="#35332E"
-        android:hint="PASSCODE"
+        android:hint="PASSWORD"
         android:background="#00000000"
-        android:textSize="14dp" />
+        android:textSize="14dp"
+        android:layout_above="@+id/imageView9" />
 
     <ImageView
         android:layout_width="15dp"
         android:layout_height="15dp"
         android:id="@+id/imageView11"
         android:src="@drawable/cellphone"
-        android:layout_alignTop="@+id/imageView10"
         android:layout_alignStart="@+id/imageView7"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="17dp"
+        android:layout_alignTop="@+id/imageView7" />
 
     <ImageView
         android:layout_width="15dp"
@@ -120,7 +81,7 @@
         android:src="@drawable/key"
         android:layout_alignTop="@+id/imageView8"
         android:layout_alignStart="@+id/imageView11"
-        android:layout_marginTop="18dp" />
+        android:layout_marginTop="17dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -146,7 +107,7 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="19dp"
         android:layout_below="@+id/imageView9"
-        android:layout_marginTop="54.33dp"
+        android:layout_marginTop="16.66dp"
         android:background="@drawable/skyline_cloud">
 
     </RelativeLayout>
