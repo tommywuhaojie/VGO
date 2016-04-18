@@ -12,7 +12,9 @@
     <string name="LogInButton">Login</string>
     <string name="RegisterButton">Register</string>
     <string name="driveInfo">Driver Information</string>
+
     <string-array name="carMake">
+        <item>Brand</item>
         <item>Acura</item>
         <item>Audi</item>
         <item>Bentley</item>
@@ -51,7 +53,10 @@
         <item>Volkswagen</item>
         <item>Volvo</item>
     </string-array>
+
     <string-array name="year">
+        <item>Year</item>
+        <item>2017</item>
         <item>2016</item>
         <item>2015</item>
         <item>2014</item>
@@ -74,9 +79,22 @@
         <item>1997</item>
         <item>1996</item>
         <item>1995</item>
-
-
     </string-array>
+
+    <string-array name="color">
+        <item>Color</item>
+        <item>White</item>
+        <item>Silver</item>
+        <item>Black</item>
+        <item>Grey</item>
+        <item>Blue</item>
+        <item>Red</item>
+        <item>Brown</item>
+        <item>Green</item>
+        <item>Yellow</item>
+        <item>Others</item>
+    </string-array>
+
     <string name="title_activity_main_menu">Main Menu</string>
     <string name="title_activity_new_trip">New Trip</string>
     <string name="title_activity_new_trip2">New Trip</string>

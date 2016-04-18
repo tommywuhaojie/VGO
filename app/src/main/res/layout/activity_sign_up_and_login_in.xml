@@ -48,15 +48,4 @@
         android:clickable="false"
         android:id="@+id/skyline"></RelativeLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="v1.0.0 alpha"
-        android:id="@+id/alpha_label"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="center_horizontal"/>
-
 </RelativeLayout>

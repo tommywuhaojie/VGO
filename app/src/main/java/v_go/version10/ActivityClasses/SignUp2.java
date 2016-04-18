@@ -5,14 +5,12 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
 import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import v_go.version10.R;
@@ -20,8 +18,8 @@ import v_go.version10.R;
 public class SignUp2 extends AppCompatActivity {
 
     private final String GREY_HINT = "#808080";
-    private int radio = 0; // 0 -> female 1 -> male
-    private int toggle = 0; // 0 -> rider 1 -> driver
+    private int userSex = 0; // 0 -> female 1 -> male
+    private int userTypeToggle = 0; // 0 -> rider 1 -> driver
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +53,7 @@ public class SignUp2 extends AppCompatActivity {
 
     public void switchToDriverInfo(View view){
 
-        if(toggle == 0)
+        if(userTypeToggle == 0)
             return;
 
         findViewById(R.id.rider_infobox).setVisibility(View.GONE);
@@ -76,19 +74,49 @@ public class SignUp2 extends AppCompatActivity {
     }
 
     public void toggleOnFirstPage(View view){
-        if(toggle == 0){
-            toggle = 1;
+        if(userTypeToggle == 0){
+            userTypeToggle = 1;
             ((ImageView)view).setImageResource(R.drawable.toggle_driver);
         }else{
-            toggle = 0;
+            userTypeToggle = 0;
             ((ImageView)view).setImageResource(R.drawable.toggle_rider);
         }
     }
     public void toggleOnSecondPage(View view){
-        if(toggle == 1){
-            toggle = 0;
+        if(userTypeToggle == 1){
+            userTypeToggle = 0;
             switchToRiderInfo(findViewById(R.id.tab_switch_black));
             ((ImageView)findViewById(R.id.toggle_1st)).setImageResource(R.drawable.toggle_rider);
+        }
+    }
+
+    public void onFemaleChecked(View view){
+        if(userSex == 1){
+            userSex = 0;
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_check);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_uncheck);
+        }
+    }
+    public void onFemaleTextClicked(View view){
+        if(userSex == 1){
+            userSex = 0;
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_check);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_uncheck);
+        }
+    }
+
+    public void onMaleChecked(View view){
+        if(userSex == 0){
+            userSex = 1;
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_uncheck);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_check);
+        }
+    }
+    public void onMaleTextClicked(View view){
+        if(userSex == 0){
+            userSex = 1;
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_uncheck);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_check);
         }
     }
 
