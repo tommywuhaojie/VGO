@@ -34,4 +34,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:8.1.0'
     compile project(':caldroid')
     compile 'com.android.support:support-v4:22.2.1'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.1.1'
+    testCompile 'junit:junit:4.12'
+    compile 'junit:junit:4.12'
 }

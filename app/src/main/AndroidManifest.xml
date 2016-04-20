@@ -91,7 +91,7 @@
         <service android:name=".HelperClasses.BackgroundService" />
 
         <activity
-            android:name=".ActivityClasses.LoginActivity"
+            android:name=".ActivityClasses.LoginNew"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar"

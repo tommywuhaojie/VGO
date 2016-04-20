@@ -9,7 +9,7 @@ import android.widget.EditText;
 
 import v_go.version10.R;
 
-public class LoginActivity extends AppCompatActivity{
+public class LoginNew extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

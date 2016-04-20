@@ -1,11 +1,9 @@
 package v_go.version10.ActivityClasses;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.EditText;
 
 import v_go.version10.R;
 
@@ -25,7 +23,7 @@ public class SignUpAndLoginIn extends AppCompatActivity {
 
     // login in
     public void onLoginClicked(View view){
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, LoginNew.class);
         startActivity(intent);
     }
 }
