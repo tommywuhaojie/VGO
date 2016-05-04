@@ -95,6 +95,20 @@
         <item>Others</item>
     </string-array>
 
+    <string-array name="type">
+        <item>Type</item>
+        <item>Sedan</item>
+        <item>Coupe</item>
+        <item>Hatchback</item>
+        <item>Sport</item>
+        <item>SUV</item>
+        <item>Truck</item>
+        <item>Van</item>
+        <item>Convertible</item>
+        <item>Electric</item>
+        <item>Others</item>
+    </string-array>
+
     <string name="title_activity_main_menu">Main Menu</string>
     <string name="title_activity_new_trip">New Trip</string>
     <string name="title_activity_new_trip2">New Trip</string>
@@ -121,5 +135,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

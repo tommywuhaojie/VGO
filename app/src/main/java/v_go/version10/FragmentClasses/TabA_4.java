@@ -47,8 +47,6 @@ import v_go.version10.R;
 import v_go.version10.googleMapServices.DirectionsJSONParser1;
 import v_go.version10.googleMapServices.GeocodeJSONParser;
 
-import static com.google.android.gms.internal.zzid.runOnUiThread;
-
 public class TabA_4 extends Fragment{
 
     private GoogleMap mMap;
@@ -115,7 +113,7 @@ public class TabA_4 extends Fragment{
 
                         Log.d("DEBUG", "RequestTrip() API return = " + result[0]);
 
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             public void run() {
                                 final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                                 alertDialog.setCanceledOnTouchOutside(false);
@@ -129,7 +127,7 @@ public class TabA_4 extends Fragment{
                                  -7						required field not set
                                  **/
                                 switch (result[0]) {
-                                    case "1" :
+                                    case "1":
                                         alertDialog.setIcon(R.drawable.check);
                                         alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setTitle("Request Sent!");
@@ -142,7 +140,7 @@ public class TabA_4 extends Fragment{
                                         alertDialog.show();
                                         break;
 
-                                    case "0" :
+                                    case "0":
                                         alertDialog.setIcon(R.drawable.fail);
                                         alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Request failed, please try again later.");
@@ -215,7 +213,7 @@ public class TabA_4 extends Fragment{
                                         alertDialog.show();
                                         break;
 
-                                    case ""  :
+                                    case "":
                                         alertDialog.setIcon(R.drawable.fail);
                                         alertDialog.requestWindowFeature(Window.FEATURE_RIGHT_ICON);
                                         alertDialog.setMessage("Request failed.");

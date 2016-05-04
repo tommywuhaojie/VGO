@@ -69,7 +69,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:background="@drawable/infobox_black"
-        android:id="@+id/rider_infobox">
+        android:id="@+id/rider_infobox"
+        android:visibility="visible"
+        android:transitionGroup="false">
 
         <ImageView
             android:layout_width="305dp"
@@ -249,7 +251,8 @@
         android:layout_alignEnd="@+id/rider_infobox"
         android:layout_alignStart="@+id/rider_infobox"
         android:clickable="true"
-        android:onClick="switchToDriverInfo" />
+        android:onClick="switchToDriverInfo"
+        android:visibility="visible" />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -345,7 +348,8 @@
             android:layout_alignStart="@+id/imageView15"
             android:layout_marginTop="7dp"
             android:layout_alignEnd="@+id/imageView15"
-            android:entries="@array/carMake"/>
+            android:entries="@array/carMake"
+            android:focusable="false" />
 
         <Spinner
             android:layout_width="220dp"
@@ -354,7 +358,8 @@
             android:background="@drawable/dropdown_driverinfo"
             android:layout_below="@+id/imageView22"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="7dp" />
+            android:layout_marginTop="7dp"
+            android:entries="@array/type" />
 
         <Spinner
             android:layout_width="220dp"
@@ -375,18 +380,6 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
             android:entries="@array/color"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Model"
-            android:id="@+id/textView33"
-            android:textColor="#ffffff"
-            android:layout_alignTop="@+id/imageView23"
-            android:layout_marginTop="7dp"
-            android:singleLine="true"
-            android:layout_alignStart="@+id/driver_license" />
 
     </RelativeLayout>
 

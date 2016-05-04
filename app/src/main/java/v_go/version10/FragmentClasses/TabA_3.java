@@ -36,9 +36,6 @@ import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.MySimpleAdapter;
 import v_go.version10.R;
 
-import static com.google.android.gms.internal.zzid.runOnUiThread;
-
-
 public class TabA_3 extends Fragment{
 
     private View view;
@@ -182,7 +179,7 @@ public class TabA_3 extends Fragment{
 
                         final int size = jsonArray.length();
                         if(size == 0){
-                            runOnUiThread(new Runnable() {
+                            getActivity().runOnUiThread(new Runnable() {
                                 public void run() {
                                     Toast.makeText(getActivity(), "Unfortunately, no trip matched.", Toast.LENGTH_LONG).show();
                                 }
@@ -228,7 +225,7 @@ public class TabA_3 extends Fragment{
                         }
                         adapter = new MySimpleAdapter(getActivity(), fillMaps, R.layout.match_trip_info_row, from, to);
 
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             public void run() {
                                 tripList.setAdapter(adapter);
                                 // make address scrolling horizontally
@@ -338,7 +335,7 @@ public class TabA_3 extends Fragment{
             public void run() {
                 try {
                     final ProgressDialog[] pDialog = new ProgressDialog[1];
-                    runOnUiThread(new Runnable() {
+                    getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             pDialog[0] = new ProgressDialog(getActivity());
                             pDialog[0].setCancelable(false);
@@ -389,7 +386,7 @@ public class TabA_3 extends Fragment{
                             getArguments().getInt("type"));
 
                     final int res = Integer.parseInt(result);
-                    runOnUiThread(new Runnable() {
+                    getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
                             alertDialog.setCanceledOnTouchOutside(false);
