@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -63,6 +64,13 @@ public class Main extends AppCompatActivity{
     // broadcast objects
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver broadcastReceiver;
+
+    // unselected and selected tab resource ids
+    private final int [] TAB_RESOURCE_ID_UNSELECTED = {R.drawable.tab1_grey, R.drawable.tab2_grey, R.drawable.tab3_grey, R.drawable.tab4_grey};
+    private final int [] TAB_RESOURCE_ID_SELECTED = {R.drawable.tab1_selected, R.drawable.tab2_selected, R.drawable.tab3_selected, R.drawable.tab4_selected};
+
+    // previously selected tab id
+    private int visitedTab = 0;
 
 
     @Override
@@ -132,11 +140,12 @@ public class Main extends AppCompatActivity{
         mTabHost = (TabHost)findViewById(android.R.id.tabhost);
         mTabHost.setOnTabChangedListener(listener);
         mTabHost.setup();
-        // remove the tab dividers
-        mTabHost.getTabWidget().setDividerDrawable(null);
 
-        // init tabs
+        // init tabs + design
         initializeTabs();
+
+        // make the icon fill the entire tab
+        setZeroPadding();
 
         // prevent dialogs from closing by outside click
         setFinishOnTouchOutside(false);
@@ -231,6 +240,11 @@ public class Main extends AppCompatActivity{
     }
 
     public void initializeTabs(){
+        // set Dividers
+        //mTabHost.getTabWidget().setDividerDrawable(null); // no divider
+        mTabHost.getTabWidget().setDividerDrawable(R.drawable.tab_divider);
+        mTabHost.getTabWidget().setDividerPadding(0);
+
         /* Setup your tab icons and content views.. Nothing special in this..*/
         // tab1
         TabHost.TabSpec spec    =   mTabHost.newTabSpec(Global.TAB_A);
@@ -240,7 +254,7 @@ public class Main extends AppCompatActivity{
                 return findViewById(R.id.realtabcontent);
             }
         });
-        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab1));
+        spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[0]));
         mTabHost.addTab(spec);
 
         // tab2
@@ -250,7 +264,7 @@ public class Main extends AppCompatActivity{
                 return findViewById(R.id.realtabcontent);
             }
         });
-        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab2));
+        spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[1]));
         mTabHost.addTab(spec);
 
         // tab3
@@ -260,7 +274,7 @@ public class Main extends AppCompatActivity{
                 return findViewById(R.id.realtabcontent);
             }
         });
-        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab3_b));
+        spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[2]));
         mTabHost.addTab(spec);
 
         // tab4
@@ -270,20 +284,22 @@ public class Main extends AppCompatActivity{
                 return findViewById(R.id.realtabcontent);
             }
         });
-        spec.setIndicator("", ContextCompat.getDrawable(this, R.drawable.tab4));
+        spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[3]));
         mTabHost.addTab(spec);
 
-        // color
-        for(int i=0;i<mTabHost.getTabWidget().getChildCount();i++)
-        {
-            mTabHost.getTabWidget().getChildAt(i).setBackgroundColor(Color.parseColor("#cccccc"));
-        }
+
         mTabHost.getTabWidget().setCurrentTab(0);
-        mTabHost.getTabWidget().getChildAt(0).setBackgroundColor(Color.parseColor("#a6a6a6"));
 
         // title
         //TextView tv = (TextView) mTabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title);
         //tv.setText("Trip");
+    }
+
+    public void setZeroPadding(){
+        for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++)
+        {
+            mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
+        }
     }
 
     /*Comes here when user switch tab, or we do programmatically*/
@@ -331,17 +347,20 @@ public class Main extends AppCompatActivity{
                 pushFragments(tabId, mStacks.get(tabId).lastElement(), false,false);
             }
 
-            // change the color of tabs
-            for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++) {
-                mTabHost.getTabWidget().getChildAt(i).setBackgroundColor(Color.parseColor("#cccccc"));
-            }
-            mTabHost.getTabWidget().getChildAt(mTabHost.getCurrentTab()).setBackgroundColor(Color.parseColor("#a6a6a6"));
+            // grey out the old one
+            ImageView image = (ImageView) mTabHost.getTabWidget().getChildAt(visitedTab).findViewById(android.R.id.icon);
+            image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_UNSELECTED[visitedTab], null));
+            // change the icon for new one
+            image = (ImageView) mTabHost.getTabWidget().getChildAt(mTabHost.getCurrentTab()).findViewById(android.R.id.icon);
+            image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_SELECTED[mTabHost.getCurrentTab()], null));
+
+            visitedTab = mTabHost.getCurrentTab();
 
             // if there is a red dot, dismiss it after switch to 3rd tab
             if(tabId.equals(Global.TAB_C) && Global.TAB3_NOTIFICATION){
                 if(Global.TAB3_NOTIFICATION){
                     ImageView mImageView = (ImageView) mTabHost.getTabWidget().getChildAt(2).findViewById(android.R.id.icon);
-                    mImageView.setImageDrawable(getResources().getDrawable(R.drawable.tab3_b));
+                    mImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.tab3_b, null));
                     Global.TAB3_NOTIFICATION = false;
                 }
             }
