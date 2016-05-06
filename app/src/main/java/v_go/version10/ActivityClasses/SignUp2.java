@@ -96,30 +96,15 @@ public class SignUp2 extends AppCompatActivity {
     public void onFemaleChecked(View view){
         if(userSex == 1){
             userSex = 0;
-            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_check);
-            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_uncheck);
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.female_check);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.male_uncheck);
         }
     }
-    public void onFemaleTextClicked(View view){
-        if(userSex == 1){
-            userSex = 0;
-            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_check);
-            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_uncheck);
-        }
-    }
-
     public void onMaleChecked(View view){
         if(userSex == 0){
             userSex = 1;
-            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_uncheck);
-            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_check);
-        }
-    }
-    public void onMaleTextClicked(View view){
-        if(userSex == 0){
-            userSex = 1;
-            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.radio_uncheck);
-            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.radio_check);
+            ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.female_uncheck);
+            ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.male_check);
         }
     }
 

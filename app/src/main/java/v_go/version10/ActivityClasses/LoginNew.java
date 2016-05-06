@@ -1,5 +1,6 @@
 package v_go.version10.ActivityClasses;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -44,6 +45,13 @@ public class LoginNew extends AppCompatActivity{
     }
 
     public void onLoginClicked(View view){
+
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Logging in...");
+        pDialog.show();
+
         // hardcode username + password login (to be removed when phone api is ready)
         Thread networkThread = new Thread(new Runnable() {
             @Override
@@ -52,6 +60,7 @@ public class LoginNew extends AppCompatActivity{
                 if(user.Login("1165637488@qq.com", "123456").contains("1")){
                     Intent main = new Intent(LoginNew.this, Main.class);
                     startActivity(main);
+                    pDialog.dismiss();
                 }
             }
         });

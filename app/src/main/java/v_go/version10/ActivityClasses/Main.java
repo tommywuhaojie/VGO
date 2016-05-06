@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -68,6 +69,7 @@ public class Main extends AppCompatActivity{
     // unselected and selected tab resource ids
     private final int [] TAB_RESOURCE_ID_UNSELECTED = {R.drawable.tab1_grey, R.drawable.tab2_grey, R.drawable.tab3_grey, R.drawable.tab4_grey};
     private final int [] TAB_RESOURCE_ID_SELECTED = {R.drawable.tab1_selected, R.drawable.tab2_selected, R.drawable.tab3_selected, R.drawable.tab4_selected};
+    private final String [] TAB_COLOR = {"#1B5F5F", "#DA4431", "#50B9AC", "#35332E"};
 
     // previously selected tab id
     private int visitedTab = 0;
@@ -355,6 +357,9 @@ public class Main extends AppCompatActivity{
             image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_SELECTED[mTabHost.getCurrentTab()], null));
 
             visitedTab = mTabHost.getCurrentTab();
+
+            // change action bar to match the theme color
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor(TAB_COLOR[mTabHost.getCurrentTab()])));
 
             // if there is a red dot, dismiss it after switch to 3rd tab
             if(tabId.equals(Global.TAB_C) && Global.TAB3_NOTIFICATION){
