@@ -13,10 +13,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class User {
+public class User implements UserInterface {
     /*
     * v-go url addrress
     * */
+    @Override
     public String Rootpath(){return "http://www.v-go.ca";}
     /*
     * return value:
@@ -26,10 +27,11 @@ public class User {
     * 0     :account not activited(not implement yet)
     * 1     :successfully register;
     * */
-    public String Register(String email,String password,String phone,String lastname,String firstname){
+    @Override
+    public String Register(String email, String password, Integer phone, String lastname, String firstname){
         String text = null;
         String url_string = this.Rootpath()+"/create/register.php";
-        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
+        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+String.valueOf(phone);
         HttpURLConnection urlconnet = null;
         URL url = null;
         CookieManager cookieManager = new CookieManager();
@@ -60,10 +62,10 @@ public class User {
             }
             text = response.toString().trim();
         } catch (MalformedURLException e) {
-            Log.i("DEBUG", "error0");
+            //Log.i("DEBUG", "error0");
             e.printStackTrace();
         } catch (IOException e) {
-            Log.i("DEBUG","error1");
+            //Log.i("DEBUG","error1");
             e.printStackTrace();
         }finally {
             if (urlconnet!=null){
@@ -78,7 +80,8 @@ public class User {
     * -1    : fail to login
     *1      : sucessfully login as passanger
     * */
-    public String Login(String email,String password){
+    @Override
+    public String Login(String email, String password){
         String text = null;
         String url_string = this.Rootpath()+"/login/logIn.php";
         String data="email="+email+"&password="+password;
