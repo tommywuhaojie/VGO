@@ -121,7 +121,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         }
         String address = "address=" + location;
         String sensor = "sensor=false";
-        url = url + address + "&" + sensor;
+        String country = "components=country:CA";
+        url = url + address + "&" + sensor + "&" + country;
         DownloadTask2 downloadTask = new DownloadTask2();
         downloadTask.execute(url);
         // hide keyboard
@@ -289,7 +290,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     }
                     String address = "address=" + location;
                     String sensor = "sensor=false";
-                    url = url + address + "&" + sensor;
+                    String country = "components=country:CA";
+                    url = url + address + "&" + sensor + "&" + country;
                     DownloadTask2 downloadTask = new DownloadTask2();
                     downloadTask.execute(url);
                     // keyboard
@@ -341,7 +343,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title(addressAry[0]);
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_m));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.center_pin));
                     // adding marker
                     markerAry[0] = mMap.addMarker(marker);
                     //markerAry[0].showInfoWindow();
@@ -349,8 +351,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
                     button.setText("SET DESTINATION");
                     // Change marker color to red
-                    ImageView image = (ImageView) view.findViewById(R.id.marker);
-                    image.setImageResource(R.drawable.b_m);
+                    //ImageView image = (ImageView) view.findViewById(R.id.marker);
+                    //image.setImageResource(R.drawable.b_m);
 
                     // Change type to "B"
                     type = "B";
@@ -382,7 +384,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("DESTINATION");
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_m));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.center_pin));
                     markerAry[1] = mMap.addMarker(marker);
 
                     LatLng pickup = new LatLng(markerAry[0].getPosition().latitude , markerAry[0].getPosition().longitude);

@@ -134,6 +134,7 @@ public class Request implements RequestInterface {
 
         }
         //test return output
+        Log.i("michaellog","!!! last id " + last_id);
         Log.i("michaellog","!!!" + jsonarray_string);
         if (jsonarray_string==null){
             Log.i("michaellog","thimonth error2");

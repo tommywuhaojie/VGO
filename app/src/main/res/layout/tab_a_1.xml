@@ -55,8 +55,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/marker"
         android:layout_gravity="center"
-        android:src="@drawable/a_m"
-        android:layout_marginBottom="16dp" />
+        android:src="@drawable/center_pin"
+        android:layout_marginBottom="25dp" />
 
     <SearchView
         android:layout_width="match_parent"

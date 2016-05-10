@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -70,6 +71,7 @@ public class Main extends AppCompatActivity{
     private final int [] TAB_RESOURCE_ID_UNSELECTED = {R.drawable.tab1_grey, R.drawable.tab2_grey, R.drawable.tab3_grey, R.drawable.tab4_grey};
     private final int [] TAB_RESOURCE_ID_SELECTED = {R.drawable.tab1_selected, R.drawable.tab2_selected, R.drawable.tab3_selected, R.drawable.tab4_selected};
     private final String [] TAB_COLOR = {"#1B5F5F", "#DA4431", "#50B9AC", "#35332E"};
+    private final String [] ACTIONBAR_TITLE = {"TRIP", "SOCIAL", "NOTIFICATION", "ME"};
 
     // previously selected tab id
     private int visitedTab = 0;
@@ -143,11 +145,12 @@ public class Main extends AppCompatActivity{
         mTabHost.setOnTabChangedListener(listener);
         mTabHost.setup();
 
+        // setup action bar
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.custom_actionbar_layout);
+
         // init tabs + design
         initializeTabs();
-
-        // make the icon fill the entire tab
-        setZeroPadding();
 
         // prevent dialogs from closing by outside click
         setFinishOnTouchOutside(false);
@@ -241,9 +244,12 @@ public class Main extends AppCompatActivity{
         return notifStack;
     }
 
+    public void setActionbarTitle(String title){
+        ((TextView)getSupportActionBar().getCustomView().findViewById(R.id.action_bar_title)).setText(title);
+    }
+
     public void initializeTabs(){
         // set Dividers
-        //mTabHost.getTabWidget().setDividerDrawable(null); // no divider
         mTabHost.getTabWidget().setDividerDrawable(R.drawable.tab_divider);
         mTabHost.getTabWidget().setDividerPadding(0);
 
@@ -289,20 +295,15 @@ public class Main extends AppCompatActivity{
         spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[3]));
         mTabHost.addTab(spec);
 
-
         mTabHost.getTabWidget().setCurrentTab(0);
 
-        // title
-        //TextView tv = (TextView) mTabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title);
-        //tv.setText("Trip");
-    }
-
-    public void setZeroPadding(){
+        // make the icon fill the entire tab
         for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++)
         {
             mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
         }
     }
+
 
     /*Comes here when user switch tab, or we do programmatically*/
     TabHost.OnTabChangeListener listener    =   new TabHost.OnTabChangeListener() {
@@ -349,17 +350,22 @@ public class Main extends AppCompatActivity{
                 pushFragments(tabId, mStacks.get(tabId).lastElement(), false,false);
             }
 
+            int currTab = mTabHost.getCurrentTab();
+
             // grey out the old one
             ImageView image = (ImageView) mTabHost.getTabWidget().getChildAt(visitedTab).findViewById(android.R.id.icon);
             image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_UNSELECTED[visitedTab], null));
             // change the icon for new one
-            image = (ImageView) mTabHost.getTabWidget().getChildAt(mTabHost.getCurrentTab()).findViewById(android.R.id.icon);
-            image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_SELECTED[mTabHost.getCurrentTab()], null));
+            image = (ImageView) mTabHost.getTabWidget().getChildAt(currTab).findViewById(android.R.id.icon);
+            image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), TAB_RESOURCE_ID_SELECTED[currTab], null));
 
-            visitedTab = mTabHost.getCurrentTab();
+            visitedTab = currTab;
 
             // change action bar to match the theme color
-            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor(TAB_COLOR[mTabHost.getCurrentTab()])));
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor(TAB_COLOR[currTab])));
+
+            // change action bar title
+            setActionbarTitle(ACTIONBAR_TITLE[currTab]);
 
             // if there is a red dot, dismiss it after switch to 3rd tab
             if(tabId.equals(Global.TAB_C) && Global.TAB3_NOTIFICATION){

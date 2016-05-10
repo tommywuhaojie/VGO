@@ -47,7 +47,7 @@ public class BackgroundService extends Service {
 
                         Request request = new Request();
                         if(!Global.IS_LOGED_IN){
-                            final String NUM_OF_NOTIF_RECEIVED_ALREADY = "1000";
+                            final String NUM_OF_NOTIF_RECEIVED_ALREADY = "0";
                             jsonArray = request.RequestList(NUM_OF_NOTIF_RECEIVED_ALREADY);
                             Global.IS_LOGED_IN = true;
                         }else {
@@ -149,7 +149,7 @@ public class BackgroundService extends Service {
 
                     }catch (Exception e){
                         e.printStackTrace();
-                        Log.d("DEBUG", "EXCEPTION OCCURS!!!");
+                        Log.d("DEBUG", "Exception occurs while polling !!!");
                     }
                 }
             }
