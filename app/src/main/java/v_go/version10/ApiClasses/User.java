@@ -28,10 +28,10 @@ public class User implements UserInterface {
     * 1     :successfully register;
     * */
     @Override
-    public String Register(String email, String password, Integer phone, String lastname, String firstname){
+    public String Register(String email, String password, String phone, String lastname, String firstname){
         String text = null;
-        String url_string = this.Rootpath()+"/create/register.php";
-        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+String.valueOf(phone);
+        String url_string = this.Rootpath()+"/user/userRegister.php";
+        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
         HttpURLConnection urlconnet = null;
         URL url = null;
         CookieManager cookieManager = new CookieManager();
@@ -70,7 +70,6 @@ public class User implements UserInterface {
         }finally {
             if (urlconnet!=null){
                 urlconnet.disconnect();
-
             }
         }
         return text;

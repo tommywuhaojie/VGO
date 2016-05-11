@@ -155,7 +155,7 @@ public class Trip implements TripInterface {
                                double end_latitude, double end_longitude, String end_location, int estimate_time,
                                double estimate_distance, int type){
         String text = null;
-        String url_string = new User().Rootpath()+"/create/tripRegister.php";
+        String url_string = new User().Rootpath()+"/trip/tripRegister.php";
         String data="date_id="+time+"&start_lat="+start_latitude+"&start_lng="+start_longitude
                 +"&start_location="+start_location+"&end_lat="+end_latitude+"&end_lng="+end_longitude
                 +"&end_location="+end_location+"&est_time="+estimate_time+"&est_distance="
@@ -223,7 +223,7 @@ public class Trip implements TripInterface {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
-        String url_string = new User().Rootpath()+"/search/byMonth.php";
+        String url_string = new User().Rootpath()+"/trip/thisMonthTrip.php";
         String data="yearMonth="+yearmonth;
         URL url = null;
         try {
@@ -310,7 +310,7 @@ public class Trip implements TripInterface {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
-        String url_string =  new User().Rootpath()+ "/match/matchTrip.php";
+        String url_string =  new User().Rootpath()+ "/trip/matchTrip.php";
         String data = "start_lat="+start_lat+"&start_lng="+start_lng+"&end_lat="+end_lat+"&end_lng="+end_lng+"&time="+start_time+"&reg_as="+reg_as+"&multi_allow="+mult_allow;
         try {
             url_string+="?"+"start_lat="+start_lat+"&start_lng="+start_lng+"&end_lat="+end_lat+"&end_lng="+end_lng+"&time="+ URLEncoder.encode(start_time, "utf-8")+"&reg_as="+reg_as+"&multi_allow="+mult_allow;

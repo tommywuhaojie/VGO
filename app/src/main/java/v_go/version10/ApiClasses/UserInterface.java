@@ -33,7 +33,7 @@ public interface UserInterface {
         * 0     :failed(no specify reason)
         * 1     :successfully register;
         * */
-    String Register(String email, String password, Integer phone, String lastname, String firstname);
+    String Register(String email, String password, String phone, String lastname, String firstname);
 
     /*
         * return value:
