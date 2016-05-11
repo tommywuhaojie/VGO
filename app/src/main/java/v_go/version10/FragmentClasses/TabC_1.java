@@ -330,12 +330,17 @@ public class TabC_1 extends Fragment  {
             public void run() {
                     Trip trip = new Trip();
                     jsonArray[0] = trip.ThisMonthTrip(year_month);
-                    int size = jsonArray[0].length();
                     if(jsonArray[0] == null){
-                        Toast.makeText(getActivity(), "Error:API return null object", Toast.LENGTH_SHORT).show();
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), "Error:API return null object", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }else {
                         try {
                             // mark all the dates that contains trip(s)
+                            int size = jsonArray[0].length();
                             for (int i = 0; i < size; i++) {
                                 JSONObject jsonObject = jsonArray[0].getJSONObject(i);
                                 Date date = new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getString("starting_date"));

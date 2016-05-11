@@ -146,8 +146,8 @@ public class Main extends AppCompatActivity{
         mTabHost.setup();
 
         // setup action bar
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setCustomView(R.layout.custom_actionbar_layout);
+        //getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        //getSupportActionBar().setCustomView(R.layout.custom_actionbar_layout);
 
         // init tabs + design
         initializeTabs();
@@ -245,7 +245,8 @@ public class Main extends AppCompatActivity{
     }
 
     public void setActionbarTitle(String title){
-        ((TextView)getSupportActionBar().getCustomView().findViewById(R.id.action_bar_title)).setText(title);
+        //((TextView)getSupportActionBar().getCustomView().findViewById(R.id.action_bar_title)).setText(title);
+        getSupportActionBar().setTitle(title);
     }
 
     public void initializeTabs(){

@@ -12,6 +12,7 @@
         android:textColor="#ffffff"
         android:id="@+id/action_bar_title"
         android:textSize="18sp"
-        android:gravity="center_vertical|center|center_horizontal" />
+        android:gravity="center_vertical|center|center_horizontal"
+        android:layout_weight="1"/>
 
 </LinearLayout>
