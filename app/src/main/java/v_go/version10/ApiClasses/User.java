@@ -30,7 +30,7 @@ public class User implements UserInterface {
     @Override
     public String Register(String email, String password, String phone, String lastname, String firstname){
         String text = null;
-        String url_string = this.Rootpath()+"/user/userRegister.php";
+        String url_string = this.Rootpath()+"/self/userRegister.php";
         String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
         HttpURLConnection urlconnet = null;
         URL url = null;
