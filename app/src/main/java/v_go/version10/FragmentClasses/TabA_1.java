@@ -122,8 +122,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         }
         String address = "address=" + location;
         String sensor = "sensor=false";
-        String country = "components=country:CA";
-        url = url + address + "&" + sensor + "&" + country;
+        url = url + address + "&" + sensor;
         DownloadTask2 downloadTask = new DownloadTask2();
         downloadTask.execute(url);
         // hide keyboard
@@ -404,7 +403,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     args.putString("address_a", addressAry[0]);
                     args.putString("address_b", addressAry[1]);
 
-                    Fragment fragment = new TabA_2();
+                    // go to next fragment
+                    Fragment fragment = new TabA_2_new();
                     fragment.setArguments(args);
                     ((Main) getActivity()).pushFragments(Global.TAB_A, fragment, true, true);
                 }
