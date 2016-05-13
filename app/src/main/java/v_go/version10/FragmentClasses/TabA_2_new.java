@@ -63,9 +63,6 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
     private View view; // This view
     private GoogleMap mMap;
-    private MarkerOptions marker_a;
-    private MarkerOptions marker_b;
-    private int readyMarker = 0;
 
     //Global variables for post trip
     private String time = "";
@@ -109,8 +106,25 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         }
 
         // draw marker and route on map
-        setMarker(latA + "," + lngA);
-        setMarker(latB + "," + lngB);
+        final MarkerOptions marker_a = new MarkerOptions();
+        marker_a.position(new LatLng(latA, lngA));
+        marker_a.icon(BitmapDescriptorFactory.fromResource(R.drawable.point_a));
+        marker_a.title("Pickup");
+
+        final MarkerOptions marker_b = new MarkerOptions();
+        marker_b.position(new LatLng(latB, lngB));
+        marker_b.icon(BitmapDescriptorFactory.fromResource(R.drawable.point_b));
+        marker_b.title("Destination");
+
+        mMap.addMarker(marker_a);
+        mMap.addMarker(marker_b);
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                drawRoute(marker_a, marker_b);
+            }
+        });
 
         // show addresses
         TextView pointA = (TextView)view.findViewById(R.id.point_a);
@@ -120,22 +134,20 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         pointA.setText(locaA);
         pointB.setText(locaB);
 
-        // initialize two latlng objects
-        LatLng pickup = new LatLng(latA, lngA);
-        LatLng dest = new LatLng(latB, lngB);
 
         // getting URL to the Google Directions API
-        String url = getDirectionsUrl(pickup, dest);
+        String url = getDirectionsUrl(
+                new LatLng(latA, lngA),
+                new LatLng(latB, lngB));
 
         // calculate time and distance
         DownloadTask3 downloadTask3 = new DownloadTask3();
         downloadTask3.execute(url);
 
         // preset date & time
-        TextView dateTime = (TextView)view.findViewById(R.id.when);
+        TextView dateTime = (TextView)view.findViewById(R.id.date);
         if(Global.DATE_TIME != ""){
             dateTime.setText(Global.DATE_TIME);
-            dateTime.setTextColor(Color.BLACK);
         }
 
         // SCHEDULE BUTTON IS CLICKED
@@ -143,8 +155,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iv.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.image_click));
-
+                //iv.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.image_click));
                 scheduleTrip();
             }
         });
@@ -177,50 +188,31 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             }
         });
 
-        /* comment out because bellow feature not available on new UI
-        // search on google button is pressed
-        Button toGoogleButton = (Button)view.findViewById(R.id.toGoogle);
-        toGoogleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://maps.google.com/maps?saddr="+latA+","+lngA+"&daddr="+latB+","+lngB));
-                startActivity(intent);
-            }
-        });
-        // allow multiple passenger toggle
-        final Switch sw = (Switch)view.findViewById(R.id.switch1);
-        if(Global.ALLOW_MUL_PASSEN == 1) {
-            sw.setChecked(true);
-        }
-        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView,
-                                         boolean isChecked) {
-                if (isChecked) {
-                    allow_multi = 1;
-                    Global.ALLOW_MUL_PASSEN = 1;
-                } else {
-                    allow_multi = 0;
-                    Global.ALLOW_MUL_PASSEN = 0;
-                }
-            }
-        });
-        */
-
         return view;
     }
 
-    private void setMarker(String latlng){
-        String url = "https://maps.googleapis.com/maps/api/geocode/json?";
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        String lalng = "latlng=" + latlng;
-        String sensor = "sensor=false";
-        url = url + lalng + "&" + sensor;
-        DownloadTask2 downloadTask = new DownloadTask2();
-        downloadTask.execute(url);
     }
 
+    private void drawRoute(MarkerOptions marker_a, MarkerOptions marker_b){
+        // zoom out to see all markers
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder.include(marker_a.getPosition());
+        builder.include(marker_b.getPosition());
+        LatLngBounds bounds = builder.build();
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+        mMap.moveCamera(cu);
+        float zoom = mMap.getCameraPosition().zoom;
+        LatLng center = new LatLng(mMap.getCameraPosition().target.latitude + 0.02, mMap.getCameraPosition().target.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom - 1.1f));
+        // draw route
+        String url = getDirectionsUrl(marker_a.getPosition(), marker_b.getPosition());
+        DownloadTask downloadTask = new DownloadTask();
+        downloadTask.execute(url);
+    }
 
     // PICK DATE AND TIME
     private int year, month, day, hour, minute;
@@ -321,26 +313,20 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         hour = i;
         minute = i1;
 
-        //YYYY-MM-DD at HH:mm
-        when.setText("    " + year + "-" +
-                (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
-                (day < 10 ? "0" + day : "" + day) + " at " +
-                (hour < 10 ? "0" + hour : hour) + ":" +
-                (minute < 10 ? "0" + minute : minute));
-
-        // save it as global variable
-        Global.DATE_TIME = "    " + year + "-" +
+        String dateTime = year + "-" +
                 (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
                 (day < 10 ? "0" + day : "" + day) + " at " +
                 (hour < 10 ? "0" + hour : hour) + ":" +
                 (minute < 10 ? "0" + minute : minute);
 
+        //YYYY-MM-DD at HH:mm
+        when.setText(dateTime);
+
+        // save it as global variable
+        Global.DATE_TIME = dateTime;
+
         //YYYY-MM-DD HH:mm
-        this.time = (year + "-" +
-                (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
-                (day < 10 ? "0" + day : "" + day) + " " +
-                (hour < 10 ? "0" + hour : hour) + ":" +
-                (minute < 10 ? "0" + minute : minute));
+        this.time = dateTime;
     }
 
     @Override
@@ -361,27 +347,19 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     }
 
     //GOOGLE FIND ROUTE SERVICES START HERE--------------------------------------------------------------------------------
-
     private String getDirectionsUrl(LatLng origin,LatLng dest){
-
         // Origin of route
         String str_origin = "origin="+origin.latitude+","+origin.longitude;
-
         // Destination of route
         String str_dest = "destination="+dest.latitude+","+dest.longitude;
-
         // Sensor enabled
         String sensor = "sensor=false";
-
         // Building the parameters to the web service
         String parameters = str_origin+"&"+str_dest+"&"+sensor;
-
         // Output format
         String output = "json";
-
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
-
         return url;
     }
     /** A method to download json data from url */
@@ -391,29 +369,20 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         HttpURLConnection urlConnection = null;
         try{
             URL url = new URL(strUrl);
-
             // Creating an http connection to communicate with url
             urlConnection = (HttpURLConnection) url.openConnection();
-
             // Connecting to url
             urlConnection.connect();
-
             // Reading data from url
             iStream = urlConnection.getInputStream();
-
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
             StringBuffer sb = new StringBuffer();
-
             String line = "";
             while( ( line = br.readLine()) != null){
                 sb.append(line);
             }
-
             data = sb.toString();
-
             br.close();
-
         }catch(Exception e){
             Log.d("Exception download url", e.toString());
         }finally{
@@ -422,122 +391,14 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         }
         return data;
     }
-    // PIN MARKERS AND DRAW ROUTE START HERE ******************************************************
-    /** A class, to download Places from Geocoding webservice */
-    private class DownloadTask2 extends AsyncTask<String, Integer, String> {
-
-        String data = null;
-
-        // Invoked by execute() method of this object
-        @Override
-        protected String doInBackground(String... url) {
-            try{
-                data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task", e.toString());
-            }
-            return data;
-        }
-
-        // Executed after the complete execution of doInBackground() method
-        @Override
-        protected void onPostExecute(String result){
-            // Instantiating ParserTask which parses the json data from Geocoding webservice
-            // in a non-ui thread
-            ParserTask2 parserTask = new ParserTask2();
-            // Start parsing the places in JSON format
-            // Invokes the "doInBackground()" method of the class ParseTask
-            parserTask.execute(result);
-        }
-    }
-
-    /** A class to parse the Geocoding Places in non-ui thread */
-    class ParserTask2 extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
-        JSONObject jObject;
-        // Invoked by execute() method of this object
-        @Override
-        protected List<HashMap<String,String>> doInBackground(String... jsonData) {
-            List<HashMap<String, String>> places = null;
-            GeocodeJSONParser parser = new GeocodeJSONParser();
-            try{
-                jObject = new JSONObject(jsonData[0]);
-                /** Getting the parsed data as a an ArrayList */
-                places = parser.parse(jObject);
-            }catch(Exception e){
-                Log.d("Exception", e.toString());
-            }
-            return places;
-        }
-
-        // Executed after the complete execution of doInBackground() method
-        @Override
-        protected void onPostExecute(List<HashMap<String,String>> list){
-
-            for(int i=0;i<list.size();i++){
-                // Creating a marker
-                MarkerOptions markerOptions = new MarkerOptions();
-                // Getting a place from the places list
-                HashMap<String, String> hmPlace = list.get(i);
-                // Getting latitude of the place
-                double lat = Double.parseDouble(hmPlace.get("lat"));
-                // Getting longitude of the place
-                double lng = Double.parseDouble(hmPlace.get("lng"));
-                // Getting name
-                //String name = hmPlace.get("formatted_address");
-                LatLng latLng = new LatLng(lat, lng);
-                // Setting the position for the marker
-                markerOptions.position(latLng);
-                // Setting the title for the marker
-                //markerOptions.title(name);
-
-                // Increment ready marker
-                readyMarker++;
-                // Initialize maker_a & maker_b
-                if(readyMarker == 1) {
-                    marker_a = markerOptions;
-                    marker_a.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_marker_resized));
-                    marker_a.title("Pickup");
-                }else if(readyMarker == 2) {
-                    marker_b = markerOptions;
-                    marker_b.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_marker_resized));
-                    marker_b.title("Destination");
-                }
-                // Placing a marker on the touched position
-                mMap.addMarker(markerOptions);
-                // Locate the first location
-                if(readyMarker == 2){
-                    // Zoom out to see all markers
-                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    builder.include(marker_a.getPosition());
-                    builder.include(marker_b.getPosition());
-                    LatLngBounds bounds = builder.build();
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-                    mMap.moveCamera(cu);
-                    float zoom = mMap.getCameraPosition().zoom;
-                    LatLng center = mMap.getCameraPosition().target;
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom - 0.7f));
-
-                    // Draw Route
-                    String url = getDirectionsUrl(marker_a.getPosition(), marker_b.getPosition());
-                    DownloadTask downloadTask = new DownloadTask();
-                    downloadTask.execute(url);
-                }
-
-            }
-        }
-    }
-
 
     /** Draw the route between two markers methods **/
     private class DownloadTask extends AsyncTask<String, Void, String> {
-
         // Downloading data in non-ui thread
         @Override
         protected String doInBackground(String... url) {
-
             // For storing data from web service
             String data = "";
-
             try{
                 // Fetching the data from web service
                 data = downloadUrl(url[0]);
@@ -546,15 +407,11 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             }
             return data;
         }
-
         // Executes in UI thread, after the execution of
-        // doInBackground()
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             ParserTask parserTask = new ParserTask();
-
             // Invokes the thread for parsing the JSON data
             parserTask.execute(result);
         }
@@ -562,18 +419,14 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
     /** A class to parse the Google Places in JSON format */
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>> >{
-
         // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
-
             try{
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser1 parser = new DirectionsJSONParser1();
-
                 // Starts parsing data
                 routes = parser.parse(jObject);
             }catch(Exception e){
@@ -588,32 +441,25 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             ArrayList<LatLng> points = null;
             PolylineOptions lineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
-
             // Traversing through all the routes
             for(int i=0;i<result.size();i++){
                 points = new ArrayList<LatLng>();
                 lineOptions = new PolylineOptions();
-
                 // Fetching i-th route
                 List<HashMap<String, String>> path = result.get(i);
-
                 // Fetching all the points in i-th route
                 for(int j=0;j<path.size();j++){
                     HashMap<String,String> point = path.get(j);
-
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
-
                     points.add(position);
                 }
-
                 // Adding all the points in the route to LineOptions
                 lineOptions.addAll(points);
-                lineOptions.width(10);
+                lineOptions.width(15);
                 lineOptions.color(Color.BLUE);
             }
-
             try {
                 // Drawing polyline in the Google Map for the i-th route
                 mMap.addPolyline(lineOptions);
@@ -622,8 +468,6 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             }
         }
     }
-
-
     // FIND DISTANCE AND TRAVEL TIME BETWEEN A AND B START HERE ***********************************
     // Fetches data from url passed
     private class DownloadTask3 extends AsyncTask<String, Void, String> {
@@ -631,10 +475,8 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         // Downloading data in non-ui thread
         @Override
         protected String doInBackground(String... url) {
-
             // For storing data from web service
             String data = "";
-
             try{
                 // Fetching the data from web service
                 data = downloadUrl(url[0]);
@@ -649,9 +491,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             ParserTask3 parserTask3 = new ParserTask3();
-
             // Invokes the thread for parsing the JSON data
             parserTask3.execute(result);
         }
@@ -663,14 +503,11 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
-
             try{
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser2 parser = new DirectionsJSONParser2();
-
                 // Starts parsing data
                 routes = parser.parse(jObject);
             }catch(Exception e){
@@ -682,26 +519,19 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-
             String distance1 = "";
             String duration1 = "";
-
             try {
                 if (result.size() < 1) {
                     return;
                 }
-
                 // Traversing through all the routes
                 for (int i = 0; i < result.size(); i++) {
-
-
                     // Fetching i-th route
                     List<HashMap<String, String>> path = result.get(i);
-
                     // Fetching all the points in i-th route
                     for (int j = 0; j < path.size(); j++) {
                         HashMap<String, String> point = path.get(j);
-
                         if (j == 0) {    // Get distance from the list
                             distance1 = point.get("distance");
                             continue;
@@ -709,9 +539,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
                             duration1 = point.get("duration");
                             continue;
                         }
-
                     }
-
                 }
                 TextView distancetv = (TextView) view.findViewById(R.id.distance);
                 TextView durationtv = (TextView) view.findViewById(R.id.duration);
@@ -721,7 +549,6 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
                 durationtv.setTextColor(Color.BLACK);
                 distance = distance1;
                 duration = duration1;
-
             }catch (Exception e){
                 e.printStackTrace();
             }

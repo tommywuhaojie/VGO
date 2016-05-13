@@ -337,8 +337,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     if(autoCompView.getText().toString().equals("Updating...")){
                         return;
                     }
-                    // change title
-                    getActivity().setTitle("Set Destination");
                     ((Main) getActivity()).enableBackButton(true);
 
                     // Add start_marker_resized to pick up location
@@ -494,9 +492,10 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             @Override
             public void onMapDragged(){
                 // set ui effects
-                view.findViewById(R.id.address_background).setAlpha(0.2f);
+                //view.findViewById(R.id.address_background).setAlpha(0.2f);
                 mImageButton.setAlpha(0.2f);
-                button.setAlpha(0.2f);
+                //button.setAlpha(0.2f);
+                button.setVisibility(View.GONE);
 
                 // Map is dragged
                 if(mapIsDragging)
@@ -519,9 +518,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             @Override
             public void onMapReleased() {
                 // set ui effects
-                view.findViewById(R.id.address_background).setAlpha(1.0f);
+                //view.findViewById(R.id.address_background).setAlpha(1.0f);
                 mImageButton.setAlpha(1.0f);
-                button.setAlpha(1.0f);
+                //button.setAlpha(1.0f);
 
                 // move the button up when finish updating
                 //ObjectAnimator transAnimation = ObjectAnimator.ofFloat(button, "translationY", 0.2f * 1000, 0f);
@@ -578,6 +577,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
             autoCompView.setText(addr);
             autoCompView.clearFocus();
+            button.setVisibility(View.VISIBLE);
+
 
             if(firstTime==0){
                 autoCompView.setText("");
