@@ -45,8 +45,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +69,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     private GoogleMap mMap;
 
     //Global variables for post trip
+    private int year, month, day, hour, minute;
     private String time = "";
     private String duration = "";
     private String distance = "";
@@ -77,6 +82,9 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     private int type = 0;
     private int allow_multi = 0;
 
+    TextView dateTextView;
+    TextView timeTextView;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -88,6 +96,9 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         getActivity().setTitle("Summary");
         ((Main)getActivity()).enableBackButton(true);
         setHasOptionsMenu(true);
+
+        dateTextView = (TextView) view.findViewById(R.id.date);
+        timeTextView = (TextView) view.findViewById(R.id.time);
 
         // init map
         mMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -145,29 +156,53 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         downloadTask3.execute(url);
 
         // preset date & time
-        TextView dateTime = (TextView)view.findViewById(R.id.date);
-        if(Global.DATE_TIME != ""){
-            dateTime.setText(Global.DATE_TIME);
-        }
+        //TextView dateTime = (TextView)view.findViewById(R.id.date);
+        //if(Global.DATE_TIME != ""){
+        //    dateTime.setText(Global.DATE_TIME);
+        //}
 
-        // SCHEDULE BUTTON IS CLICKED
-        final ImageView iv = (ImageView) view.findViewById(R.id.date_box);
-        iv.setOnClickListener(new View.OnClickListener() {
+        // pop up select date dialog
+        ImageView dateBoxView = (ImageView) view.findViewById(R.id.date_box);
+        dateBoxView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //iv.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.image_click));
-                scheduleTrip();
+                openSelectDatePickerDialog();
             }
         });
+
+        // pop up select time dialog
+        ImageView timeBoxView = (ImageView) view.findViewById(R.id.time_box);
+        timeBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSelectTimePickerDialog();
+            }
+        });
+
 
         ImageView findRideButton = (ImageView)view.findViewById(R.id.find_ride_button);
         findRideButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(time.matches("")){
-                    Toast.makeText(getActivity(), "You haven't selected data & time.", Toast.LENGTH_SHORT).show();
+
+                if(dateTextView.getText().toString() == "Select Date" || timeTextView.getText().toString() == "Select Time"){
+                    Toast.makeText(getActivity(), "Data or Time is not picked.", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                String dateTime = year + "-" +
+                        (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
+                        (day < 10 ? "0" + day : "" + day) + " at " +
+                        (hour < 10 ? "0" + hour : hour) + ":" +
+                        (minute < 10 ? "0" + minute : minute);
+
+                // save it as global variable
+                //Global.DATE_TIME = dateTime;
+
+                //YYYY-MM-DD HH:mm
+                time = dateTime;
+
                 // Pass data arguments to TabA_3
                 Bundle args = new Bundle();
                 args.putDouble("lat_a", latA);
@@ -215,8 +250,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     }
 
     // PICK DATE AND TIME
-    private int year, month, day, hour, minute;
-    public void scheduleTrip(){
+    public void openSelectDatePickerDialog(){
         initDateTimeData();
         Calendar cDefault = Calendar.getInstance();
         cDefault.set(year, month, day);
@@ -252,7 +286,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             daysArray[i] = daysList.get(i);
         }
 
-        datePickerDialog.setSelectableDays( daysArray );
+        datePickerDialog.setSelectableDays(daysArray);
         datePickerDialog.setOnCancelListener(this);
         datePickerDialog.show( getActivity().getFragmentManager(), "DatePickerDialog" );
     }
@@ -278,14 +312,44 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     }
 
     @Override
-    public void onDateSet(DatePickerDialog datePickerDialog, int i, int i1, int i2) {
-        Calendar tDefault = Calendar.getInstance();
-        tDefault.set(year, month, day, hour, minute);
-
+    public void onDateSet(DatePickerDialog datePickerDialog, int i, int i1, int i2)
+    {
         year = i;
         month = i1;
         day = i2;
 
+        String date = "";
+        try {
+            DateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd");
+            fromFormat.setLenient(false);
+            DateFormat toFormat = new SimpleDateFormat("MMM d yyyy");
+            toFormat.setLenient(false);
+            String dateStr = year + "-" +(month + 1) + "-" + day;
+            Date dateObj = fromFormat.parse(dateStr);
+            date = toFormat.format(dateObj).trim();
+
+            String capMonth = date.substring(0,3).toUpperCase();
+            String dayStr = "";
+            if(day == 1 || day == 21 || day == 31)
+                dayStr = day + "st";
+            else if(day == 2 || day == 22)
+                dayStr = day + "nd";
+            else if(day == 3 || day == 23)
+                dayStr = day + "rd";
+            else
+                dayStr = day + "th";
+
+            date = capMonth + " " + dayStr + " " + year;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        dateTextView.setText(date);
+    }
+
+    private void openSelectTimePickerDialog(){
+        Calendar tDefault = Calendar.getInstance();
+        tDefault.set(year, month, day, hour, minute);
         TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(
                 this,
                 tDefault.get(Calendar.HOUR_OF_DAY),
@@ -294,39 +358,36 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         );
         timePickerDialog.setOnCancelListener(this);
         timePickerDialog.show(getActivity().getFragmentManager(), "timePickerDialog");
-        timePickerDialog.setTitle("PICKUP TIME");
+        timePickerDialog.setTitle("Pickup Time");
         timePickerDialog.setThemeDark(true);
     }
 
 
     @Override
-    public void onTimeSet(RadialPickerLayout radialPickerLayout, int i, int i1) {
-        /*
-        if( i < 9 || i > 18 ){
-            onDateSet(null, year, month, day);
-            Toast.makeText(this, "Somente entre 9h e 18h", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        */
-        TextView when = (TextView)view.findViewById(R.id.date);
-
+    public void onTimeSet(RadialPickerLayout radialPickerLayout, int i, int i1)
+    {
         hour = i;
         minute = i1;
 
-        String dateTime = year + "-" +
-                (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
-                (day < 10 ? "0" + day : "" + day) + " at " +
-                (hour < 10 ? "0" + hour : hour) + ":" +
-                (minute < 10 ? "0" + minute : minute);
-
-        //YYYY-MM-DD at HH:mm
-        when.setText(dateTime);
-
-        // save it as global variable
-        Global.DATE_TIME = dateTime;
-
-        //YYYY-MM-DD HH:mm
-        this.time = dateTime;
+        String hourStr = "";
+        String am_or_pm = "";
+        if(hour >= 12) {
+            if(hour != 12) {
+                hourStr = (hour - 12) + "";
+            }else{
+                hourStr = hour + "";
+            }
+            am_or_pm = "pm";
+        }else{
+            if(hour == 0) {
+                hourStr = "12";
+            }else {
+                hourStr = hour + "";
+            }
+            am_or_pm = "am";
+        }
+        String timeStr = hourStr + ":" + (minute < 10 ? "0" + minute : minute) + am_or_pm;
+        timeTextView.setText(timeStr);
     }
 
     @Override
