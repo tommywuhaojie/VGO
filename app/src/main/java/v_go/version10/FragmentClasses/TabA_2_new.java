@@ -186,8 +186,11 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             @Override
             public void onClick(View v) {
 
-                if(dateTextView.getText().toString() == "Select Date" || timeTextView.getText().toString() == "Select Time"){
-                    Toast.makeText(getActivity(), "Data or Time is not picked.", Toast.LENGTH_SHORT).show();
+                System.out.println("!!!" + dateTextView.getText().toString() + "!!!");
+                System.out.println("!!!" + timeTextView.getText().toString() + "!!!");
+
+                if(dateTextView.getText().toString().contains("Pick a Date") || timeTextView.getText().toString().contains("Pick a Time")){
+                    Toast.makeText(getActivity(), "You haven't picked the date or time.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
