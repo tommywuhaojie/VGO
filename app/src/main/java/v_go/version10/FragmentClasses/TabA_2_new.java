@@ -82,8 +82,10 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
     private int type = 0;
     private int allow_multi = 0;
 
-    TextView dateTextView;
-    TextView timeTextView;
+    private TextView dateTextView;
+    private TextView timeTextView;
+    private final String DEFAULT_DATE_BOX_TEXT = "Pick a Date";
+    private final String DEFAULT_TIME_BOX_TEXT = "Pick a Time";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -186,10 +188,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             @Override
             public void onClick(View v) {
 
-                System.out.println("!!!" + dateTextView.getText().toString() + "!!!");
-                System.out.println("!!!" + timeTextView.getText().toString() + "!!!");
-
-                if(dateTextView.getText().toString().contains("Pick a Date") || timeTextView.getText().toString().contains("Pick a Time")){
+                if(dateTextView.getText().toString().contains(DEFAULT_DATE_BOX_TEXT) || timeTextView.getText().toString().contains(DEFAULT_TIME_BOX_TEXT)){
                     Toast.makeText(getActivity(), "You haven't picked the date or time.", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -300,8 +299,8 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             year = c.get(Calendar.YEAR);
             month = c.get(Calendar.MONTH);
             day = c.get(Calendar.DAY_OF_MONTH);
-            hour = c.get(Calendar.HOUR_OF_DAY);
-            minute = c.get(Calendar.MINUTE);
+            //hour = c.get(Calendar.HOUR_OF_DAY);
+            //minute = c.get(Calendar.MINUTE);
         }
     }
 
@@ -352,7 +351,9 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
     private void openSelectTimePickerDialog(){
         Calendar tDefault = Calendar.getInstance();
-        //tDefault.set(year, month, day, hour, minute);
+        if(!timeTextView.getText().toString().contains(DEFAULT_TIME_BOX_TEXT)) {
+            tDefault.set(year, month, day, hour, minute);
+        }
         TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(
                 this,
                 tDefault.get(Calendar.HOUR_OF_DAY),
