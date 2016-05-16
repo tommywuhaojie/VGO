@@ -352,7 +352,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
     private void openSelectTimePickerDialog(){
         Calendar tDefault = Calendar.getInstance();
-        tDefault.set(year, month, day, hour, minute);
+        //tDefault.set(year, month, day, hour, minute);
         TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(
                 this,
                 tDefault.get(Calendar.HOUR_OF_DAY),
