@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".MapActivity"
+        android:background="#ffffff"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <fragment
+            android:id="@+id/map"
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView26"
+            android:background="@drawable/point_a_bar"
+            android:layout_marginTop="5dp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView29"
+            android:background="@drawable/point_b_bar"
+            android:layout_marginTop="50dp"
+            android:layout_gravity="center_horizontal|top" />
+
+        <TextView
+            android:layout_width="315dp"
+            android:layout_height="43dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Address A"
+            android:id="@+id/point_a"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="315dp"
+            android:layout_height="43dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Address B"
+            android:id="@+id/point_b"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="50dp"
+            android:gravity="center_vertical" />
+
+    </FrameLayout>
+
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="500dp">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Date"
+                android:id="@+id/textView22"
+                android:layout_marginTop="24dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignStart="@+id/date_box"
+                android:textSize="16dp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/date_box"
+                android:background="@drawable/date_time_box"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_below="@+id/textView22"
+                android:layout_centerHorizontal="true"
+                android:clickable="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Time"
+                android:id="@+id/textView23"
+                android:layout_marginTop="10dp"
+                android:textSize="16dp"
+                android:layout_below="@+id/date_box"
+                android:layout_alignStart="@+id/date_box" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/time_box"
+                android:background="@drawable/date_time_box"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_below="@+id/textView23"
+                android:layout_alignLeft="@+id/date_box"
+                android:clickable="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Pick a Date"
+                android:id="@+id/date"
+                android:layout_alignTop="@+id/date_box"
+                android:layout_alignStart="@+id/date_box"
+                android:layout_alignBottom="@+id/date_box"
+                android:layout_alignEnd="@+id/date_box"
+                android:gravity="center_vertical"
+                android:textColor="#ffffff"
+                android:layout_marginLeft="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Pick a Time"
+                android:id="@+id/time"
+                android:gravity="center_vertical"
+                android:textColor="#ffffff"
+                android:layout_marginLeft="20dp"
+                android:layout_alignTop="@+id/time_box"
+                android:layout_alignStart="@+id/time_box"
+                android:layout_alignBottom="@+id/time_box"
+                android:layout_alignEnd="@+id/time_box" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView32"
+                android:background="@drawable/km_box"
+                android:layout_below="@+id/time_box"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="30dp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView33"
+                android:background="@drawable/min_box"
+                android:layout_below="@+id/time_box"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="30dp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/find_ride_button"
+                android:layout_below="@+id/imageView32"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/find_ride_button"
+                android:layout_marginTop="30dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="32"
+                android:id="@+id/distance"
+                android:layout_alignTop="@+id/imageView32"
+                android:layout_alignStart="@+id/imageView32"
+                android:textSize="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="55"
+                android:id="@+id/duration"
+                android:layout_alignTop="@+id/imageView33"
+                android:layout_alignStart="@+id/imageView33"
+                android:textSize="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="30dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="km"
+                android:id="@+id/textView47"
+                android:layout_alignBottom="@+id/distance"
+                android:layout_toEndOf="@+id/distance"
+                android:layout_marginLeft="5dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="mins"
+                android:id="@+id/textView48"
+                android:layout_alignBottom="@+id/textView47"
+                android:layout_toEndOf="@+id/duration"
+                android:layout_marginLeft="5dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Distance"
+                android:id="@+id/textView49"
+                android:layout_below="@+id/distance"
+                android:layout_alignStart="@+id/distance"
+                android:layout_marginLeft="25dp"
+                android:textSize="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Duration"
+                android:id="@+id/textView50"
+                android:layout_alignBottom="@+id/textView49"
+                android:layout_alignStart="@+id/duration"
+                android:layout_marginLeft="25dp"
+                android:textSize="16dp" />
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>

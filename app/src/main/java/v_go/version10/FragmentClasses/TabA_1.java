@@ -90,7 +90,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
     private Marker[] markerAry;
     private String[] addressAry;
     private View view;
-    private Button button;
+    private ImageView button;
+    private ImageView addressBar;
     private ImageButton mImageButton;
     private int firstTime; // first time of camera changing
     private boolean mapIsDragged = false;
@@ -271,6 +272,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         // set up google map if needed
         setUpMapIfNeeded();
 
+        // address bar background
+        addressBar = (ImageView) view.findViewById(R.id.address_background);
+
         // auto complete
         autoCompView = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView);
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.auto_complete_list));
@@ -289,7 +293,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     }
                     String address = "address=" + location;
                     String sensor = "sensor=false";
-                    url = url + address + "&" + sensor;
+                    String country = "components=country:CA";
+                    url = url + address + "&" + sensor + "&" + country;
                     DownloadTask2 downloadTask = new DownloadTask2();
                     downloadTask.execute(url);
                     // keyboard
@@ -322,9 +327,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         type = "A";
         getActivity().setTitle("Set Pickup Location");
         ((Main) getActivity()).enableBackButton(false);
-        button = (Button)view.findViewById(R.id.set);
-        button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
-        button.setText("SET PICKUP");
+        button = (ImageView)view.findViewById(R.id.set);
+        //button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
+        //button.setText("SET PICKUP");on
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(type.matches("A")) {
@@ -332,8 +337,6 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     if(autoCompView.getText().toString().equals("Updating...")){
                         return;
                     }
-                    // change title
-                    getActivity().setTitle("Set Destination");
                     ((Main) getActivity()).enableBackButton(true);
 
                     // Add start_marker_resized to pick up location
@@ -341,16 +344,17 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title(addressAry[0]);
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.a_m));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.center_pin));
                     // adding marker
                     markerAry[0] = mMap.addMarker(marker);
                     //markerAry[0].showInfoWindow();
 
-                    button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
-                    button.setText("SET DESTINATION");
+                    //button.setBackgroundColor(Color.parseColor("#FF7043"));//LIGHT RED
+                    //button.setText("SET DESTINATION");
                     // Change marker color to red
-                    ImageView image = (ImageView) view.findViewById(R.id.marker);
-                    image.setImageResource(R.drawable.b_m);
+                    //ImageView image = (ImageView) view.findViewById(R.id.marker);
+                    //image.setImageResource(R.drawable.b_m);
+                    addressBar.setImageResource(R.drawable.to_bar);
 
                     // Change type to "B"
                     type = "B";
@@ -382,7 +386,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     // create marker
                     MarkerOptions marker = new MarkerOptions().position(centerOfMap).title("DESTINATION");
                     // Changing marker icon
-                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.b_m));
+                    marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.center_pin));
                     markerAry[1] = mMap.addMarker(marker);
 
                     LatLng pickup = new LatLng(markerAry[0].getPosition().latitude , markerAry[0].getPosition().longitude);
@@ -397,7 +401,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
                     args.putString("address_a", addressAry[0]);
                     args.putString("address_b", addressAry[1]);
 
-                    Fragment fragment = new TabA_2();
+                    // go to next fragment
+                    Fragment fragment = new TabA_2_new();
                     fragment.setArguments(args);
                     ((Main) getActivity()).pushFragments(Global.TAB_A, fragment, true, true);
                 }
@@ -487,9 +492,10 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             @Override
             public void onMapDragged(){
                 // set ui effects
-                view.findViewById(R.id.linear_lay).setAlpha(0.2f);
+                //view.findViewById(R.id.address_background).setAlpha(0.2f);
                 mImageButton.setAlpha(0.2f);
-                button.setAlpha(0.2f);
+                //button.setAlpha(0.2f);
+                button.setVisibility(View.GONE);
 
                 // Map is dragged
                 if(mapIsDragging)
@@ -512,9 +518,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             @Override
             public void onMapReleased() {
                 // set ui effects
-                view.findViewById(R.id.linear_lay).setAlpha(1.0f);
+                //view.findViewById(R.id.address_background).setAlpha(1.0f);
                 mImageButton.setAlpha(1.0f);
-                button.setAlpha(1.0f);
+                //button.setAlpha(1.0f);
 
                 // move the button up when finish updating
                 //ObjectAnimator transAnimation = ObjectAnimator.ofFloat(button, "translationY", 0.2f * 1000, 0f);
@@ -538,7 +544,7 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
 
                     }
                 };
-                updateHandler.postDelayed(updateRunnable, 300);
+                updateHandler.postDelayed(updateRunnable, 700);
             }
         };
     }
@@ -571,6 +577,8 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
             }
             autoCompView.setText(addr);
             autoCompView.clearFocus();
+            button.setVisibility(View.VISIBLE);
+
 
             if(firstTime==0){
                 autoCompView.setText("");
@@ -611,15 +619,17 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         int id = item.getItemId();
         if(id == android.R.id.home){
             if(type.matches("B")) {
-                getActivity().setTitle("Set Pickup Location");
+                //getActivity().setTitle("Set Pickup Location");
                 ((Main)getActivity()).enableBackButton(false);
 
-                button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
-                button.setText("SET PICKUP");
+                //button.setBackgroundColor(Color.parseColor("#7CB342"));//LIGHT GREEN
+                //button.setText("SET PICKUP");
+                addressBar.setImageResource(R.drawable.from_bar);
+
                 mMap.clear();
                 ImageView image = (ImageView) view.findViewById(R.id.marker);
                 image.setVisibility(View.VISIBLE);
-                image.setImageResource(R.drawable.a_m);
+                image.setImageResource(R.drawable.center_pin);
 
                 // Change type back to "A"
                 type = "A";

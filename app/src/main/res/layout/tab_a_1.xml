@@ -20,43 +20,34 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical" /> -->
 
-    <LinearLayout
+    <ImageView
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="#ffffff"
-        android:id="@+id/linear_lay">
+        android:layout_height="wrap_content"
+        android:background="@drawable/from_bar"
+        android:id="@+id/address_background"
+        android:layout_marginTop="15dp">
 
-        <AutoCompleteTextView
-            android:id="@+id/autoCompleteTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Enter address here..."
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:singleLine="true"
-            android:layout_gravity="center_horizontal|top"/>
+    </ImageView>
 
-    </LinearLayout>
-
-    <Button
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:text="SET"
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/set"
         android:layout_gravity="center_horizontal|bottom"
         android:textColor="#FFFFFF"
         android:textSize="15dp"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        android:background="@drawable/set_button" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/marker"
         android:layout_gravity="center"
-        android:src="@drawable/a_m"
-        android:layout_marginBottom="16dp" />
+        android:src="@drawable/center_pin"
+        android:layout_marginBottom="25.5dp" />
 
     <SearchView
         android:layout_width="match_parent"
@@ -69,14 +60,27 @@
         android:visibility="gone" />
 
     <ImageButton
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/myLocation"
-        android:layout_gravity="top|right"
-        android:background="@drawable/my_location_button"
-        android:layout_marginTop="60dp"
+        android:layout_gravity="right|bottom"
+        android:background="@drawable/my_location"
+        android:clickable="true"
         android:layout_marginRight="10dp"
-        android:clickable="true" />
+        android:layout_marginBottom="10dp" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autoCompleteTextView"
+        android:layout_width="260dp"
+        android:layout_height="42.5dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:hint="Enter address here..."
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:layout_gravity="right|top"
+        android:layout_marginTop="15dp"
+        android:background="#00000000"
+        android:textColor="#000000" />
 
 </FrameLayout>
 
