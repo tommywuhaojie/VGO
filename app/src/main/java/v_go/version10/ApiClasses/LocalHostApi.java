@@ -17,10 +17,10 @@ public class LocalHostApi {
 
     private static final String URL = "http://127.0.0.1:8080/register";
 
-    public String Register(String email,String password){
+    public String Register(String phone_number,String email,String password, String first_name, String last_name ){
         String text = null;
 
-        String data = "email="+email+"&password="+password;
+        String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
 
         HttpURLConnection urlconnect = null;
         URL url = null;
@@ -30,10 +30,6 @@ public class LocalHostApi {
             url = new URL(URL);
             urlconnect = (HttpURLConnection) url.openConnection();
             urlconnect.setRequestMethod("POST");
-
-            // send data
-            urlconnect.setRequestProperty("email", email);
-            urlconnect.setRequestProperty("password", password);
 
             urlconnect.setUseCaches(false);
             urlconnect.setDoInput(true);
