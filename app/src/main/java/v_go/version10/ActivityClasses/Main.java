@@ -70,8 +70,8 @@ public class Main extends AppCompatActivity{
     // unselected and selected tab resource ids
     private final int [] TAB_RESOURCE_ID_UNSELECTED = {R.drawable.tab1_grey, R.drawable.tab2_grey, R.drawable.tab3_grey, R.drawable.tab4_grey};
     private final int [] TAB_RESOURCE_ID_SELECTED = {R.drawable.tab1_selected, R.drawable.tab2_selected, R.drawable.tab3_selected, R.drawable.tab4_selected};
-    private final String [] TAB_COLOR = {"#1B5F5F", "#DA4431", "#50B9AC", "#35332E"};
-    private final String [] ACTIONBAR_TITLE = {"TRIP", "SOCIAL", "NOTIFICATION", "ME"};
+    private final String [] TAB_COLOR = {"#1B5F5F", "#50B9AC", "#DA4431", "#35332E"};
+    private final String [] ACTIONBAR_TITLE = {"TRIP", "NOTIFICATION", "SOCIAL", "ME"};
 
     // previously selected tab id
     private int visitedTab = 0;
