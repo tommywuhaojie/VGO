@@ -76,7 +76,7 @@ public class User {
     /*
     * return value:
     * -1    : fail to login
-    *1      : sucessfully login as passanger
+    *  1    : sucessfully login as passanger
     * */
     public String Login(String email,String password){
         String text = null;

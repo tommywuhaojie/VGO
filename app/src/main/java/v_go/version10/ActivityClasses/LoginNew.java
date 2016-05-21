@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import v_go.version10.ApiClasses.User;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.R;
