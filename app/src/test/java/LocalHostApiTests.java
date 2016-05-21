@@ -27,7 +27,14 @@ public class LocalHostApiTests {
         * -1    : fail to login
         *  1    : successfully login
         * */
-        JSONObject result2 = localServer.Login("7786889383", "aA123456");
-        System.out.println("-->Login Result: " + result2.getString("code") + " " + result2.getString("msg"));
+        JSONObject result = localServer.Login("7786889383", "aA123456");
+        System.out.println("-->Login Result: " + result.getString("code") + " " + result.getString("msg"));
+    }
+
+    @Test
+    public void logout() throws Exception
+    {
+        JSONObject result =  localServer.Logout();
+        System.out.println("-->Logout Result: " + result.toString());
     }
 }
