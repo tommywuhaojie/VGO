@@ -35,15 +35,11 @@ public class LoginTests {
         String result = user.Login(" 1165637488@qq.com", "123456");
         Assert.assertEquals("0",result);
     }
-    /*@Test
-    public void register(){
-        String res = user.Register("testerjava@qq.com", "aA123456", "7789451236", "superman", "tester");
-        Assert.assertEquals("1", res);
-    }
-    */
 
-    @After
-    public void cleanUp(){
-
+    @Test
+    public void InvalidPassword(){
+        String result = user.Login("1165637488@qq.com", "12345 6");
+        Assert.assertEquals("0",result);
     }
+
 }
