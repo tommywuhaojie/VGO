@@ -1,18 +1,15 @@
 package v_go.version10.APITests;
 import org.junit.*;
 
-import v_go.version10.ApiClasses.LocalHostApi;
 import v_go.version10.ApiClasses.User;
 
 public class LoginTests {
 
     private User user;
-    private LocalHostApi localServer;
 
     @Before
     public void setUp() throws Exception {
         user = new User();
-        localServer = new LocalHostApi();
     }
 
     @Test
@@ -28,19 +25,21 @@ public class LoginTests {
 
     @Test
     public void loginWithInvalidAccount(){
-        String result = user.Login(" ", " ");
-        Assert.assertEquals("-1", result);
+        String result = user.Login("invalid@qq.com", "000000");
+        Assert.assertEquals("0", result);
+    }
+
+
+    @Test
+    public void loginWithAccountWithSpace(){
+        String result = user.Login(" 1165637488@qq.com", "123456");
+        Assert.assertEquals("0",result);
     }
 
     @Test
-    public void localApiRegister(){
-        String res = localServer.Register("123456@qq.com", "aA123456");
-        System.out.println("Server: " + res);
-
+    public void InvalidPassword(){
+        String result = user.Login("1165637488@qq.com", "12345 6");
+        Assert.assertEquals("0",result);
     }
 
-    @After
-    public void cleanUp(){
-
-    }
 }
