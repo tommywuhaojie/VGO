@@ -59,11 +59,14 @@ public class LoginNew extends AppCompatActivity{
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                User user = new User();
-                if(user.Login("1165637488@qq.com", "123456").contains("1")){
-                    Intent main = new Intent(LoginNew.this, Main.class);
-                    startActivity(main);
-                    pDialog.dismiss();
+                try {
+                    if(User.Login("1165637488@qq.com", "123456").getString("code").contains("1")){
+                        Intent main = new Intent(LoginNew.this, Main.class);
+                        startActivity(main);
+                        pDialog.dismiss();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         });

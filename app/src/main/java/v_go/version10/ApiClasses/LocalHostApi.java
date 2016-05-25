@@ -14,6 +14,7 @@ import java.net.URL;
 
 public class LocalHostApi {
 
+    private static final String SERVER_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/";
     private static final String REG_URL = "http://127.0.0.1:8080/register";
     private static final String LOGIN_URL = "http://127.0.0.1:8080/login";
     private static final String LOGOUT_URL = "http://127.0.0.1:8080/logout";
