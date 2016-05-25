@@ -16,7 +16,7 @@ public class LoginTests {
 
     @Test
     public void loginWithValidAccount() throws Exception {
-        
+
         * return value:
         * -1    : fail to login
         *  1    : successfully login as passenger
