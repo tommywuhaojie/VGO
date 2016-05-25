@@ -1,58 +1,40 @@
 package v_go.version10.ApiClasses;
 
-import android.util.Log;
-
+import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-public class User implements UserInterface {
-    /*
-    * v-go url addrress
-    * */
-    @Override
-    public String Rootpath(){return "http://www.v-go.ca";}
-    /*
-    * return value:
-    * -1    : fail to register;
-    * -2    :invalid inputs/ did not fill in all fields;
-    * -3    :email already exist;
-    * 0     :account not activited(not implement yet)
-    * 1     :successfully register;
-    * */
-    @Override
-    public String Register(String email, String password, String phone, String lastname, String firstname){
-        String text = null;
-        String url_string = this.Rootpath()+"/self/userRegister.php";
-        String data="email="+email+"&password="+password+"&first_name="+firstname+"&last_name="+lastname+"&phone_number="+phone;
-        HttpURLConnection urlconnet = null;
-        URL url = null;
+public class User {
+
+    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
+        String json_text = null;
+        String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
+        HttpURLConnection connection = null;
+        URL url;
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(url_string);
-            urlconnet = (HttpURLConnection) url.openConnection();
-            urlconnet.setRequestMethod("POST");
-            //urlconnet.setRequestProperty("Content-Type", "application/x-www.urlencoded");
-            //urlconnet.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
-            //urlconnet.setRequestProperty("Content-Language", "en-US");
-            urlconnet.setUseCaches(false);
-            urlconnet.setDoInput(true);
-            urlconnet.setDoOutput(true);
-            // Log.i("michalelog input:",data);
-            DataOutputStream writer = new DataOutputStream(urlconnet.getOutputStream());
+            url = new URL(ServerConstants.REGISTER_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
             writer.writeBytes(data);
             writer.flush();
             writer.close();
+
             //Response
-            InputStream is = urlconnet.getInputStream();
+            InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
             StringBuffer response = new StringBuffer();
@@ -60,51 +42,48 @@ public class User implements UserInterface {
                 response.append(line);
                 response.append("\r");
             }
-            text = response.toString().trim();
-        } catch (MalformedURLException e) {
-            //Log.i("DEBUG", "error0");
-            e.printStackTrace();
-        } catch (IOException e) {
-            //Log.i("DEBUG","error1");
+            json_text = response.toString();
+        } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if (urlconnet!=null){
-                urlconnet.disconnect();
+            if (connection!=null){
+                connection.disconnect();
             }
         }
-        return text;
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
+
     /*
     * return value:
     * -1    : fail to login
-    *1      : sucessfully login as passanger
+    *  1    : successfully login
     * */
-    @Override
-    public String Login(String email, String password){
-        String text = null;
-        String url_string = this.Rootpath()+"/login/logIn.php";
-        String data="email="+email+"&password="+password;
-        HttpURLConnection urlconnet = null;
-        URL url = null;
+    public static JSONObject Login(String phone_number,String password){
+        String json_text = null;
+        String data="phone_number="+phone_number+"&password="+password;
+        HttpURLConnection connection = null;
+        URL url;
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(url_string);
-            urlconnet = (HttpURLConnection) url.openConnection();
-            urlconnet.setRequestMethod("POST");
-            //urlconnet.setRequestProperty("Content-Type", "application/x-www.urlencoded");
-            //urlconnet.setRequestProperty("Content-Length", Integer.toString(data.getBytes().length));
-            //urlconnet.setRequestProperty("Content-Language", "en-US");
-            urlconnet.setUseCaches(false);
-            urlconnet.setDoInput(true);
-            urlconnet.setDoOutput(true);
-            // Log.i("michalelog input:",data);
-            DataOutputStream writer = new DataOutputStream(urlconnet.getOutputStream());
+            url = new URL(ServerConstants.LOGIN_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
             writer.writeBytes(data);
             writer.flush();
             writer.close();
             //Response
-            InputStream is = urlconnet.getInputStream();
+            InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
             String line;
             StringBuffer response = new StringBuffer();
@@ -112,19 +91,63 @@ public class User implements UserInterface {
                 response.append(line);
                 response.append("\r");
             }
-            text = response.toString().trim();
-        } catch (MalformedURLException e) {
-            Log.i("DEBUG","error0");
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.i("DEBUG","error1");
+            json_text = response.toString().trim();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (urlconnet!=null){
-                urlconnet.disconnect();
-
+            if (connection != null){
+                connection.disconnect();
             }
         }
-        return text;
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    /*
+    * return value:
+    *  1    : successfully logged out
+    * */
+    public static JSONObject Logout(){
+        String json_text = null;
+        HttpURLConnection connection = null;
+        URL url;
+        CookieManager cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
+        try {
+            url = new URL(ServerConstants.LOGOUT_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
     }
 }

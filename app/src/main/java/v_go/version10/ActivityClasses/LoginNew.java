@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import v_go.version10.ApiClasses.User;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.R;
@@ -56,11 +59,14 @@ public class LoginNew extends AppCompatActivity{
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                User user = new User();
-                if(user.Login("1165637488@qq.com", "123456").contains("1")){
-                    Intent main = new Intent(LoginNew.this, Main.class);
-                    startActivity(main);
-                    pDialog.dismiss();
+                try {
+                    if(User.Login("1165637488@qq.com", "123456").getString("code").contains("1")){
+                        Intent main = new Intent(LoginNew.this, Main.class);
+                        startActivity(main);
+                        pDialog.dismiss();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         });

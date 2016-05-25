@@ -17,7 +17,7 @@ import java.net.URL;
 public class Request implements RequestInterface {
     @Override
     public String TripRequest(String trip_id, String reg_as){
-        String url_string = new User().Rootpath()+"/request/tripRequest.php";
+        String url_string = "/request/tripRequest.php";
         String data="trip_id="+trip_id+"&reg_as="+reg_as;
         HttpURLConnection urlconnet = null;
         URL url = null;
@@ -73,7 +73,7 @@ public class Request implements RequestInterface {
         String jsonarray_string = null;
         try {
             String data = "request_id="+request_id+"&state="+state;
-            String url_string = new User().Rootpath() + "/request/responseRequest.php?" + data;
+            String url_string = "/request/responseRequest.php?" + data;
             URL url = new URL(url_string);
             urlconnet = (HttpURLConnection) url.openConnection();
             urlconnet.setRequestMethod("GET");
@@ -105,7 +105,7 @@ public class Request implements RequestInterface {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
-        String url_string = new User().Rootpath()+"/request/Notification.php"+"?request_id="+last_id;
+        String url_string = "/request/Notification.php"+"?request_id="+last_id;
 
         try {
             URL url = new URL(url_string);
@@ -156,7 +156,7 @@ public class Request implements RequestInterface {
         HttpURLConnection urlconnet = null;
         JSONArray json = null;
         String jsonarray_string = null;
-        String url_string = new User().Rootpath()+"/request/listRequest.php"+"?count="+count;
+        String url_string ="/request/listRequest.php"+"?count="+count;
 
         try {
             URL url = new URL(url_string);
