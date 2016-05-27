@@ -1,7 +1,4 @@
-package v_go.version10.APITests;
-import org.junit.*;
-
-import v_go.version10.ApiClasses.User;
+package v_go.version10.LocalApiTests;
 
 public class LoginTests {
 
