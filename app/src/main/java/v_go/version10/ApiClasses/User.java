@@ -121,7 +121,7 @@ public class User {
         try {
             url = new URL(ServerConstants.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("DELETE");
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
