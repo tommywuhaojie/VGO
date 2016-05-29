@@ -20,4 +20,5 @@ public class ExampleTests {
         System.out.println("-->Logout Result: " + result3.toString());
         Assert.assertEquals("1", result3.getString("code"));
     }
+
 }

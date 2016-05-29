@@ -14,8 +14,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
-import com.facebook.login.LoginManager;
-
 import v_go.version10.ActivityClasses.Login;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.HelperClasses.Global;
@@ -40,11 +38,6 @@ public class TabD_1 extends Fragment   {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                // log out from Facebook
-                if(Global.FB_LOGIN){
-                    LoginManager.getInstance().logOut();
-                }
 
                 // reset all user global variables
                 Global.resetAll();

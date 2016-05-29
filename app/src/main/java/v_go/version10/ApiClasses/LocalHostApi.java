@@ -1,8 +1,6 @@
 package v_go.version10.ApiClasses;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -14,22 +12,15 @@ import java.net.URL;
 
 public class LocalHostApi {
 
-    private static final String SERVER_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/";
-    private static final String REG_URL = "http://127.0.0.1:8080/register";
-    private static final String LOGIN_URL = "http://127.0.0.1:8080/login";
-    private static final String LOGOUT_URL = "http://127.0.0.1:8080/logout";
-
-    public JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
+    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
         String json_text = null;
-
         String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
-
         HttpURLConnection connection = null;
-        URL url = null;
+        URL url;
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(REG_URL);
+            url = new URL(ServerConstants.LOCAL_REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
 
@@ -52,7 +43,6 @@ public class LocalHostApi {
                 response.append("\r");
             }
             json_text = response.toString();
-            System.out.println(json_text);
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -69,21 +59,15 @@ public class LocalHostApi {
         return jsonObject;
     }
 
-    /*
-    * return value:
-    * -1    : fail to login
-    *  1    : sucessfully login as passanger
-    * */
-    public JSONObject Login(String phone_number,String password){
+    public static JSONObject Login(String phone_number,String password){
         String json_text = null;
-        //String url_string = this.Rootpath()+"/login/logIn.php";
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
         URL url;
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(LOGIN_URL);
+            url = new URL(ServerConstants.LOCAL_LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setUseCaches(false);
@@ -119,28 +103,19 @@ public class LocalHostApi {
         return jsonObject;
     }
 
-    /*
-    * return value:
-    * -1    : fail to logout
-    *  1    : sucessfully logged out
-    * */
-    public JSONObject Logout(){
+    public static JSONObject Logout(){
         String json_text = null;
         HttpURLConnection connection = null;
         URL url;
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(LOGOUT_URL);
+            url = new URL(ServerConstants.LOCAL_LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("DELETE");
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
-            //DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-            //writer.writeBytes(data);
-            //writer.flush();
-            //writer.close();
             //Response
             InputStream is = connection.getInputStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is));
