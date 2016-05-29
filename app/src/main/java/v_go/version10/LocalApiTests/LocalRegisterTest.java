@@ -1,4 +1,4 @@
-package v_go.version10.LocalApiTests;
+/*package v_go.version10.LocalApiTests;
 
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -18,3 +18,4 @@ public class LocalRegisterTest {
 
     }
 }
+*/

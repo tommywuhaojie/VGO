@@ -12,7 +12,7 @@ public class SocketIoHelper extends Application {
     private Socket mSocket;
     {
         try {
-            final String SERVER_URL = "http://127.0.0.1:8080";
+            final String SERVER_URL = "http://chat.socket.io";
             mSocket = IO.socket(SERVER_URL);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
