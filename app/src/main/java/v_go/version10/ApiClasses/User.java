@@ -69,8 +69,6 @@ public class User {
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
         URL url;
-        CookieManager cookieManager = new CookieManager();
-        CookieHandler.setDefault(cookieManager);
         try {
             url = new URL(ServerConstants.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
@@ -116,8 +114,6 @@ public class User {
         String json_text = null;
         HttpURLConnection connection = null;
         URL url;
-        CookieManager cookieManager = new CookieManager();
-        CookieHandler.setDefault(cookieManager);
         try {
             url = new URL(ServerConstants.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
