@@ -17,8 +17,6 @@ public class User {
         String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
         HttpURLConnection connection = null;
         URL url;
-        CookieManager cookieManager = new CookieManager();
-        CookieHandler.setDefault(cookieManager);
         try {
             url = new URL(ServerConstants.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
@@ -69,6 +67,8 @@ public class User {
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
         URL url;
+        CookieManager cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
         try {
             url = new URL(ServerConstants.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
