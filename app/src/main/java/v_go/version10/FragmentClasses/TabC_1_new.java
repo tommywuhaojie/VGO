@@ -216,7 +216,7 @@ public class TabC_1_new extends Fragment   {
         //addMessage(mUsername, message);
 
         // perform the sending message attempt.
-        mSocket.emit("chat message", message);
+        mSocket.emit("chat message",mUsername +" "+ message);
     }
 
     /*
