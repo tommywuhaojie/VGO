@@ -32,22 +32,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
+import io.socket.client.Socket;
 import v_go.version10.ApiClasses.Request;
+import v_go.version10.ApiClasses.User;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
 import v_go.version10.FragmentClasses.TabC_1;
+import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.FragmentClasses.TabC_2;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
+import v_go.version10.SocketIo.SocketIoHelper;
 
 public class Main extends AppCompatActivity{
 
@@ -61,9 +66,6 @@ public class Main extends AppCompatActivity{
     private boolean allow = true;
     // top object of this stack equals to top item of the listView
     private Stack<Notification> notifStack;
-    // broadcast objects
-    private LocalBroadcastManager mLocalBroadcastManager;
-    private BroadcastReceiver broadcastReceiver;
 
     // unselected and selected tab resource ids
     private final int [] TAB_RESOURCE_ID_UNSELECTED = {R.drawable.tab1_grey, R.drawable.tab2_grey, R.drawable.tab3_grey, R.drawable.tab4_grey};
@@ -74,6 +76,62 @@ public class Main extends AppCompatActivity{
     // previously selected tab id
     private int visitedTab = 0;
 
+    // socket.io
+    private Socket mSocket;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(mSocket == null) {
+            SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+            mSocket = socketHelper.getSocket();
+        }
+        // connect to server when App resumes
+        mSocket.connect();
+
+        Log.d("DEBUG", "App Resume");
+    }
+
+    // This method is equivalent to calling Logout
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // disconnect from server when Main activity is destroyed
+        if(mSocket != null) {
+            mSocket.disconnect();
+        }
+
+        // calling logout to kill session
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject jsonObject = User.Logout();
+                    Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
+                }catch (Exception e){
+                    Log.d("DEBUG", "something went wrong when attempting to logout");
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        networkThread.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // pause long polling
+        //stopService(new Intent(getBaseContext(), BackgroundService.class));
+
+        Log.d("DEBUG", "App Pause");
+    }
+
+    public Socket getScoket(){
+        return mSocket;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -83,49 +141,6 @@ public class Main extends AppCompatActivity{
         // lists initialization
         notifStack = new Stack<>();
 
-        /**-------- Background Services and UI Updating for message and request notifications -----------------**/
-
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if(intent.getAction().equals("new_request")) {
-
-                    // prepare new notification toast
-                    int numOfNewReq = intent.getIntExtra("num_of_new_req", 0);
-                    String notifToast = "You have " + numOfNewReq + " new notification";
-                    if(numOfNewReq == 1){
-                        notifToast += "!";
-                    }else{
-                        notifToast += "s!";
-                    }
-                    // make toast
-                    Toast toast = Toast.makeText(getApplicationContext(), notifToast, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 500);
-                    toast.show();
-
-                    // if not currently not in 3rd tab change third tab icon
-                    if(mTabHost.getCurrentTab() != 2) {
-                        ImageView mImageView = (ImageView) mTabHost.getTabWidget().getChildAt(2).findViewById(android.R.id.icon);
-                        mImageView.setImageDrawable(getResources().getDrawable(R.drawable.tab3_b_no));
-                        Global.TAB3_NOTIFICATION = true;
-                    }
-
-                    // if at calendar page update "bell icon"
-                    if(getCurrentFragment() instanceof TabC_1) {
-                        ((TabC_1)getCurrentFragment()).updateUi();
-                    }
-
-                    // push new notifications to notification stack
-                    pushToNotifStack(intent);
-
-                }
-            }
-        };
-
-
-        /**---------------------------------------------------------------------------------------------------------------**/
         mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup();
 
@@ -336,7 +351,7 @@ public class Main extends AppCompatActivity{
                 }else if(tabId.equals(Global.TAB_B)){
                     pushFragments(tabId, new TabB_1(), false,true);
                 }else if(tabId.equals(Global.TAB_C)){
-                    pushFragments(tabId, new TabC_1(), false,true);
+                    pushFragments(tabId, new TabC_1_new(), false,true);
                 }else if(tabId.equals(Global.TAB_D)){
                     pushFragments(tabId, new TabD_1(), false,true);
                 }
@@ -551,37 +566,18 @@ public class Main extends AppCompatActivity{
         }
         return super.dispatchTouchEvent(ev);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // temp solution
-        if(Global.FB_LOGIN){
-            return;
-        }
-        // start/resume long polling
-        //startService(new Intent(getBaseContext(), BackgroundService.class));
-
-        // receive broadcast from service
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("new_request");
-        mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
-
-        Log.d("DEBUG", "App Resume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // temp solution
-        if(Global.FB_LOGIN){
-            return;
-        }
-        // pause long polling
-        stopService(new Intent(getBaseContext(), BackgroundService.class));
-
-        Log.d("DEBUG", "App Pause");
-    }
-
-
 }
+
+/** Programmatic Way to Get Hash Code **
+ try {
+ PackageInfo info = getPackageManager().getPackageInfo(
+ "v_go.version10",
+ PackageManager.GET_SIGNATURES);
+ for (Signature signature : info.signatures) {
+ MessageDigest md = MessageDigest.getInstance("SHA");
+ md.update(signature.toByteArray());
+ Log.d("DEBUG", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+ }
+ } catch (PackageManager.NameNotFoundException e) {
+ } catch (NoSuchAlgorithmException e) {}
+ **/

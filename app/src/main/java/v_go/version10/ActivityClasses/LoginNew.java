@@ -33,24 +33,6 @@ public class LoginNew extends AppCompatActivity{
         // set hint color match background
         phone.setHintTextColor(Color.parseColor("#50B9AC"));
         passcode.setHintTextColor(Color.parseColor("#50B9AC"));
-
-        /** Programmatic Way to Get Hash Code **
-         try {
-         PackageInfo info = getPackageManager().getPackageInfo(
-         "v_go.version10",
-         PackageManager.GET_SIGNATURES);
-         for (Signature signature : info.signatures) {
-         MessageDigest md = MessageDigest.getInstance("SHA");
-         md.update(signature.toByteArray());
-         Log.d("DEBUG", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-         }
-         } catch (PackageManager.NameNotFoundException e) {
-         } catch (NoSuchAlgorithmException e) {}
-         **/
-
-        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-        Socket mSocket = socketHelper.getSocket();
-        mSocket.connect();
     }
 
     public void onLoginClicked(View view){
@@ -66,7 +48,7 @@ public class LoginNew extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-                    if(User.Login("1165637488@qq.com", "123456").getString("code").contains("1")){
+                    if(User.Login("7786889383", "aA123456").getString("code").equals("1")){
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();

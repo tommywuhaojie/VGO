@@ -14,7 +14,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
-import v_go.version10.ActivityClasses.Login;
+import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
@@ -42,7 +42,7 @@ public class TabD_1 extends Fragment   {
                 // reset all user global variables
                 Global.resetAll();
 
-                Intent intent = new Intent(getActivity(), Login.class);
+                Intent intent = new Intent(getActivity(), LoginNew.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("logout", true);
                 startActivity(intent);
