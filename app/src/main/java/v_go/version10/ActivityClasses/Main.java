@@ -562,7 +562,7 @@ public class Main extends AppCompatActivity{
             return;
         }
         // start/resume long polling
-        startService(new Intent(getBaseContext(), BackgroundService.class));
+        //startService(new Intent(getBaseContext(), BackgroundService.class));
 
         // receive broadcast from service
         IntentFilter filter = new IntentFilter();

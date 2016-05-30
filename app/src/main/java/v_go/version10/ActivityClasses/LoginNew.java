@@ -26,11 +26,11 @@ public class LoginNew extends AppCompatActivity{
         setContentView(R.layout.activity_login_new);
 
         EditText phone = (EditText)findViewById(R.id.phone);
-        EditText passcode = (EditText)findViewById(R.id.passcode);
+        EditText password = (EditText)findViewById(R.id.password);
 
         // set hint color match background
         phone.setHintTextColor(Color.parseColor("#50B9AC"));
-        passcode.setHintTextColor(Color.parseColor("#50B9AC"));
+        password.setHintTextColor(Color.parseColor("#50B9AC"));
 
         /** Programmatic Way to Get Hash Code **
          try {
@@ -60,7 +60,7 @@ public class LoginNew extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-                    if(User.Login("1165637488@qq.com", "123456").getString("code").contains("1")){
+                    if(User.Login("1165637488@qq.com", "123456").getString("code").equals("1")){
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();
