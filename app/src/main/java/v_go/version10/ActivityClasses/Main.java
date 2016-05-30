@@ -31,8 +31,6 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.login.LoginManager;
-
 import org.json.JSONArray;
 
 import java.util.ArrayList;

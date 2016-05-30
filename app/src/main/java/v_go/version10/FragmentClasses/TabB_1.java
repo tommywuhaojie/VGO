@@ -13,10 +13,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,60 +40,7 @@ public class TabB_1 extends Fragment   {
         ((Main) getActivity()).enableBackButton(false);
         setHasOptionsMenu(true);
 
-        // to test FB friend list
-        if(Global.FB_LOGIN){
-            facebookTesting();
-        }
-
         return view;
-    }
-
-    private void facebookTesting(){
-        /* make the API call */
-        new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "me/friends",
-                null,
-                HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    public void onCompleted(GraphResponse response) {
-                        /* handle the result */
-                        if(response != null) {
-                            Log.d("DEBUG", response.toString());
-                        }
-                        try {
-                            JSONArray friendArray = response.getJSONObject().getJSONArray("data");
-                            Log.d("DEBUG", "size1: " + friendArray.length());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-        ).executeAsync();
-
-        new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "/me/taggable_friends",
-                null,
-                HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    public void onCompleted(GraphResponse response) {
-
-                        try {
-                            JSONArray friendArray = response.getJSONObject().getJSONArray("data");
-                            Log.d("DEBUG", "size2: " + friendArray.length());
-
-                            for(int i=0; i<friendArray.length(); i++){
-                                Log.d("DEBUG", friendArray.getJSONObject(i).getString("name"));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-
-                    }
-                }
-        ).executeAsync();
     }
 
     @Override

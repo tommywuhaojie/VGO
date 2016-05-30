@@ -14,9 +14,11 @@ import android.widget.EditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.socket.client.Socket;
 import v_go.version10.ApiClasses.User;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.R;
+import v_go.version10.SocketIo.SocketIoHelper;
 
 public class LoginNew extends AppCompatActivity{
 
@@ -45,6 +47,10 @@ public class LoginNew extends AppCompatActivity{
          } catch (PackageManager.NameNotFoundException e) {
          } catch (NoSuchAlgorithmException e) {}
          **/
+
+        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+        Socket mSocket = socketHelper.getSocket();
+        mSocket.connect();
     }
 
     public void onLoginClicked(View view){

@@ -20,16 +20,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,7 +29,6 @@ import v_go.version10.ApiClasses.User;
 
 public class Login extends AppCompatActivity {
 
-    private CallbackManager mCallbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,65 +51,6 @@ public class Login extends AppCompatActivity {
         // change action bar title
         getSupportActionBar().setTitle("Sign In");
 
-        // Initialize Facebook SDK before setContentView(Layout ID)
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        mCallbackManager = CallbackManager.Factory.create();
-        setContentView(R.layout.activity_login);
-
-        /** --------------------------- Facebook Login ----------------------------- **/
-        LoginButton FBLoginButton = (LoginButton) findViewById(R.id.login_button);
-        FBLoginButton.setReadPermissions("user_friends");
-        FBLoginButton.setReadPermissions("public_profile");
-        FBLoginButton.setReadPermissions("email");
-
-        FBLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-
-                GraphRequest.newMeRequest(
-                        loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject json, GraphResponse response) {
-                                if (response.getError() != null) {
-                                    // handle error
-                                    Log.d("DEBUG", "FB Login Failed");
-                                } else {
-                                    Log.d("DEBUG", "FB Login Success");
-                                    Global.FB_LOGIN = true;
-                                    try {
-
-                                        String jsonresult = String.valueOf(json);
-                                        System.out.println("JSON Result"+jsonresult);
-
-                                        //String str_email = json.getString("email");
-                                        String str_id = json.getString("id");
-                                        String str_name = json.getString("name");
-
-                                        Intent intent = new Intent(Login.this, Main.class);
-                                        intent.putExtra("isFacebookLogin", true);
-                                        intent.putExtra("id", str_id);
-                                        intent.putExtra("name", str_name);
-
-                                        // if successful enter Main activity
-                                        startActivity(intent);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-
-                        }).executeAsync();
-            }
-
-            @Override
-            public void onCancel() {
-            }
-
-            @Override
-            public void onError(FacebookException e) {
-            }
-        });
 
         //AsyncTask-------------------------------------------------------------
         class LoginAsyncTask extends AsyncTask<Void, Void, String> {
@@ -299,11 +229,6 @@ public class Login extends AppCompatActivity {
         } else {
             return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

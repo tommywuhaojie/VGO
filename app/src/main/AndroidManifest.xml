@@ -18,7 +18,7 @@ package="v_go.version10">
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-    <application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name"
+    <application android:name=".SocketIo.SocketIoHelper" android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
