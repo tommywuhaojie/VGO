@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -55,19 +57,50 @@ public class TabC_1_new extends Fragment   {
     private Socket mSocket;
 
     private Boolean isConnected = true;
+    private int onAttachCounter = 0;
+
+    private FragmentActivity m_activity;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mAdapter = new MessageAdapter(context, mMessages);
+        if(onAttachCounter == 0) {
+            mAdapter = new MessageAdapter(context, mMessages);
+        }
+        onAttachCounter++;
+
+        m_activity = getActivity();
+
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+    }
+
+    public void turnOffAllSocketListeners(){
+        mSocket.off(Socket.EVENT_CONNECT, onConnect);
+        mSocket.off(Socket.EVENT_DISCONNECT, onDisconnect);
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off("chat message", onNewMessage);
+        mSocket.off("user joined", onUserJoined);
+        mSocket.off("user left", onUserLeft);
+        mSocket.off("typing", onTyping);
+        mSocket.off("stop typing", onStopTyping);
+    }
+    private void scrollToBottom() {
+        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
+        Log.d("DEBUG", "scroll to buttom");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        Random ran = new Random();
-        mUsername = "User#" + ran.nextInt(101);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.tab_c_1_new, container, false);
@@ -82,23 +115,43 @@ public class TabC_1_new extends Fragment   {
         ((Main) getActivity()).enableBackButton(false);
         setHasOptionsMenu(true);
 
-        // socket.io setup
-        mSocket = ((Main) getActivity()).getScoket();
-        mSocket.on(Socket.EVENT_CONNECT,onConnect);
-        mSocket.on(Socket.EVENT_DISCONNECT,onDisconnect);
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("chat message", onNewMessage);
-        mSocket.on("user joined", onUserJoined);
-        mSocket.on("user left", onUserLeft);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
+        // setup socket only once when attaching this fragment the first time
+        if(onAttachCounter == 1) {
+
+            // temp solution
+            Random ran = new Random();
+            mUsername = "AndroidClient #" + ran.nextInt(101) + ":";
+
+            // socket.io setup
+            mSocket = ((Main) getActivity()).getScoket();
+            mSocket.on(Socket.EVENT_CONNECT, onConnect);
+            mSocket.on(Socket.EVENT_DISCONNECT, onDisconnect);
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on("chat message", onNewMessage);
+            mSocket.on("user joined", onUserJoined);
+            mSocket.on("user left", onUserLeft);
+            mSocket.on("typing", onTyping);
+            mSocket.on("stop typing", onStopTyping);
+        }
 
         mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
         mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mMessagesView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
+        mInputMessageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollToBottom();
+                    }
+                }, 300);
+            }
+        });
         mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int id, KeyEvent event) {
@@ -113,7 +166,6 @@ public class TabC_1_new extends Fragment   {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (null == mUsername) return;
@@ -123,16 +175,13 @@ public class TabC_1_new extends Fragment   {
                     mTyping = true;
                     mSocket.emit("typing");
                 }
-
                 mTypingHandler.removeCallbacks(onTypingTimeout);
                 mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
             }
-
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
-
         ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,6 +191,12 @@ public class TabC_1_new extends Fragment   {
         });
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        scrollToBottom();
     }
 
     @Override
@@ -172,7 +227,7 @@ public class TabC_1_new extends Fragment   {
         addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
     }
 
-    private void addMessage(String username, String message) {
+    private void addMessage(String username, String message) {Log.d("DEBUG", "add message!!!!!!!!!!!!");
         mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
                 .username(username).message(message).build());
         mAdapter.notifyItemInserted(mMessages.size() - 1);
@@ -216,7 +271,7 @@ public class TabC_1_new extends Fragment   {
         //addMessage(mUsername, message);
 
         // perform the sending message attempt.
-        mSocket.emit("chat message",mUsername +" "+ message);
+        mSocket.emit("chat message", mUsername + " " + message);
     }
 
     /*
@@ -235,16 +290,11 @@ public class TabC_1_new extends Fragment   {
     }
     */
 
-    private void scrollToBottom() {
-        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
-
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            if(getActivity() == null) {
+            if(getActivity() == null)
                 return;
-            }
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -265,9 +315,8 @@ public class TabC_1_new extends Fragment   {
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            if(getActivity() == null) {
+            if(getActivity() == null)
                 return;
-            }
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -296,7 +345,7 @@ public class TabC_1_new extends Fragment   {
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            m_activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     /*
@@ -313,7 +362,7 @@ public class TabC_1_new extends Fragment   {
                     removeTyping(username);
                     */
                     // temp test solution
-                    String username = "testing";
+                    String username = "->";
                     String message = args[0].toString();
 
                     addMessage(username, message);

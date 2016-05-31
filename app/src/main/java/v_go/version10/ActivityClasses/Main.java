@@ -82,23 +82,29 @@ public class Main extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-
-        if(mSocket == null) {
-            SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-            mSocket = socketHelper.getSocket();
-        }
-        // connect to server when App resumes
-        mSocket.connect();
-
-        Log.d("DEBUG", "App Resume");
+        Log.d("DEBUG", "Main onResume");
     }
 
-    // This method is equivalent to calling Logout
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("DEBUG", "Main onPause");
+
+        // pause long polling
+        //stopService(new Intent(getBaseContext(), BackgroundService.class));
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // disconnect from server when Main activity is destroyed
+        Log.d("DEBUG", "Main onDestroy");
+
         if(mSocket != null) {
+            // turn off all socket listeners
+            if( !mStacks.get(Global.TAB_C).isEmpty()){
+                ((TabC_1_new)mStacks.get(Global.TAB_C).firstElement()).turnOffAllSocketListeners();
+            }
+            // disconnect from server when Main activity is destroyed
             mSocket.disconnect();
         }
 
@@ -112,31 +118,33 @@ public class Main extends AppCompatActivity{
                 }catch (Exception e){
                     Log.d("DEBUG", "something went wrong when attempting to logout");
                     e.printStackTrace();
-                }
-
-            }
-        });
+                }}});
         networkThread.start();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // pause long polling
-        //stopService(new Intent(getBaseContext(), BackgroundService.class));
-
-        Log.d("DEBUG", "App Pause");
     }
 
     public Socket getScoket(){
         return mSocket;
+    }
+    public void setTabHostVisibility(Boolean visible){
+        if(visible) {
+            mTabHost.getTabWidget().setVisibility(View.VISIBLE);
+        }else{
+            mTabHost.getTabWidget().setVisibility(View.GONE);
+        }
+
+    }
+    private void initializeSocketConnection(){
+        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+        mSocket = socketHelper.getSocket();
+        mSocket.connect();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initializeSocketConnection();
 
         // lists initialization
         notifStack = new Stack<>();
@@ -329,10 +337,10 @@ public class Main extends AppCompatActivity{
             }
             allow = false;
 
+            // allow to change tab before wait 0.2 second
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    // Actions to do after 0.3 seconds
                     allow = true;
                 }
             }, 200);
