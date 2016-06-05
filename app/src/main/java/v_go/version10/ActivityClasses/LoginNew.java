@@ -2,8 +2,10 @@ package v_go.version10.ActivityClasses;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -22,38 +24,46 @@ import v_go.version10.SocketIo.SocketIoHelper;
 
 public class LoginNew extends AppCompatActivity{
 
+    private EditText phone;
+    private EditText password;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_new);
 
-        EditText phone = (EditText)findViewById(R.id.phone);
-        EditText passcode = (EditText)findViewById(R.id.passcode);
+        phone = (EditText)findViewById(R.id.phone);
+        password = (EditText)findViewById(R.id.password);
 
         // set hint color match background
         phone.setHintTextColor(Color.parseColor("#50B9AC"));
-        passcode.setHintTextColor(Color.parseColor("#50B9AC"));
-
-        /** Programmatic Way to Get Hash Code **
-         try {
-         PackageInfo info = getPackageManager().getPackageInfo(
-         "v_go.version10",
-         PackageManager.GET_SIGNATURES);
-         for (Signature signature : info.signatures) {
-         MessageDigest md = MessageDigest.getInstance("SHA");
-         md.update(signature.toByteArray());
-         Log.d("DEBUG", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-         }
-         } catch (PackageManager.NameNotFoundException e) {
-         } catch (NoSuchAlgorithmException e) {}
-         **/
-
-        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-        Socket mSocket = socketHelper.getSocket();
-        mSocket.connect();
+        password.setHintTextColor(Color.parseColor("#50B9AC"));
     }
 
     public void onLoginClicked(View view){
+
+        boolean error = true;
+
+        if(phone.getText().toString().trim().length() == 0)
+        {
+            phone.setError("Empty Phone Number");
+            error = false;
+        }
+        if (!phone.getText().toString().matches("\\d+"))
+        {
+            phone.setError("Invalid Phone Number");
+            error = false;
+        }
+        if(password.getText().toString().trim().length() == 0)
+        {
+            password.setError("Empty Phone Number");
+            error = false;
+        }
+        if(!error){
+            return;
+        }
+
 
         final ProgressDialog pDialog = new ProgressDialog(this);
         pDialog.setCanceledOnTouchOutside(false);
@@ -61,16 +71,39 @@ public class LoginNew extends AppCompatActivity{
         pDialog.setMessage("Logging in...");
         pDialog.show();
 
+        final AlertDialog alertDialog = new AlertDialog.Builder(LoginNew.this).create();
+        alertDialog.setMessage("Incorrect phone number or password");
+
         // hardcode username + password login (to be removed when phone api is ready)
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if(User.Login("1165637488@qq.com", "123456").getString("code").contains("1")){
+                    if(User.Login(phone.getText().toString().trim(), password.getText().toString()).getString("code").equals("1"))
+                    {
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();
                     }
+                    else
+                    {
+                        pDialog.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                                        "OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            }
+                                        });
+                                alertDialog.show();
+
+                            }
+                        });
+                    }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
