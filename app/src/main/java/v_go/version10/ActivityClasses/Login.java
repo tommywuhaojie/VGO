@@ -164,6 +164,7 @@ public class Login extends AppCompatActivity {
 
         Button button = (Button)findViewById(R.id.loginButton);
 
+        assert button != null;
         button.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
