@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "v_go.version10"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -17,6 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     testOptions {
         unitTests.returnDefaultValues = true
     }
@@ -38,7 +39,10 @@ dependencies {
     compile ('io.socket:socket.io-client:0.7.0') {
         exclude group: 'org.json', module: 'json'
     }
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
+
     testCompile 'junit:junit:4.12'
     testCompile 'org.json:json:20140107'
+
     //compile 'junit:junit:4.12'
 }

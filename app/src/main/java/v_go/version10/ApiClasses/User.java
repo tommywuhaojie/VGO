@@ -1,14 +1,26 @@
 package v_go.version10.ApiClasses;
 
+
+import android.graphics.Bitmap;
+import android.util.Base64;
+import android.util.Log;
+
 import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 public class User {
 
@@ -21,6 +33,7 @@ public class User {
             url = new URL(ServerConstants.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
 
             connection.setUseCaches(false);
             connection.setDoInput(true);
@@ -73,6 +86,7 @@ public class User {
             url = new URL(ServerConstants.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -118,6 +132,7 @@ public class User {
             url = new URL(ServerConstants.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
+            connection.setConnectTimeout(10 * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -145,5 +160,59 @@ public class User {
             e.printStackTrace();
         }
         return jsonObject;
+    }
+
+    public static String UploadAvatar(Bitmap bitmap) {
+        String attachmentName = "avatar";
+        String attachmentFileName = ".jpg";
+        String crlf = "\r\n";
+        String twoHyphens = "--";
+        String boundary =  "*****";
+        HttpURLConnection httpUrlConnection = null;
+        String response = null;
+        URL url = null;
+        try {
+            url = new URL("http://192.168.1.73:8080/profile");
+            httpUrlConnection = (HttpURLConnection) url.openConnection();
+            httpUrlConnection.setUseCaches(false);
+            httpUrlConnection.setDoOutput(true);
+
+            httpUrlConnection.setRequestMethod("POST");
+            httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
+            httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
+            httpUrlConnection.setRequestProperty(
+                    "Content-Type", "multipart/form-data;boundary=" + boundary);
+            DataOutputStream request = new DataOutputStream(
+                    httpUrlConnection.getOutputStream());
+
+            request.writeBytes(twoHyphens + boundary + crlf);
+            request.writeBytes("Content-Disposition: form-data; name=\"" +
+                    attachmentName + "\";filename=\"" +
+                    attachmentFileName + "\"" + crlf);
+            request.writeBytes(crlf);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,bos);
+            byte[] pixels = bos.toByteArray();
+            request.write(pixels);
+            request.writeBytes(crlf);
+            request.writeBytes(twoHyphens + boundary + twoHyphens + crlf);
+            request.flush();
+            request.close();
+            InputStream responseStream = new BufferedInputStream(httpUrlConnection.getInputStream());
+            BufferedReader responseStreamReader = new BufferedReader(new InputStreamReader(responseStream));
+            String line = "";
+            StringBuilder stringBuilder = new StringBuilder();
+            while ((line = responseStreamReader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+            responseStreamReader.close();
+            httpUrlConnection.disconnect();
+            response = stringBuilder.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+        return response;
     }
 }

@@ -47,7 +47,8 @@
         android:layout_above="@+id/imageView8"
         android:layout_alignEnd="@+id/imageView7"
         android:layout_toEndOf="@+id/imageView11"
-        android:autoText="false" />
+        android:autoText="false"
+        android:layout_marginRight="10dp" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -63,7 +64,8 @@
         android:hint="PASSWORD"
         android:background="#00000000"
         android:textSize="14dp"
-        android:layout_above="@+id/imageView9" />
+        android:layout_above="@+id/imageView9"
+        android:layout_marginRight="10dp" />
 
     <ImageView
         android:layout_width="15dp"

@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ import java.util.Random;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.Main;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.InstantMessage.Message;
 import v_go.version10.InstantMessage.MessageAdapter;
 import v_go.version10.R;
@@ -197,6 +199,12 @@ public class TabC_1_new extends Fragment   {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         scrollToBottom();
+
+        if(Global.JUMP_TO_TABA) {
+            TabHost host = (TabHost) getActivity().findViewById(android.R.id.tabhost);
+            host.setCurrentTab(0);
+            Global.JUMP_TO_TABA = false;
+        }
     }
 
     @Override

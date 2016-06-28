@@ -19,6 +19,7 @@ public class Global {
     public static boolean IS_LOGED_IN = false;
     public static int LATEST_REQ_ID = 0;
     public static int DISPLAYED_NOTIF_NUM = 0;
+    public static boolean JUMP_TO_TABA = true;
 
 
     // RESET ALL NOTIFICATION TRACKING VAR
@@ -29,6 +30,7 @@ public class Global {
 
         TAB3_NOTIFICATION = false;
         IS_LOGED_IN = false;
+        JUMP_TO_TABA = true;
         LATEST_REQ_ID = 0;
         DISPLAYED_NOTIF_NUM = 0;
     }

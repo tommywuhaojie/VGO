@@ -177,6 +177,14 @@ public class Main extends AppCompatActivity{
         setFinishOnTouchOutside(false);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // initialize the chat first
+        //mTabHost.setCurrentTab(2);
+        //Log.d("DEBUG", "set current tab");
+    }
+
     // push new notification to stack
     private void pushToNotifStack(Intent intent){
         int req_id[] = intent.getIntArrayExtra("req_id_array");
@@ -278,7 +286,6 @@ public class Main extends AppCompatActivity{
         /* Setup your tab icons and content views.. Nothing special in this..*/
         // tab1
         TabHost.TabSpec spec    =   mTabHost.newTabSpec(Global.TAB_A);
-        mTabHost.setCurrentTab(0);
         spec.setContent(new TabHost.TabContentFactory() {
             public View createTabContent(String tag) {
                 return findViewById(R.id.realtabcontent);
@@ -317,13 +324,14 @@ public class Main extends AppCompatActivity{
         spec.setIndicator("", ContextCompat.getDrawable(this, TAB_RESOURCE_ID_UNSELECTED[3]));
         mTabHost.addTab(spec);
 
-        mTabHost.getTabWidget().setCurrentTab(0);
-
         // make the icon fill the entire tab
         for (int i = 0; i < mTabHost.getTabWidget().getChildCount(); i++)
         {
             mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
         }
+
+        // initialize socket for chat message first
+        mTabHost.setCurrentTab(2);
     }
 
 
@@ -331,6 +339,10 @@ public class Main extends AppCompatActivity{
     TabHost.OnTabChangeListener listener    =   new TabHost.OnTabChangeListener() {
         public void onTabChanged(String tabId) {
 
+            Log.d("DEBUG", "TAB CHANGE!!!" + tabId);
+
+            // get rid of the switch tab delay for now
+            /*
             if(!allow){
                 mTabHost.setCurrentTabByTag(mCurrentTab);
                 return;
@@ -344,6 +356,7 @@ public class Main extends AppCompatActivity{
                     allow = true;
                 }
             }, 200);
+            */
 
             /*Set current tab..*/
             mCurrentTab = tabId;

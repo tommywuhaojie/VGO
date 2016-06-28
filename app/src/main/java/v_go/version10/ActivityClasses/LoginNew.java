@@ -46,19 +46,18 @@ public class LoginNew extends AppCompatActivity{
 
         boolean error = true;
 
-        if(phone.getText().toString().trim().length() == 0)
-        {
+        if(phone.getText().toString().trim().length() == 0) {
             phone.setError("Empty Phone Number");
             error = false;
         }
-        if (!phone.getText().toString().matches("\\d+"))
+        else if (!phone.getText().toString().matches("\\d+"))
         {
             phone.setError("Invalid Phone Number");
             error = false;
         }
-        if(password.getText().toString().trim().length() == 0)
+        if(password.getText().toString().length() == 0)
         {
-            password.setError("Empty Phone Number");
+            password.setError("Empty Password");
             error = false;
         }
         if(!error){
@@ -73,9 +72,7 @@ public class LoginNew extends AppCompatActivity{
         pDialog.show();
 
         final AlertDialog alertDialog = new AlertDialog.Builder(LoginNew.this).create();
-        alertDialog.setMessage("Incorrect phone number or password");
 
-        // hardcode username + password login (to be removed when phone api is ready)
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -93,6 +90,7 @@ public class LoginNew extends AppCompatActivity{
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                alertDialog.setMessage("Incorrect phone number or password.");
                                 alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
                                         "OK", new DialogInterface.OnClickListener() {
                                             @Override
@@ -101,12 +99,26 @@ public class LoginNew extends AppCompatActivity{
                                             }
                                         });
                                 alertDialog.show();
-
                             }
                         });
                     }
 
-                } catch (JSONException e) {
+                } catch (Exception e) {
+                    pDialog.dismiss();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            alertDialog.setMessage("Unable to reach server.\n" + "Please check your network connection.");
+                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                                    "OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
+                    });
                     e.printStackTrace();
                 }
             }
