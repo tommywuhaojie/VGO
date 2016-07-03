@@ -137,4 +137,8 @@
     </string>
     <string name="title_activity_maps">Map</string>
 
+    <plurals name="message_participants">
+        <item quantity="other">there are %d participants</item>
+    </plurals>
+
 </resources>

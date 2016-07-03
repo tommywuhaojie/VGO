@@ -84,8 +84,6 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
     private TextView dateTextView;
     private TextView timeTextView;
-    private final String DEFAULT_DATE_BOX_TEXT = "Pick a Date";
-    private final String DEFAULT_TIME_BOX_TEXT = "Pick a Time";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -101,6 +99,16 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
         dateTextView = (TextView) view.findViewById(R.id.date);
         timeTextView = (TextView) view.findViewById(R.id.time);
+
+        // initial default datetime as now
+        Calendar cal = Calendar.getInstance();
+        int yr = cal.get(Calendar.YEAR);
+        int mon = cal.get(Calendar.MONTH);
+        int dy = cal.get(Calendar.DAY_OF_MONTH);
+        int hr = cal.get(Calendar.HOUR);
+        int min = cal.get(Calendar.MINUTE);
+        dateTextView.setText(customDateFormat(yr, mon, dy));
+        timeTextView.setText(customTimeFormat(hr, min));
 
         // init map
         mMap = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -187,11 +195,6 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         findRideButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(dateTextView.getText().toString().contains(DEFAULT_DATE_BOX_TEXT) || timeTextView.getText().toString().contains(DEFAULT_TIME_BOX_TEXT)){
-                    Toast.makeText(getActivity(), "You haven't picked the date or time.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
                 String dateTime = year + "-" +
                         (month + 1 < 10 ? "0" + (month + 1) : month + 1) + "-" +
@@ -290,7 +293,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
         datePickerDialog.setSelectableDays(daysArray);
         datePickerDialog.setOnCancelListener(this);
-        datePickerDialog.show( getActivity().getFragmentManager(), "DatePickerDialog" );
+        datePickerDialog.show(getActivity().getFragmentManager(), "DatePickerDialog");
     }
 
     private void initDateTimeData(){
@@ -320,7 +323,40 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         month = i1;
         day = i2;
 
-        String date = "";
+        String dateStr = customDateFormat(year, month, day);
+        if(dateStr != null){
+            dateTextView.setText(dateStr);
+        }
+    }
+
+    private void openSelectTimePickerDialog(){
+        Calendar tDefault = Calendar.getInstance();
+
+        tDefault.set(year, month, day, hour, minute);
+
+        TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(
+                this,
+                tDefault.get(Calendar.HOUR_OF_DAY),
+                tDefault.get(Calendar.MINUTE),
+                true
+        );
+        timePickerDialog.setOnCancelListener(this);
+        timePickerDialog.show(getActivity().getFragmentManager(), "timePickerDialog");
+        timePickerDialog.setTitle("Pickup Time");
+        timePickerDialog.setThemeDark(true);
+    }
+
+
+    @Override
+    public void onTimeSet(RadialPickerLayout radialPickerLayout, int i, int i1)
+    {
+        hour = i;
+        minute = i1;
+        timeTextView.setText(customTimeFormat(hour, minute));
+    }
+
+    private String customDateFormat(int year, int mouth, int day){
+        String date;
         try {
             DateFormat fromFormat = new SimpleDateFormat("yyyy-MM-dd");
             fromFormat.setLenient(false);
@@ -345,36 +381,14 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        dateTextView.setText(date);
+        return date;
     }
 
-    private void openSelectTimePickerDialog(){
-        Calendar tDefault = Calendar.getInstance();
-        if(!timeTextView.getText().toString().contains(DEFAULT_TIME_BOX_TEXT)) {
-            tDefault.set(year, month, day, hour, minute);
-        }
-        TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(
-                this,
-                tDefault.get(Calendar.HOUR_OF_DAY),
-                tDefault.get(Calendar.MINUTE),
-                true
-        );
-        timePickerDialog.setOnCancelListener(this);
-        timePickerDialog.show(getActivity().getFragmentManager(), "timePickerDialog");
-        timePickerDialog.setTitle("Pickup Time");
-        timePickerDialog.setThemeDark(true);
-    }
-
-
-    @Override
-    public void onTimeSet(RadialPickerLayout radialPickerLayout, int i, int i1)
-    {
-        hour = i;
-        minute = i1;
-
-        String hourStr = "";
-        String am_or_pm = "";
+    private String customTimeFormat(int hour, int minute){
+        String hourStr;
+        String am_or_pm;
         if(hour >= 12) {
             if(hour != 12) {
                 hourStr = (hour - 12) + "";
@@ -390,8 +404,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
             }
             am_or_pm = "am";
         }
-        String timeStr = hourStr + ":" + (minute < 10 ? "0" + minute : minute) + am_or_pm;
-        timeTextView.setText(timeStr);
+        return hourStr + ":" + (minute < 10 ? "0" + minute : minute) + am_or_pm;
     }
 
     @Override
