@@ -144,6 +144,9 @@ public class Main extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // start socket io background service
+        startService(new Intent(this, BackgroundService.class));
+
         initializeSocketConnection();
 
         // lists initialization

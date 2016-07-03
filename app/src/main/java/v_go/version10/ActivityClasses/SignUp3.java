@@ -1,5 +1,6 @@
 package v_go.version10.ActivityClasses;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -24,13 +25,18 @@ import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileDescriptor;
+import java.net.URL;
+
 import v_go.version10.ApiClasses.User;
 import v_go.version10.R;
 
 public class SignUp3 extends AppCompatActivity {
 
+    private ImageView imgView;
     private static final int GALLERY_RESULT = 100;
     private static final int CAMERA_RESULT = 200;
     private Uri target_uri;
@@ -39,6 +45,8 @@ public class SignUp3 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_3);
+
+        imgView = (ImageView) findViewById(R.id.avator);
     }
 
     public void onGalleryClicked(View view){
@@ -69,14 +77,21 @@ public class SignUp3 extends AppCompatActivity {
                     Bitmap bitmap = getBitmapFromUri(target_uri);
                     final int RESIZE = 256;
                     bitmap = Bitmap.createScaledBitmap(bitmap, RESIZE, RESIZE, false);
-                    User.UploadAvatar(bitmap);
+                    JSONObject jsonObject = User.UploadAvatar(bitmap);
+                    System.out.println(jsonObject.toString());
 
                 } catch (Exception e) {
-                    System.err.println(e);
+                    e.printStackTrace();
                 }
             }
         });
         networkThread.start();
+        try {
+            networkThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        this.finish();
     }
 
     @Override
@@ -108,10 +123,8 @@ public class SignUp3 extends AppCompatActivity {
                     if (resultCode == RESULT_OK) {
                         target_uri = result.getUri();
 
-                        ImageView imgView = (ImageView) findViewById(R.id.avator);
                         Bitmap bitmap = getBitmapFromUri(target_uri);
-
-                        bitmap = getCircularBitmap(bitmap);
+                        bitmap = User.getCircularBitmap(bitmap);
                         imgView.setImageBitmap(bitmap);
 
                         // on cropping error
@@ -142,31 +155,5 @@ public class SignUp3 extends AppCompatActivity {
 
     public void onBackArrowClicked(View view){
         onBackPressed();
-    }
-
-    public static Bitmap getCircularBitmap(Bitmap bitmap) {
-        Bitmap output;
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            output = Bitmap.createBitmap(bitmap.getHeight(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        } else {
-            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getWidth(), Bitmap.Config.ARGB_8888);
-        }
-        Canvas canvas = new Canvas(output);
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        float r = 0;
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            r = bitmap.getHeight() / 2;
-        } else {
-            r = bitmap.getWidth() / 2;
-        }
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawCircle(r, r, r, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
     }
 }
