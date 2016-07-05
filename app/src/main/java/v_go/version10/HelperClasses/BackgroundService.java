@@ -12,7 +12,9 @@ import org.json.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.socket.client.Socket;
 import v_go.version10.ApiClasses.Request;
+import v_go.version10.SocketIo.SocketIoHelper;
 
 /** Background thread for long polling repeated by Timer **/
 /** DON'T update any UI from this class !!! **/
@@ -33,6 +35,10 @@ public class BackgroundService extends Service {
         super.onCreate();
 
         final LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        //SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+        //Socket mSocket = socketHelper.getSocket();
+        //mSocket.connect();
     }
 
     @Override

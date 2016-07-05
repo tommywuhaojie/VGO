@@ -196,18 +196,6 @@ public class TabC_1_new extends Fragment   {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        scrollToBottom();
-
-        if(Global.JUMP_TO_TABA) {
-            TabHost host = (TabHost) getActivity().findViewById(android.R.id.tabhost);
-            host.setCurrentTab(0);
-            Global.JUMP_TO_TABA = false;
-        }
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.menu_main, menu);

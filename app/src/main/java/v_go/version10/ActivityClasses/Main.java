@@ -50,6 +50,7 @@ import v_go.version10.FragmentClasses.TabC_2;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.Notification;
+import v_go.version10.HelperClasses.UserCache;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.SocketIo.SocketIoHelper;
@@ -78,6 +79,13 @@ public class Main extends AppCompatActivity{
 
     // socket.io
     private Socket mSocket;
+
+    // cached object to store current user's infomation
+    private UserCache userCache = new UserCache();
+
+    public UserCache getUserCache(){
+        return userCache;
+    }
 
     @Override
     protected void onResume() {
@@ -334,7 +342,7 @@ public class Main extends AppCompatActivity{
         }
 
         // initialize socket for chat message first
-        mTabHost.setCurrentTab(2);
+        mTabHost.setCurrentTab(0);
     }
 
 
