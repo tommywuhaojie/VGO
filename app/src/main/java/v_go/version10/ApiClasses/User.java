@@ -3,39 +3,116 @@ package v_go.version10.ApiClasses;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.util.Base64;
-import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 
 public class User {
+
+    public static JSONObject SendVerificationCode(String phone_number){
+        String json_text = null;
+        String data="phone_number="+phone_number;
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(ServerUrls.SEND_CODE_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    public static JSONObject VerifyCode(String phone_number, String code){
+        String json_text = null;
+        String data="phone_number="+phone_number+"&code="+code;
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(ServerUrls.VERIFY_CODE_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
 
     public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
         String json_text = null;
         String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerConstants.REGISTER_URL);
+            URL url = new URL(ServerUrls.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(10 * 1000);
@@ -61,6 +138,7 @@ public class User {
             json_text = response.toString();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }finally {
             if (connection!=null){
                 connection.disconnect();
@@ -87,7 +165,7 @@ public class User {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            URL url = new URL(ServerConstants.LOGIN_URL);
+            URL url = new URL(ServerUrls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(10 * 1000);
@@ -110,6 +188,7 @@ public class User {
             json_text = response.toString().trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         } finally {
             if (connection != null){
                 connection.disconnect();
@@ -132,7 +211,7 @@ public class User {
         String json_text = null;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerConstants.LOGOUT_URL);
+            URL url = new URL(ServerUrls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setConnectTimeout(10 * 1000);
@@ -151,6 +230,7 @@ public class User {
             json_text = response.toString().trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         } finally {
             if (connection != null){
                 connection.disconnect();
@@ -175,7 +255,7 @@ public class User {
         String response;
         String json_text = null;
         try {
-            URL url = new URL(ServerConstants.UPLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.UPLOAD_AVATAR_URL);
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
@@ -214,6 +294,7 @@ public class User {
             json_text = response.trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         JSONObject jsonObject = null;
         try {
@@ -230,7 +311,7 @@ public class User {
 
         try {
             String data = "user_id=" + user_id;
-            URL url = new URL(ServerConstants.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(10 * 1000);
@@ -253,7 +334,7 @@ public class User {
     public static Bitmap DownloadAvatar(){
         InputStream inputStream;
         try {
-            URL url = new URL(ServerConstants.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             inputStream = url.openConnection().getInputStream();
         }catch (Exception e){
             e.printStackTrace();

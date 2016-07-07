@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.CountDownTimer;
 
 import java.util.Random;
 
@@ -69,5 +70,18 @@ public class Global {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
+    }
+
+    public static int CAN_SEND_CODE_AGAIN_IN_SECOND = 0;
+    public static void startSendCodeTimer(int sec){
+
+        new CountDownTimer(sec * 1000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                CAN_SEND_CODE_AGAIN_IN_SECOND = ((int)(millisUntilFinished / 1000));
+            }
+            public void onFinish() {
+                CAN_SEND_CODE_AGAIN_IN_SECOND = 0;
+            }
+        }.start();
     }
 }
