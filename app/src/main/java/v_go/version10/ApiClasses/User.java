@@ -106,8 +106,21 @@ public class User {
         }
         return jsonObject;
     }
+    /* INPUT:
+            * 'objectid'
+            * 'email'
+            * 'password'
+            * 'first_name'
+            * 'last_name'
+            * 'sex'          (1 for male 0 for female)
+            * 'driver_license'
+            * 'plate_number'
+            * 'colour'
+            * 'car_model' format example(2016-HONDA-SEDAN)
+    * */
 
-    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
+    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name,
+                                      String sex, String driver_license, String plate_number, String car_model, String colour){
         String json_text = null;
         String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
         HttpURLConnection connection = null;

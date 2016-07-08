@@ -159,6 +159,8 @@
         android:layout_below="@+id/imageView8"
         android:layout_alignStart="@+id/imageView8"
         android:layout_marginTop="10dp"
-        android:textColor="#35332E" />
+        android:textColor="#35332E"
+        android:layout_alignEnd="@+id/imageView8"
+        android:gravity="center" />
 
 </RelativeLayout>

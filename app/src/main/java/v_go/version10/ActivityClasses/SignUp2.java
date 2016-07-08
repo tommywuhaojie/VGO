@@ -8,10 +8,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.text.SpannableString;
+import android.text.method.PasswordTransformationMethod;
 import android.text.style.UnderlineSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,8 +23,12 @@ import v_go.version10.R;
 public class SignUp2 extends AppCompatActivity {
 
     private final String GREY_HINT = "#808080";
-    private int userSex = 0; // 0 -> female 1 -> male
+    private int userSex = -1; // 0 -> female 1 -> male -1 -> not selected
     private int userTypeToggle = 0; // 0 -> rider 1 -> driver
+
+    private Button showOrHideButton;
+    private EditText passwordET;
+    private boolean showPwd = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,15 +38,17 @@ public class SignUp2 extends AppCompatActivity {
         EditText editText1 = (EditText)findViewById(R.id.first_name);
         EditText editText2 = (EditText)findViewById(R.id.last_name);
         EditText editText3 = (EditText)findViewById(R.id.email_address);
-        EditText editText4 = (EditText)findViewById(R.id.password);
+        passwordET = (EditText)findViewById(R.id.password);
         EditText editText5 = (EditText)findViewById(R.id.license_plate);
         EditText editText6 = (EditText)findViewById(R.id.driver_license);
+
+        showOrHideButton = (Button) findViewById(R.id.show_hide);
 
         // set hint color match background
         editText1.setHintTextColor(Color.parseColor(GREY_HINT));
         editText2.setHintTextColor(Color.parseColor(GREY_HINT));
         editText3.setHintTextColor(Color.parseColor(GREY_HINT));
-        editText4.setHintTextColor(Color.parseColor(GREY_HINT));
+        passwordET.setHintTextColor(Color.parseColor(GREY_HINT));
         editText5.setHintTextColor(Color.parseColor(GREY_HINT));
         editText6.setHintTextColor(Color.parseColor(GREY_HINT));
 
@@ -94,17 +102,29 @@ public class SignUp2 extends AppCompatActivity {
     }
 
     public void onFemaleChecked(View view){
-        if(userSex == 1){
+        if(userSex == 1 || userSex == -1){
             userSex = 0;
             ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.female_check);
             ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.male_uncheck);
         }
     }
     public void onMaleChecked(View view){
-        if(userSex == 0){
+        if(userSex == 0 || userSex == -1){
             userSex = 1;
             ((ImageView)findViewById(R.id.radio_female)).setImageResource(R.drawable.female_uncheck);
             ((ImageView)findViewById(R.id.radio_male)).setImageResource(R.drawable.male_check);
+        }
+    }
+
+    public void onShowOrHidePwdClicked(View view){
+        if(showPwd){
+            passwordET.setTransformationMethod(new PasswordTransformationMethod());
+            showOrHideButton.setText("SHOW");
+            showPwd = false;
+        }else{
+            passwordET.setTransformationMethod(null);
+            showOrHideButton.setText("HIDE");
+            showPwd = true;
         }
     }
 

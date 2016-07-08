@@ -78,7 +78,7 @@ public class SignUp1 extends AppCompatActivity {
                                     Log.d("DEBUG", "SendCodeApi: " + jsonObject.getString("msg"));
 
                                     if (jsonObject.getString("code").matches("1")) {
-                                        Toast.makeText(SignUp1.this, "Code is sent successfully", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(SignUp1.this, "Code is sent successfully.", Toast.LENGTH_LONG).show();
 
                                         // set 60 seconds count down
                                         Global.CAN_SEND_CODE_AGAIN_IN_SECOND = 60;
@@ -93,14 +93,14 @@ public class SignUp1 extends AppCompatActivity {
                                         }.start(); // start timer only when code is sent out successfully
 
                                     } else {
-                                        Toast.makeText(SignUp1.this, "Failed to send code, please ensure your phone number is correct", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(SignUp1.this, "Failed to send code, please ensure your phone number is correct.", Toast.LENGTH_LONG).show();
                                     }
                                 }catch (Exception e){
                                     e.printStackTrace();
-                                    Toast.makeText(SignUp1.this, "Server error occurs", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(SignUp1.this, "Server error occurs.", Toast.LENGTH_LONG).show();
                                 }
                             }else{
-                                Toast.makeText(SignUp1.this, "Unable to reach server", Toast.LENGTH_LONG).show();
+                                Toast.makeText(SignUp1.this, "Unable to reach server.", Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -136,8 +136,6 @@ public class SignUp1 extends AppCompatActivity {
         pDialog.setMessage("Verifying...");
         pDialog.show();
 
-        final AlertDialog alertDialog = new AlertDialog.Builder(SignUp1.this).create();
-
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -153,64 +151,28 @@ public class SignUp1 extends AppCompatActivity {
                                     Intent intent = new Intent(SignUp1.this, SignUp2.class);
                                     startActivity(intent);
                                     pDialog.dismiss();
+
                                 }else if(jsonObject.getString("code").matches("-1")){
                                     pDialog.dismiss();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            alertDialog.setMessage("The verification code doesn't seem right.");
-                                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                                                    "OK", new DialogInterface.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                    showDialogWithMessage("Incorrect verification code.");
 
-                                                        }
-                                                    });
-                                            alertDialog.show();
-                                        }
-                                    });
                                 }else if(jsonObject.getString("code").matches("-2")){
                                     pDialog.dismiss();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            alertDialog.setMessage("If you want to sign up with this phone number, please send code for this phone number first");
-                                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                                                    "OK", new DialogInterface.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                    showDialogWithMessage("If you want to sign up with this phone number, please send code for this phone number first.");
 
-                                                        }
-                                                    });
-                                            alertDialog.show();
-                                        }
-                                    });
-                                }else{
+                                }else {
                                     pDialog.dismiss();
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            alertDialog.setMessage("Invalid phone number or verification code");
-                                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                                                    "OK", new DialogInterface.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                                                        }
-                                                    });
-                                            alertDialog.show();
-                                        }
-                                    });
+                                    showDialogWithMessage("Invalid phone number or verification code.");
                                 }
 
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 pDialog.dismiss();
-                                Toast.makeText(SignUp1.this, "Server error occurs", Toast.LENGTH_LONG).show();
+                                Toast.makeText(SignUp1.this, "Server error occurs.", Toast.LENGTH_LONG).show();
                             }
                         }else{
                             pDialog.dismiss();
-                            Toast.makeText(SignUp1.this, "Unable to reach server", Toast.LENGTH_LONG).show();
+                            Toast.makeText(SignUp1.this, "Unable to reach server.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -218,6 +180,25 @@ public class SignUp1 extends AppCompatActivity {
         });
         networkThread.start();
     }
+
+    public void showDialogWithMessage(final String message){
+        final AlertDialog alertDialog = new AlertDialog.Builder(SignUp1.this).create();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.setMessage(message);
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                        "OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
+    }
+
     public void onBackArrowClicked(View view){
         onBackPressed();
     }
