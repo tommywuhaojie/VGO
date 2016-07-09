@@ -3,6 +3,7 @@ package v_go.version10.ApiClasses;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 
 import org.json.JSONObject;
 
@@ -135,11 +136,19 @@ public class User {
 
 
     public static JSONObject Register(String object_id,String email,String password, String first_name, String last_name,
-                                      int sex, String driver_license, String plate_number, String car_model, String colour){
+                                      int sex, String driver_license, String plate_number, String car_model, String colour, int isDriver){
         String json_text = null;
-        String data="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
-                +last_name+"&sex="+sex+"&driver_license="+driver_license+"&plate_number="+plate_number+"&car_model="+car_model
-                +"&colour="+colour;
+
+        String data;
+        if(isDriver == 0){
+            data ="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
+                    +last_name+"&sex="+sex;
+        }else{
+            data ="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
+                    +last_name+"&sex="+sex+"&driver_license="+driver_license+"&plate_number="+plate_number+"&car_model="+car_model
+                    +"&colour="+colour;
+        }
+
         HttpURLConnection connection = null;
         try {
             URL url = new URL(ServerUrls.REGISTER_URL);
@@ -371,5 +380,18 @@ public class User {
             return null;
         }
         return BitmapFactory.decodeStream(inputStream);
+    }
+
+    public static boolean isValidEmail(CharSequence target) {
+        if (TextUtils.isEmpty(target)) {
+            return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+        }
+    }
+
+    public static boolean isValidPassword(String pwd){
+        String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}";
+        return pwd.matches(pattern);
     }
 }

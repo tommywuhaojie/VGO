@@ -63,12 +63,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/imageView10"
         android:src="@drawable/send_code_button"
-        android:layout_alignTop="@+id/imageView7"
-        android:layout_alignEnd="@+id/imageView7"
-        android:layout_marginTop="12dp"
         android:layout_marginRight="5dp"
         android:clickable="true"
-        android:onClick="onSendCodeClicked" />
+        android:onClick="onSendCodeClicked"
+        android:layout_above="@+id/imageView8"
+        android:layout_alignTop="@+id/imageView7"
+        android:layout_alignEnd="@+id/imageView7" />
 
     <EditText
         android:layout_width="wrap_content"

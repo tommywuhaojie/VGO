@@ -2,10 +2,12 @@ package v_go.version10.ActivityClasses;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.text.SpannableString;
@@ -32,6 +34,7 @@ public class SignUp2 extends AppCompatActivity {
     private final String GREY_HINT = "#808080";
     private int userSex = -1; // 0 -> female 1 -> male -1 -> not selected
     private int userTypeToggle = 0; // 0 -> rider 1 -> driver
+    private int infoWindow = 0; // 0-> BasicInfoWindow 1 -> DriveInfoWindow
 
     private Button showOrHideButton;
 
@@ -88,6 +91,10 @@ public class SignUp2 extends AppCompatActivity {
 
     public void onSubmitClicked(View view){
 
+        if(!userInfoValidation()){
+            return;
+        }
+
         final ProgressDialog pDialog = new ProgressDialog(this);
         pDialog.setCanceledOnTouchOutside(false);
         pDialog.setCancelable(false);
@@ -99,10 +106,12 @@ public class SignUp2 extends AppCompatActivity {
             public void run() {
 
                 String object_id = getIntent().getStringExtra("object_id");
+                String phone_number = getIntent().getStringExtra("phone_number");
                 String email = emailET.getText().toString().trim();
                 String password = passwordET.getText().toString().trim();
                 String first_name = firstNameET.getText().toString().trim();
                 String last_name = lastNameET.getText().toString().trim();
+
                 String driver_license = driveLicenseET.getText().toString().trim();
                 String plate_number = licensePlateET.getText().toString().trim();
                 String model = yearSp.getSelectedItem().toString().trim()
@@ -110,36 +119,68 @@ public class SignUp2 extends AppCompatActivity {
                         + "-" + typeSp.getSelectedItem().toString().trim();
                 String color = colorSp.getSelectedItem().toString().trim();
 
-                final JSONObject jsonObject = User.Register(object_id, email, password, first_name, last_name,
-                        userSex, driver_license, plate_number, model, color);
+                final JSONObject registerResult = User.Register(object_id, email, password, first_name, last_name,
+                        userSex, driver_license, plate_number, model, color, userTypeToggle);
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if(jsonObject.getString("code").matches("1")){
-                                Intent intent = new Intent(SignUp2.this, SignUp3.class);
-                                startActivity(intent);
-                                pDialog.dismiss();
-                            }else{
-                                System.out.println("error msg: " + jsonObject.getString("msg"));
-                            }
-                        }catch (Exception e){
-                            e.printStackTrace();
+                try {
+                    if(registerResult.getString("code").matches("1")){
+                        // login right after register succeeded
+                        JSONObject loginResult = User.Login(phone_number, password);
+                        if(loginResult.getString("code").matches("1")){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Intent intent = new Intent(SignUp2.this, SignUp3.class);
+                                    startActivity(intent);
+                                    pDialog.dismiss();
+                                }
+                            });
+                        }else{
+                            throw new Exception("login after register failed");
+                        }
+                    }else{
+                        showDialogWithMessage(registerResult.getString("msg"));
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             pDialog.dismiss();
                             Toast.makeText(SignUp2.this, "Server error occurs.", Toast.LENGTH_LONG).show();
                         }
-                    }
-                });
+                    });
+                }
+
             }
         });
         networkThread.start();
+    }
+
+    public void showDialogWithMessage(final String message){
+        final AlertDialog alertDialog = new AlertDialog.Builder(SignUp2.this).create();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.setMessage(message);
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                        "OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
     }
 
     public void switchToDriverInfo(View view){
 
         if(userTypeToggle == 0)
             return;
+
+        infoWindow = 1;
 
         findViewById(R.id.rider_infobox).setVisibility(View.GONE);
         findViewById(R.id.tab_switch_white).setVisibility(View.GONE);
@@ -150,6 +191,9 @@ public class SignUp2 extends AppCompatActivity {
     }
 
     public void switchToRiderInfo(View view){
+
+        infoWindow = 0;
+
         findViewById(R.id.driver_infobox).setVisibility(View.GONE);
         findViewById(R.id.tab_switch_black).setVisibility(View.GONE);
         findViewById(R.id.toggle_2nd).setVisibility(View.GONE);
@@ -212,6 +256,90 @@ public class SignUp2 extends AppCompatActivity {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    public boolean userInfoValidation(){
+        // basic user info validation
+        boolean userInfoOk = true;
+
+        if(firstNameET.getText().toString().trim().equals("")){
+            firstNameET.setError("First Name cannot be empty");
+            userInfoOk = false;
+        }
+
+        if(lastNameET.getText().toString().trim().equals("")){
+            lastNameET.setError("Last Name cannot be empty");
+            userInfoOk = false;
+        }
+
+        if(!User.isValidEmail(emailET.getText().toString().trim())){
+            emailET.setError("Invalid Email Address");
+            userInfoOk = false;
+        }
+
+        if(!User.isValidPassword(passwordET.getText().toString())){
+            passwordET.setError("Password must contain:\n" +
+                    "at least 8 characters\n" +
+                    "at least 1 number\n" +
+                    "at least 1 lower case letter\n" +
+                    "at least 1 upper case letter\n" +
+                    "no whitespace");
+            userInfoOk = false;
+        }
+
+        if(userSex == -1){
+            Toast.makeText(this, "Please choose a gender.", Toast.LENGTH_LONG).show();
+            userInfoOk = false;
+        }
+
+        // driver info validation
+        boolean driverInfoOk = true;
+
+        if(userTypeToggle == 1){
+
+            if(licensePlateET.getText().toString().trim().equals("")){
+                licensePlateET.setError("License Plate Number cannot be empty");
+                driverInfoOk = false;
+            }
+
+            if(driveLicenseET.getText().toString().trim().equals("")){
+                driveLicenseET.setError("Driver License cannot be empty");
+                driverInfoOk = false;
+            }
+
+            if(brandSp.getSelectedItem().toString().trim().equals("Brand")) {
+                TextView errorText = (TextView) brandSp.getSelectedView();
+                errorText.setError("Please choose a Brand");
+                driverInfoOk = false;
+            }
+
+            if(typeSp.getSelectedItem().toString().trim().equals("Type")) {
+                TextView errorText = (TextView) typeSp.getSelectedView();
+                errorText.setError("Please choose a Type");
+                driverInfoOk = false;
+            }
+
+            if(yearSp.getSelectedItem().toString().trim().equals("Year")) {
+                TextView errorText = (TextView) yearSp.getSelectedView();
+                errorText.setError("Please choose a Year");
+                driverInfoOk = false;
+            }
+
+            if(colorSp.getSelectedItem().toString().trim().equals("Color")) {
+                TextView errorText = (TextView) colorSp.getSelectedView();
+                errorText.setError("Please choose a Color");
+                driverInfoOk = false;
+            }
+        }
+
+        if(userTypeToggle == 1 && infoWindow == 0 && userInfoOk && !driverInfoOk){
+            switchToDriverInfo(findViewById(R.id.tab_switch_white));
+        }
+        if(infoWindow == 1 && !userInfoOk && driverInfoOk){
+            switchToRiderInfo(findViewById(R.id.tab_switch_black));
+        }
+
+        return (userInfoOk && driverInfoOk);
     }
 
 }

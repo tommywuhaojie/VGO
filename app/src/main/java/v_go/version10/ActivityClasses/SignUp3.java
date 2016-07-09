@@ -1,6 +1,7 @@
 package v_go.version10.ActivityClasses;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -46,6 +47,7 @@ public class SignUp3 extends AppCompatActivity {
     private static final int CAMERA_RESULT = 200;
     private Uri target_uri;
     private Uri uriFromCamera;
+    private boolean isPicturePicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +103,17 @@ public class SignUp3 extends AppCompatActivity {
 
     public void onSetClicked(View view){
 
+        if(!isPicturePicked){
+            Toast.makeText(this, "Please pick a picture", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Uploading...");
+        pDialog.show();
+
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -113,22 +126,32 @@ public class SignUp3 extends AppCompatActivity {
                     System.out.println(jsonObject.toString());
                     Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
 
+                    Intent intent = new Intent(SignUp3.this, Main.class);
+                    startActivity(intent);
+                    pDialog.dismiss();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
         networkThread.start();
-        try {
-            networkThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         // temporary use the same ui(signUp3) for update avatar
         if(getIntent().getBooleanExtra("isUpdate", false)){
             this.finish();
         }
+
+    }
+
+    public void onSkipClicked(View view){
+        // temporary use the same ui(signUp3) for update avatar
+        if(getIntent().getBooleanExtra("isUpdate", false)){
+            this.finish();
+        }
+
+        Intent intent = new Intent(this, Main.class);
+        startActivity(intent);
     }
 
     @Override
@@ -164,16 +187,16 @@ public class SignUp3 extends AppCompatActivity {
                         bitmap = Global.getCircularBitmap(bitmap);
                         imgView.setImageBitmap(bitmap);
 
+                        isPicturePicked = true;
+
                         // on cropping error
                     } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                         Exception error = result.getError();
                         Toast.makeText(this, error.getMessage(),
                                 Toast.LENGTH_LONG).show();
                     }
-            }else{
-                Toast.makeText(this, "You didn't pick a picture",
-                        Toast.LENGTH_LONG).show();
             }
+
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
             e.printStackTrace();

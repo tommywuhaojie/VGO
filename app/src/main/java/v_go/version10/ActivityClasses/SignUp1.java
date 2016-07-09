@@ -114,7 +114,7 @@ public class SignUp1 extends AppCompatActivity {
 
         boolean ok = true;
 
-        String phoneNum = phone.getText().toString().trim();
+        final String phoneNum = phone.getText().toString().trim();
         if(!phoneNum.matches("[0-9]+") || phoneNum.length() != 10 || phoneNum.equals("")){
             phone.setError("Invalid phone number");
             ok = false;
@@ -151,6 +151,7 @@ public class SignUp1 extends AppCompatActivity {
                                     String object_id = jsonObject.getString("object_id");
                                     Intent intent = new Intent(SignUp1.this, SignUp2.class);
                                     intent.putExtra("object_id", object_id);
+                                    intent.putExtra("phone_number", phoneNum);
                                     startActivity(intent);
                                     pDialog.dismiss();
 
