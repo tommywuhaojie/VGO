@@ -129,6 +129,12 @@ public class LoginNew extends AppCompatActivity{
     public void onBackArrowClicked(View view){
         onBackPressed();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (getCurrentFocus() != null) {

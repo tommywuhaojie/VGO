@@ -1,6 +1,7 @@
 package v_go.version10.ActivityClasses;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -29,9 +31,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import v_go.version10.ApiClasses.User;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 public class SignUp3 extends AppCompatActivity {
@@ -40,6 +46,8 @@ public class SignUp3 extends AppCompatActivity {
     private static final int GALLERY_RESULT = 100;
     private static final int CAMERA_RESULT = 200;
     private Uri target_uri;
+    private Uri uriFromCamera;
+    private boolean isPicturePicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +69,50 @@ public class SignUp3 extends AppCompatActivity {
     }
 
     public void onCameraClicked(View view){
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CAMERA_RESULT);
+        try {
+            uriFromCamera = Uri.fromFile(getOutputMediaFile());
+            System.out.println("uri" + uriFromCamera.toString());
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriFromCamera);
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, CAMERA_RESULT);
+            }
+        }catch (Exception e){
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
         }
+    }
+    private static File getOutputMediaFile(){
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "VGO_IMAGE");
+
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                System.out.println("fail to create directory");
+                return null;
+            }
+        }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "AVATAR_"+ timeStamp + ".jpg");
+        return mediaFile;
     }
 
     public void onSetClicked(View view){
+
+        if(!isPicturePicked){
+            Toast.makeText(this, "Please pick a picture", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Uploading...");
+        pDialog.show();
 
         Thread networkThread = new Thread(new Runnable() {
             @Override
@@ -79,6 +124,11 @@ public class SignUp3 extends AppCompatActivity {
                     bitmap = Bitmap.createScaledBitmap(bitmap, RESIZE, RESIZE, false);
                     JSONObject jsonObject = User.UploadAvatar(bitmap);
                     System.out.println(jsonObject.toString());
+                    Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
+
+                    Intent intent = new Intent(SignUp3.this, Main.class);
+                    startActivity(intent);
+                    pDialog.dismiss();
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -86,12 +136,22 @@ public class SignUp3 extends AppCompatActivity {
             }
         });
         networkThread.start();
-        try {
-            networkThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+        // temporary use the same ui(signUp3) for update avatar
+        if(getIntent().getBooleanExtra("isUpdate", false)){
+            this.finish();
         }
-        this.finish();
+
+    }
+
+    public void onSkipClicked(View view){
+        // temporary use the same ui(signUp3) for update avatar
+        if(getIntent().getBooleanExtra("isUpdate", false)){
+            this.finish();
+        }
+
+        Intent intent = new Intent(this, Main.class);
+        startActivity(intent);
     }
 
     @Override
@@ -100,11 +160,11 @@ public class SignUp3 extends AppCompatActivity {
         try {
 
             // from Camera
-            if (requestCode == CAMERA_RESULT && resultCode == RESULT_OK
-                    && null != data) {
+            if (requestCode == CAMERA_RESULT && resultCode == RESULT_OK) {
 
                 // start cropping activity
-                CropImage.activity(data.getData())
+                System.out.println("intent not null");
+                CropImage.activity(uriFromCamera)
                         .setFixAspectRatio(true)
                         .start(this);
 
@@ -124,8 +184,10 @@ public class SignUp3 extends AppCompatActivity {
                         target_uri = result.getUri();
 
                         Bitmap bitmap = getBitmapFromUri(target_uri);
-                        bitmap = User.getCircularBitmap(bitmap);
+                        bitmap = Global.getCircularBitmap(bitmap);
                         imgView.setImageBitmap(bitmap);
+
+                        isPicturePicked = true;
 
                         // on cropping error
                     } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
@@ -133,13 +195,10 @@ public class SignUp3 extends AppCompatActivity {
                         Toast.makeText(this, error.getMessage(),
                                 Toast.LENGTH_LONG).show();
                     }
-            }else{
-                Toast.makeText(this, "You didn't pick a picture",
-                        Toast.LENGTH_LONG).show();
             }
+
         } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT)
-                    .show();
+            Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }

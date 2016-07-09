@@ -27,29 +27,34 @@ import v_go.version10.R;
 public class TabD_1 extends Fragment   {
 
     private View view;
+    private ImageView avatarImageView;
 
     @Override
     public void onResume() {
         super.onResume();
 
-        // download the avatar of current user
-        Thread networkThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Bitmap bitmap = User.DownloadAvatar();
-                if(bitmap != null){
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Bitmap circleBitmap = User.getCircularBitmap(bitmap);
-                            ImageView imageView = (ImageView) view.findViewById(R.id.avatar);
-                            imageView.setImageBitmap(circleBitmap);
-                        }
-                    });
+        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
+            Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
+            // download the avatar of current user
+            Thread networkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final Bitmap bitmap = User.DownloadAvatar();
+                    if (bitmap != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
+                                avatarImageView.setImageBitmap(circleBitmap);
+                                // cache avatar bitmap for quick access
+                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
+                            }
+                        });
+                    }
                 }
-            }
-        });
-        networkThread.start();
+            });
+            networkThread.start();
+        }
     }
 
     @Override
@@ -64,24 +69,34 @@ public class TabD_1 extends Fragment   {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         //window.setStatusBarColor(Color.BLACK);
 
-        // download the avatar of current user
-        Thread networkThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Bitmap bitmap = User.DownloadAvatar();
-                if(bitmap != null){
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Bitmap circleBitmap = User.getCircularBitmap(bitmap);
-                            ImageView imageView = (ImageView) view.findViewById(R.id.avatar);
-                            imageView.setImageBitmap(circleBitmap);
-                        }
-                    });
+        avatarImageView = (ImageView) view.findViewById(R.id.avatar);
+
+        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
+            Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
+
+            // download the avatar of current user
+            Thread networkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final Bitmap bitmap = User.DownloadAvatar();
+                    if (bitmap != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
+                                avatarImageView.setImageBitmap(circleBitmap);
+                                // cache avatar bitmap for quick access
+                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
+                            }
+                        });
+                    }
                 }
-            }
-        });
-        networkThread.start();
+            });
+            networkThread.start();
+        }else{
+            // fetch cached avatar bitmap if it's already there
+            avatarImageView.setImageBitmap(((Main)getActivity()).getUserCache().getAvatar());
+        }
 
         // change avatar
         Button changeAvatar = (Button) view.findViewById(R.id.change_avatar);
@@ -89,6 +104,7 @@ public class TabD_1 extends Fragment   {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), SignUp3.class);
+                intent.putExtra("isUpdate",true);
                 startActivity(intent);
             }
         });

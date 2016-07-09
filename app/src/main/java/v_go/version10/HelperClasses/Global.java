@@ -1,6 +1,12 @@
 package v_go.version10.HelperClasses;
 
-import android.util.Log;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.os.CountDownTimer;
 
 import java.util.Random;
 
@@ -17,12 +23,13 @@ public class Global {
 
     public static boolean TAB3_NOTIFICATION = false;
     public static boolean IS_LOGED_IN = false;
+    public static boolean NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
     public static int LATEST_REQ_ID = 0;
     public static int DISPLAYED_NOTIF_NUM = 0;
-    public static boolean JUMP_TO_TABA = true;
 
 
-    // RESET ALL NOTIFICATION TRACKING VAR
+
+    // Reset all when user is logged out
     public static void resetAll(){
         DATE_TIME = "";
         SELECTED_TYPE = 0;
@@ -30,12 +37,51 @@ public class Global {
 
         TAB3_NOTIFICATION = false;
         IS_LOGED_IN = false;
-        JUMP_TO_TABA = true;
+        NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
         LATEST_REQ_ID = 0;
         DISPLAYED_NOTIF_NUM = 0;
     }
     // GET RANDOM INT
     public static int getRandomInt(int min, int max) {
         return new Random().nextInt((max - min) + 1) + min;
+    }
+
+    public static Bitmap getCircularBitmap(Bitmap bitmap) {
+        Bitmap output;
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            output = Bitmap.createBitmap(bitmap.getHeight(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        } else {
+            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getWidth(), Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(output);
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        float r = 0;
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            r = bitmap.getHeight() / 2;
+        } else {
+            r = bitmap.getWidth() / 2;
+        }
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
+
+    public static int CAN_SEND_CODE_AGAIN_IN_SECOND = 0;
+    public static void startSendCodeTimer(int sec){
+
+        new CountDownTimer(sec * 1000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                CAN_SEND_CODE_AGAIN_IN_SECOND = ((int)(millisUntilFinished / 1000));
+            }
+            public void onFinish() {
+                CAN_SEND_CODE_AGAIN_IN_SECOND = 0;
+            }
+        }.start();
     }
 }

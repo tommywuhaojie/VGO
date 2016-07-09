@@ -105,8 +105,8 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         int yr = cal.get(Calendar.YEAR);
         int mon = cal.get(Calendar.MONTH);
         int dy = cal.get(Calendar.DAY_OF_MONTH);
-        int hr = cal.get(Calendar.HOUR);
-        int min = cal.get(Calendar.MINUTE);
+        int hr = cal.get(Calendar.HOUR); hour = hr;
+        int min = cal.get(Calendar.MINUTE); minute = min;
         dateTextView.setText(customDateFormat(yr, mon, dy));
         timeTextView.setText(customTimeFormat(hr, min));
 

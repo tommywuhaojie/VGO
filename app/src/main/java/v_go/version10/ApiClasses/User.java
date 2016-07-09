@@ -3,39 +3,155 @@ package v_go.version10.ApiClasses;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.util.Base64;
-import android.util.Log;
+import android.text.TextUtils;
 
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 
 public class User {
 
-    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name ){
+    public static JSONObject SendVerificationCode(String phone_number){
         String json_text = null;
-        String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
+        String data="phone_number="+phone_number;
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(ServerUrls.SEND_CODE_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    public static JSONObject VerifyCode(String phone_number, String code){
+        String json_text = null;
+        String data="phone_number="+phone_number+"&code="+code;
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(ServerUrls.VERIFY_CODE_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+    /* INPUT:
+    *
+    * 'objectid'
+    * 'email'
+    * 'password'
+    * 'first_name'
+    * 'last_name'
+    * 'sex'          (1 for male 0 for female)
+    * 'driver_license'
+    * 'plate_number'
+    * 'colour'
+    * 'car_model' format example(2016-HONDA-SEDAN)
+    *
+    * OUTPUT: JSON Object that contains
+    *  'code' : respond code
+    *  'msg' : respond message
+    *
+    *  1 -> Successfully registered
+    * -2 -> Invalid objectid
+    * -3 -> User have not yet vertify
+    * -4 -> Password is too weak
+    * -5 -> Invalid email format
+    * -6 -> Invalid sex field (only 0/1 allow)
+    * -300 -> Invalid first name format
+    * -301 -> Invalid last name format
+ */
+
+
+    public static JSONObject Register(String object_id,String email,String password, String first_name, String last_name,
+                                      int sex, String driver_license, String plate_number, String car_model, String colour, int isDriver){
+        String json_text = null;
+
+        String data;
+        if(isDriver == 0){
+            data ="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
+                    +last_name+"&sex="+sex;
+        }else{
+            data ="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
+                    +last_name+"&sex="+sex+"&driver_license="+driver_license+"&plate_number="+plate_number+"&car_model="+car_model
+                    +"&colour="+colour;
+        }
+
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerConstants.REGISTER_URL);
+            URL url = new URL(ServerUrls.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(10 * 1000);
@@ -61,6 +177,7 @@ public class User {
             json_text = response.toString();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }finally {
             if (connection!=null){
                 connection.disconnect();
@@ -87,7 +204,7 @@ public class User {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            URL url = new URL(ServerConstants.LOGIN_URL);
+            URL url = new URL(ServerUrls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(10 * 1000);
@@ -110,6 +227,7 @@ public class User {
             json_text = response.toString().trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         } finally {
             if (connection != null){
                 connection.disconnect();
@@ -132,7 +250,7 @@ public class User {
         String json_text = null;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerConstants.LOGOUT_URL);
+            URL url = new URL(ServerUrls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setConnectTimeout(10 * 1000);
@@ -151,6 +269,7 @@ public class User {
             json_text = response.toString().trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         } finally {
             if (connection != null){
                 connection.disconnect();
@@ -175,7 +294,7 @@ public class User {
         String response;
         String json_text = null;
         try {
-            URL url = new URL(ServerConstants.UPLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.UPLOAD_AVATAR_URL);
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
@@ -214,6 +333,7 @@ public class User {
             json_text = response.trim();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         JSONObject jsonObject = null;
         try {
@@ -230,7 +350,7 @@ public class User {
 
         try {
             String data = "user_id=" + user_id;
-            URL url = new URL(ServerConstants.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(10 * 1000);
@@ -253,7 +373,7 @@ public class User {
     public static Bitmap DownloadAvatar(){
         InputStream inputStream;
         try {
-            URL url = new URL(ServerConstants.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             inputStream = url.openConnection().getInputStream();
         }catch (Exception e){
             e.printStackTrace();
@@ -262,29 +382,16 @@ public class User {
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public static Bitmap getCircularBitmap(Bitmap bitmap) {
-        Bitmap output;
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            output = Bitmap.createBitmap(bitmap.getHeight(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    public static boolean isValidEmail(CharSequence target) {
+        if (TextUtils.isEmpty(target)) {
+            return false;
         } else {
-            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getWidth(), Bitmap.Config.ARGB_8888);
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
-        Canvas canvas = new Canvas(output);
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        float r = 0;
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            r = bitmap.getHeight() / 2;
-        } else {
-            r = bitmap.getWidth() / 2;
-        }
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawCircle(r, r, r, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
+    }
+
+    public static boolean isValidPassword(String pwd){
+        String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}";
+        return pwd.matches(pattern);
     }
 }
