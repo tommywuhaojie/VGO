@@ -1,5 +1,6 @@
 package v_go.version10.ActivityClasses;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,14 +11,20 @@ import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import v_go.version10.ApiClasses.User;
 import v_go.version10.R;
 
 public class SignUp2 extends AppCompatActivity {
@@ -27,7 +34,19 @@ public class SignUp2 extends AppCompatActivity {
     private int userTypeToggle = 0; // 0 -> rider 1 -> driver
 
     private Button showOrHideButton;
+
+    private EditText firstNameET;
+    private EditText lastNameET;
+    private EditText emailET;
     private EditText passwordET;
+    private EditText licensePlateET;
+    private EditText driveLicenseET;
+
+    private Spinner brandSp;
+    private Spinner typeSp;
+    private Spinner yearSp;
+    private Spinner colorSp;
+
     private boolean showPwd = false;
 
     @Override
@@ -35,31 +54,86 @@ public class SignUp2 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_2);
 
-        EditText editText1 = (EditText)findViewById(R.id.first_name);
-        EditText editText2 = (EditText)findViewById(R.id.last_name);
-        EditText editText3 = (EditText)findViewById(R.id.email_address);
+        firstNameET = (EditText)findViewById(R.id.first_name);
+        lastNameET = (EditText)findViewById(R.id.last_name);
+        emailET = (EditText)findViewById(R.id.email_address);
         passwordET = (EditText)findViewById(R.id.password);
-        EditText editText5 = (EditText)findViewById(R.id.license_plate);
-        EditText editText6 = (EditText)findViewById(R.id.driver_license);
+        licensePlateET = (EditText)findViewById(R.id.license_plate);
+        driveLicenseET = (EditText)findViewById(R.id.driver_license);
 
         showOrHideButton = (Button) findViewById(R.id.show_hide);
 
+        brandSp = (Spinner)findViewById(R.id.brand);
+        typeSp = (Spinner)findViewById(R.id.type);
+        yearSp = (Spinner)findViewById(R.id.year);
+        colorSp = (Spinner)findViewById(R.id.color);
+
         // set hint color match background
-        editText1.setHintTextColor(Color.parseColor(GREY_HINT));
-        editText2.setHintTextColor(Color.parseColor(GREY_HINT));
-        editText3.setHintTextColor(Color.parseColor(GREY_HINT));
+        firstNameET.setHintTextColor(Color.parseColor(GREY_HINT));
+        lastNameET.setHintTextColor(Color.parseColor(GREY_HINT));
+        emailET.setHintTextColor(Color.parseColor(GREY_HINT));
         passwordET.setHintTextColor(Color.parseColor(GREY_HINT));
-        editText5.setHintTextColor(Color.parseColor(GREY_HINT));
-        editText6.setHintTextColor(Color.parseColor(GREY_HINT));
+        licensePlateET.setHintTextColor(Color.parseColor(GREY_HINT));
+        driveLicenseET.setHintTextColor(Color.parseColor(GREY_HINT));
 
         // set license plate to all cap
-        editText5.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
+        licensePlateET.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
 
         // underline vehicle info text
         TextView textView = (TextView)findViewById(R.id.vehicle_info_text);
         SpannableString content = new SpannableString("VEHICLE INFORMATION");
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         textView.setText(content);
+    }
+
+    public void onSubmitClicked(View view){
+
+        final ProgressDialog pDialog = new ProgressDialog(this);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Submitting...");
+        pDialog.show();
+
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                String object_id = getIntent().getStringExtra("object_id");
+                String email = emailET.getText().toString().trim();
+                String password = passwordET.getText().toString().trim();
+                String first_name = firstNameET.getText().toString().trim();
+                String last_name = lastNameET.getText().toString().trim();
+                String driver_license = driveLicenseET.getText().toString().trim();
+                String plate_number = licensePlateET.getText().toString().trim();
+                String model = yearSp.getSelectedItem().toString().trim()
+                        + "-" + brandSp.getSelectedItem().toString().trim()
+                        + "-" + typeSp.getSelectedItem().toString().trim();
+                String color = colorSp.getSelectedItem().toString().trim();
+
+                final JSONObject jsonObject = User.Register(object_id, email, password, first_name, last_name,
+                        userSex, driver_license, plate_number, model, color);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if(jsonObject.getString("code").matches("1")){
+                                Intent intent = new Intent(SignUp2.this, SignUp3.class);
+                                startActivity(intent);
+                                pDialog.dismiss();
+                            }else{
+                                System.out.println("error msg: " + jsonObject.getString("msg"));
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            pDialog.dismiss();
+                            Toast.makeText(SignUp2.this, "Server error occurs.", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+        });
+        networkThread.start();
     }
 
     public void switchToDriverInfo(View view){
@@ -126,11 +200,6 @@ public class SignUp2 extends AppCompatActivity {
             showOrHideButton.setText("HIDE");
             showPwd = true;
         }
-    }
-
-    public void onSubmitClicked(View view){
-        Intent intent = new Intent(this, SignUp3.class);
-        startActivity(intent);
     }
 
     public void onBackArrowClicked(View view){

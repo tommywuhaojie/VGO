@@ -291,7 +291,7 @@
             android:layout_width="220dp"
             android:layout_height="33dp"
             android:textSize="14sp"
-            android:id="@+id/imageView22"
+            android:id="@+id/brand"
             android:background="@drawable/dropdown_driverinfo"
             android:layout_below="@+id/imageView15"
             android:layout_alignStart="@+id/imageView15"
@@ -303,9 +303,9 @@
         <Spinner
             android:layout_width="220dp"
             android:layout_height="33dp"
-            android:id="@+id/imageView23"
+            android:id="@+id/type"
             android:background="@drawable/dropdown_driverinfo"
-            android:layout_below="@+id/imageView22"
+            android:layout_below="@+id/brand"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
             android:entries="@array/type" />
@@ -313,9 +313,9 @@
         <Spinner
             android:layout_width="220dp"
             android:layout_height="33dp"
-            android:id="@+id/imageView24"
+            android:id="@+id/year"
             android:background="@drawable/dropdown_driverinfo"
-            android:layout_below="@+id/imageView23"
+            android:layout_below="@+id/type"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
             android:entries="@array/year"/>
@@ -323,9 +323,9 @@
         <Spinner
             android:layout_width="220dp"
             android:layout_height="33dp"
-            android:id="@+id/imageView25"
+            android:id="@+id/color"
             android:background="@drawable/dropdown_driverinfo"
-            android:layout_below="@+id/imageView24"
+            android:layout_below="@+id/year"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
             android:entries="@array/color"/>

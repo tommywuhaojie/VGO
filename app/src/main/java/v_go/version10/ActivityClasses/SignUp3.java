@@ -124,7 +124,11 @@ public class SignUp3 extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        this.finish();
+
+        // temporary use the same ui(signUp3) for update avatar
+        if(getIntent().getBooleanExtra("isUpdate", false)){
+            this.finish();
+        }
     }
 
     @Override

@@ -107,22 +107,39 @@ public class User {
         return jsonObject;
     }
     /* INPUT:
-            * 'objectid'
-            * 'email'
-            * 'password'
-            * 'first_name'
-            * 'last_name'
-            * 'sex'          (1 for male 0 for female)
-            * 'driver_license'
-            * 'plate_number'
-            * 'colour'
-            * 'car_model' format example(2016-HONDA-SEDAN)
-    * */
+    *
+    * 'objectid'
+    * 'email'
+    * 'password'
+    * 'first_name'
+    * 'last_name'
+    * 'sex'          (1 for male 0 for female)
+    * 'driver_license'
+    * 'plate_number'
+    * 'colour'
+    * 'car_model' format example(2016-HONDA-SEDAN)
+    *
+    * OUTPUT: JSON Object that contains
+    *  'code' : respond code
+    *  'msg' : respond message
+    *
+    *  1 -> Successfully registered
+    * -2 -> Invalid objectid
+    * -3 -> User have not yet vertify
+    * -4 -> Password is too weak
+    * -5 -> Invalid email format
+    * -6 -> Invalid sex field (only 0/1 allow)
+    * -300 -> Invalid first name format
+    * -301 -> Invalid last name format
+ */
 
-    public static JSONObject Register(String phone_number,String email,String password, String first_name, String last_name,
-                                      String sex, String driver_license, String plate_number, String car_model, String colour){
+
+    public static JSONObject Register(String object_id,String email,String password, String first_name, String last_name,
+                                      int sex, String driver_license, String plate_number, String car_model, String colour){
         String json_text = null;
-        String data="email="+email+"&password="+password+"&first_name="+first_name+"&last_name="+last_name+"&phone_number="+phone_number;
+        String data="objectid="+object_id+"&email="+email+"&password="+password+"&first_name="+first_name+"&last_name="
+                +last_name+"&sex="+sex+"&driver_license="+driver_license+"&plate_number="+plate_number+"&car_model="+car_model
+                +"&colour="+colour;
         HttpURLConnection connection = null;
         try {
             URL url = new URL(ServerUrls.REGISTER_URL);

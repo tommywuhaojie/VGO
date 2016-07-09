@@ -148,7 +148,9 @@ public class SignUp1 extends AppCompatActivity {
                                 Log.d("DEBUG", "VerifyCodeApi: " + jsonObject.getString("msg"));
 
                                 if(jsonObject.getString("code").matches("1")) {
+                                    String object_id = jsonObject.getString("object_id");
                                     Intent intent = new Intent(SignUp1.this, SignUp2.class);
+                                    intent.putExtra("object_id", object_id);
                                     startActivity(intent);
                                     pDialog.dismiss();
 
@@ -158,7 +160,7 @@ public class SignUp1 extends AppCompatActivity {
 
                                 }else if(jsonObject.getString("code").matches("-2")){
                                     pDialog.dismiss();
-                                    showDialogWithMessage("If you want to sign up with this phone number, please send code for this phone number first.");
+                                    showDialogWithMessage("Please send code for this phone number first.");
 
                                 }else {
                                     pDialog.dismiss();
