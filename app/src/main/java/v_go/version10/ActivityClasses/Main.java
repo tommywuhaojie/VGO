@@ -109,9 +109,9 @@ public class Main extends AppCompatActivity{
 
         if(mSocket != null) {
             // turn off all socket listeners
-            if( !mStacks.get(Global.TAB_C).isEmpty()){
-                ((TabC_1_new)mStacks.get(Global.TAB_C).firstElement()).turnOffAllSocketListeners();
-            }
+            //if( !mStacks.get(Global.TAB_C).isEmpty()){
+            //    ((TabC_1_new)mStacks.get(Global.TAB_C).firstElement()).turnOffAllSocketListeners();
+            //}
             // disconnect from server when Main activity is destroyed
             mSocket.disconnect();
         }
@@ -196,90 +196,6 @@ public class Main extends AppCompatActivity{
         //Log.d("DEBUG", "set current tab");
     }
 
-    // push new notification to stack
-    private void pushToNotifStack(Intent intent){
-        int req_id[] = intent.getIntArrayExtra("req_id_array");
-        int trip_id[] = intent.getIntArrayExtra("trip_id_array");
-        int type[] = intent.getIntArrayExtra("notif_type_array");
-        int rec_flag[] = intent.getIntArrayExtra("receive_flag_array");
-        String start_loc[] = intent.getStringArrayExtra("start_loc_array");
-        String end_loc[] = intent.getStringArrayExtra("end_loc_array");
-        String name[] = intent.getStringArrayExtra("sender_name_array");
-
-        for(int i=req_id.length-1; i>=0; i--){
-            notifStack.push(new Notification(req_id[i], trip_id[i], type[i], rec_flag[i],
-                                             start_loc[i], end_loc[i], name[i]));
-        }
-    }
-    // fetch the request list from server again
-    public void refreshNotifStack(){
-
-        // clear the stack
-        notifStack.clear();
-        // fetch the list again
-       Thread networkThread = new Thread(new Runnable() {
-          @Override
-           public void run() {
-                final String NUM_OF_NOTIF_RECEIVED_ALREADY = "1000";
-                Request request = new Request();
-                JSONArray jsonArray = request.RequestList(NUM_OF_NOTIF_RECEIVED_ALREADY);
-
-                try {
-                    for (int j = jsonArray.length() - 1; j >= 0; j--) {
-                        int type = -1;
-                        // notification type and results
-                        if (jsonArray.getJSONObject(j).has("accept") && jsonArray.getJSONObject(j).getInt("accept") != 2) {
-                            int result = jsonArray.getJSONObject(j).getInt("accept");
-                            // denied
-                            if (result == 0) {
-                                type = 2;
-                                // accepted
-                            } else if (result == 1) {
-                                type = 3;
-                                // pending
-                            } else if (result == 2) {
-                                type = 4;
-                            }
-                        } else if (jsonArray.getJSONObject(j).has("reg_as")) {
-                            type = jsonArray.getJSONObject(j).getInt("reg_as");
-                        }
-
-                        // handle type of -1
-                        if(type == -1)
-                            throw new Exception("notif type return -1");
-
-                        notifStack.push(new Notification(
-                                        jsonArray.getJSONObject(j).getInt("request_id"),
-                                        jsonArray.getJSONObject(j).getInt("trip_id"),
-                                        type,
-                                        jsonArray.getJSONObject(j).getInt("received_flag"),
-                                        jsonArray.getJSONObject(j).getString("start_location"),
-                                        jsonArray.getJSONObject(j).getString("end_location"),
-                                        jsonArray.getJSONObject(j).getString("name"))
-                        );
-                    }
-
-                    // when finish loading
-                    ((TabC_2)getCurrentFragment()).setupAdapter();
-
-                    Log.d("DEBUG", "Notif list refresh! # of notif: "+ notifStack.size());
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Log.d("DEBUG", "EXCEPTION!");
-                }
-
-            }
-        });
-       networkThread.start();
-        /*
-       try {
-           networkThread.join();
-       } catch (InterruptedException e) {
-            e.printStackTrace();
-       }
-       */
-
-    }
     public Stack<Notification> getNotifStack(){
         return notifStack;
     }

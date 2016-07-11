@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context="v_go.version10.FragmentClasses.TabC_1_new">
+    <item
+        android:id="@+id/add"
+        android:icon="@drawable/add_contact"
+        android:title="Add"
+        app:showAsAction="ifRoom"/>
+</menu>

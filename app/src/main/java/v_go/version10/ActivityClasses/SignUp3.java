@@ -126,6 +126,12 @@ public class SignUp3 extends AppCompatActivity {
                     System.out.println(jsonObject.toString());
                     Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
 
+                    // temporary use the same ui(signUp3) for update avatar
+                    if(getIntent().getBooleanExtra("isUpdate", false)){
+                        SignUp3.this.finish();
+                        return;
+                    }
+
                     Intent intent = new Intent(SignUp3.this, Main.class);
                     startActivity(intent);
                     pDialog.dismiss();
@@ -137,17 +143,13 @@ public class SignUp3 extends AppCompatActivity {
         });
         networkThread.start();
 
-        // temporary use the same ui(signUp3) for update avatar
-        if(getIntent().getBooleanExtra("isUpdate", false)){
-            this.finish();
-        }
-
     }
 
     public void onSkipClicked(View view){
         // temporary use the same ui(signUp3) for update avatar
         if(getIntent().getBooleanExtra("isUpdate", false)){
             this.finish();
+            return;
         }
 
         Intent intent = new Intent(this, Main.class);

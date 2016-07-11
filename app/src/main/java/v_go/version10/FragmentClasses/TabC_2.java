@@ -122,6 +122,7 @@ public class TabC_2 extends Fragment   {
     }
 
     /** setup adapter here to avoid lagging during changing view **/
+    /*
     @Override
     public void onResume() {
         super.onResume();
@@ -139,6 +140,7 @@ public class TabC_2 extends Fragment   {
         });
         thread.start();
     }
+    */
 
     /** setup the notification listview **/
     public void setupAdapter() {
