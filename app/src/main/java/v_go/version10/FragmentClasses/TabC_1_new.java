@@ -1,5 +1,7 @@
 package v_go.version10.FragmentClasses;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -14,9 +16,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +29,8 @@ import java.util.List;
 import java.util.Stack;
 
 import v_go.version10.ActivityClasses.Main;
-import v_go.version10.HelperClasses.Global;
+import v_go.version10.ApiClasses.User;
+import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.MySimpleAdapter;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.R;
@@ -34,8 +40,6 @@ public class TabC_1_new extends Fragment {
     private View view;
     private SimpleAdapter adapter;
     private ListView contactListView;
-    private Stack<Notification> notifStack;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,8 +76,9 @@ public class TabC_1_new extends Fragment {
                 // disable tab when loading notification
                 ((Main) getActivity()).getTabWidget().setEnabled(false);
 
-                setupAdapter();
-                contactListView.setAdapter(adapter);
+                //setupAdapter();
+                //contactListView.setAdapter(adapter);
+                Toast.makeText(getActivity(), "Everything is up to date.", Toast.LENGTH_SHORT).show();
                 // enable tab
                 ((Main) getActivity()).getTabWidget().setEnabled(true);
 
@@ -84,7 +89,7 @@ public class TabC_1_new extends Fragment {
                     public void run() {
                         swipeRefreshLayout.setRefreshing(false);
                     }
-                }, 1000);
+                }, 2000);
             }
         });
         // refresh only at the top of the ListView mechanism
@@ -108,52 +113,22 @@ public class TabC_1_new extends Fragment {
     }
 
     /** setup the notification listview **/
-    public void setupAdapter() {
-        String[] from = new String[]{"name", "message"};
+    public void setupAdapter(String first_name_last_name) {
+        String[] from = new String[]{"first_name_last_name", "last_message"};
         int[] to = new int[]{R.id.firstLine, R.id.secondLine};
         List<HashMap<String, String>> fillMaps = new ArrayList<HashMap<String, String>>();
 
-        // refresh the notif stack
-        //((Main)getActivity()).refreshNotifStack();
-        // get the notif stack from main
-        notifStack = ((Main)getActivity()).getNotifStack();
+        HashMap<String, String> map = new HashMap<String, String>();
 
-        // make a clone copy of the notif tack
-        @SuppressWarnings("unchecked")
-        Stack<Notification> notifStackCopy = ((Stack<Notification>)notifStack.clone());
+        map.put("first_name_last_name", first_name_last_name);
+        map.put("last_message","dummy");
 
-        int size = notifStack.size();
-        if(size == 0){
-            Toast.makeText(getActivity(), "You don't have any notification.", Toast.LENGTH_LONG).show();
-        }else{
-            for(int i=0; i<size; i++) {
+        fillMaps.add(map);
 
-                HashMap<String, String> map = new HashMap<String, String>();
+        adapter = new ContactListAdapter(getActivity(), fillMaps, R.layout.contact_row, from, to);
 
-                Notification notif = notifStackCopy.pop();
-                map.put("name", notif.getFirstName());
-
-                /** determine notification type and result **/
-                map.put("message","dummy");
-
-                fillMaps.add(map);
-            }
-            adapter = new MySimpleAdapter(getActivity(), fillMaps, R.layout.notification_row, from, to);
-        }
-
-        // run on ui thread
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                setupListView();
-            }
-        });
-    }
-
-    private void setupListView(){
-        // setAdapter for listview
         contactListView.setAdapter(adapter);
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -167,9 +142,65 @@ public class TabC_1_new extends Fragment {
 
         int id = item.getItemId();
         if (id == R.id.add) {
-            Toast.makeText(getContext(), "Adding", Toast.LENGTH_LONG).show();
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(getContext());
+            View promptsView = li.inflate(R.layout.add_contact_dialog, null);
+            final EditText phoneET = (EditText)promptsView.findViewById(R.id.add_contact_phone_number);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Add",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+
+                                    addToContactList(phoneET.getText().toString());
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            // show it
+            alertDialog.show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addToContactList(final String phone_number){
+
+        final String REQUEST_BY_PHONE_NUMBER = "phone_number";
+
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                final JSONObject result = User.GetUserInfo(phone_number, REQUEST_BY_PHONE_NUMBER);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(result.getString("code").matches("1")){
+                                setupAdapter(result.getString("first_name") + " " + result.getString("last_name"));
+                            }else if(result.getString("code").matches("-1")) {
+                                Toast.makeText(getContext(), "User is not found.", Toast.LENGTH_SHORT).show();
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            Toast.makeText(getContext(), "Server error occurs.", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+        });
+        networkThread.start();
     }
 
 }

@@ -192,6 +192,83 @@ public class User {
         return jsonObject;
     }
 
+    /* PATH: host_url:8080/account/getUserInfo
+     *
+     * INPUT:
+     * 'phone_number' or 'user_id' (only one input will be accepted at a time)
+     *
+     * OUTPUT: JSON Object that contains
+     *  'code' : respond code
+     *  'msg' : respond message
+     *
+     *   1 -> Get user information successfully
+     *  -1 -> phone_number or user_id does not exist
+     *  -2 -> Either phone_number or user_id is not specified or undefined
+     *  -3 -> You can only specify one user identifications, either phone_number or user_id(object_id)
+     *
+     * ** Upon successful request, you will also be return with:
+     *
+     * 'user_id': String
+     * 'phone_number': String
+     * 'email': String
+     * 'first_name': String
+     * 'last_name': String
+     * 'sex': String 0 -> female, 1 -> male
+     * 'driver_flag': Boolean true -> driver, false -> not-a-driver
+     *
+     * ** The following info will be returned if driver_flag is true,
+     * ** otherwise empty strings will be returned
+     *
+     * 'driver_license': String
+     * 'plate_number': String
+     * 'colour': String
+     * 'car_model': String (eg. "2017-Ferrari-Coupe")
+     *
+     */
+    // type: "phone_number" or "user_id"
+    public static JSONObject GetUserInfo(String identification, String type){
+        String json_text = null;
+        String data =  type + "=" + identification;
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(ServerUrls.GET_USER_INFO_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
     /*
     * return value:
     * -1    : fail to login
