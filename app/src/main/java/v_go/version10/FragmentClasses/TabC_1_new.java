@@ -2,6 +2,7 @@ package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -31,6 +32,7 @@ import java.util.Stack;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.User;
 import v_go.version10.HelperClasses.ContactListAdapter;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.MySimpleAdapter;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.R;
@@ -40,6 +42,9 @@ public class TabC_1_new extends Fragment {
     private View view;
     private SimpleAdapter adapter;
     private ListView contactListView;
+    List<HashMap<String, String>> hashMap = new ArrayList<>();
+    List<Bitmap> avatarList = new ArrayList<>();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -56,11 +61,16 @@ public class TabC_1_new extends Fragment {
 
         // set up the notification list
         contactListView = (ListView) view.findViewById(R.id.listView);
+
+        // retrieve ListView
+        if(adapter != null) {
+            contactListView.setAdapter(adapter);
+        }
+
         // on listView item clicked
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 // create new private chat activity
             }
         });
@@ -113,21 +123,38 @@ public class TabC_1_new extends Fragment {
     }
 
     /** setup the notification listview **/
-    public void setupAdapter(String first_name_last_name) {
-        String[] from = new String[]{"first_name_last_name", "last_message"};
-        int[] to = new int[]{R.id.firstLine, R.id.secondLine};
-        List<HashMap<String, String>> fillMaps = new ArrayList<HashMap<String, String>>();
+    public void setupAdapter(String first_name_last_name, final String user_id) {
+        final String[] from = new String[]{"first_name_last_name", "last_message"};
+        final int[] to = new int[]{R.id.firstLine, R.id.secondLine};
 
-        HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<>();
 
         map.put("first_name_last_name", first_name_last_name);
-        map.put("last_message","dummy");
+        map.put("last_message", "Hello");
 
-        fillMaps.add(map);
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        adapter = new ContactListAdapter(getActivity(), fillMaps, R.layout.contact_row, from, to);
+                Bitmap bitmap = User.DownloadAvatar(user_id);
 
-        contactListView.setAdapter(adapter);
+                bitmap = Global.getCircularBitmap(bitmap);
+
+                avatarList.add(0, bitmap);
+
+                hashMap.add(0, map);
+
+                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        contactListView.setAdapter(adapter);
+                    }
+                });
+            }
+        });
+        networkThread.start();
     }
 
     @Override
@@ -188,7 +215,11 @@ public class TabC_1_new extends Fragment {
                     public void run() {
                         try{
                             if(result.getString("code").matches("1")){
-                                setupAdapter(result.getString("first_name") + " " + result.getString("last_name"));
+
+                                String displayName = result.getString("first_name") + " " + result.getString("last_name");
+                                String user_id = result.getString("user_id");
+                                setupAdapter(displayName, user_id);
+
                             }else if(result.getString("code").matches("-1")) {
                                 Toast.makeText(getContext(), "User is not found.", Toast.LENGTH_SHORT).show();
                             }

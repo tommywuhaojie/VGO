@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -36,6 +37,7 @@ import v_go.version10.SocketIo.SocketIoHelper;
 public class BackgroundService extends Service {
 
     private boolean onForeground = false;
+    private int numberOfPushNotifications = 0;
 
     public BackgroundService() {
         super();
@@ -72,16 +74,24 @@ public class BackgroundService extends Service {
 
     private void sendNotification(){
 
+        numberOfPushNotifications++;
+        String displayMsg;
+        if(numberOfPushNotifications > 1){
+            displayMsg = "You have " + numberOfPushNotifications + " new messages.";
+        }else{
+            displayMsg = "You have " + numberOfPushNotifications + " new message.";
+        }
+
         Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         final int NOTIFICATION_ID = 12345;
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.vgo_logo)
+                        .setSmallIcon(R.drawable.vgo_logo_small)
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.vgo_logo_large))
                         .setContentTitle("V-GO")
-                        .setContentText("You have a new message")
-                        .setSound(notificationSound)
-                        .setLights(Color.RED, 300, 300);
+                        .setContentText(displayMsg)
+                        .setSound(notificationSound);
         ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
 
         Intent targetIntent = new Intent(this, SignUpAndLoginIn.class);
@@ -90,14 +100,18 @@ public class BackgroundService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
 
+        wakeUpScreen();
+    }
+
+    private void wakeUpScreen(){
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
         boolean isScreenOn = pm.isScreenOn();
         if(!isScreenOn)
         {
             PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK |PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.ON_AFTER_RELEASE,"MyLock");
-            wl.acquire(10000);
+            wl.acquire(5000);
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyCpuLock");
-            wl_cpu.acquire(10000);
+            wl_cpu.acquire(5000);
         }
     }
 

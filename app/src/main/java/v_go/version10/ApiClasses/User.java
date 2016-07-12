@@ -429,7 +429,7 @@ public class User {
             String data = "user_id=" + user_id;
             URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("POST");
             connection.setConnectTimeout(10 * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);

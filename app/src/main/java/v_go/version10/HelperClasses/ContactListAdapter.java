@@ -1,9 +1,13 @@
 package v_go.version10.HelperClasses;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,14 +30,26 @@ public class ContactListAdapter extends SimpleAdapter {
      *                 TextViews. The first N views in this list are given the values of the first N columns
      */
 
-    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {
+    private List<Bitmap> avatarList;
+
+    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to, List<Bitmap> avatarList) {
         super(context, data, resource, from, to);
+        this.avatarList = avatarList;
     }
 
     // this function gets called once each row is revealed
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
+
+        Bitmap bitmap = avatarList.get(position);
+        if(bitmap != null){
+            ImageView imageView = ((ImageView) view.findViewById(R.id.icon));
+            if(imageView != null){
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+
         return view;
     }
 }
