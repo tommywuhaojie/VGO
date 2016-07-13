@@ -2,6 +2,7 @@ package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import java.util.Stack;
 
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.User;
+import v_go.version10.Chat.ChatActivity;
 import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.MySimpleAdapter;
@@ -71,7 +73,10 @@ public class TabC_1_new extends Fragment {
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // create new private chat activity
+
+                // open up a new chat activity
+                Intent intent = new Intent(getContext(), ChatActivity.class);
+                getActivity().startActivity(intent);
             }
         });
 

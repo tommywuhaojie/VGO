@@ -142,9 +142,9 @@ public class Main extends AppCompatActivity{
 
     }
     private void initializeSocketConnection(){
-        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-        mSocket = socketHelper.getSocket();
-        mSocket.connect();
+       // SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+       // mSocket = socketHelper.getSocket();
+       // mSocket.connect();
     }
 
     @Override

@@ -27,6 +27,7 @@ import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ActivityClasses.SignUpAndLoginIn;
 import v_go.version10.ApiClasses.Request;
+import v_go.version10.Chat.App;
 import v_go.version10.R;
 import v_go.version10.SocketIo.SocketIoHelper;
 
@@ -55,7 +56,7 @@ public class BackgroundService extends Service {
         //broadcastIntent.putExtra("num_of_new_req", numOfNotification);
         mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 
-        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
+        SocketIoHelper socketHelper = new SocketIoHelper();
         Socket mSocket = socketHelper.getSocket();
         mSocket.connect();
 

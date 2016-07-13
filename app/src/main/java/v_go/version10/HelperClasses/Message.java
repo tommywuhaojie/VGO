@@ -1,4 +1,4 @@
-package v_go.version10.InstantMessage;
+package v_go.version10.HelperClasses;
 
 public class Message {
 
