@@ -1,9 +1,7 @@
 package v_go.version10.FragmentClasses;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,13 +12,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,12 +34,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,11 +47,9 @@ import java.util.List;
 
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.HelperClasses.Global;
-import v_go.version10.HelperClasses.SegmentedButton;
 import v_go.version10.R;
 import v_go.version10.googleMapServices.DirectionsJSONParser1;
 import v_go.version10.googleMapServices.DirectionsJSONParser2;
-import v_go.version10.googleMapServices.GeocodeJSONParser;
 
 public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, DialogInterface.OnCancelListener {
 
@@ -98,7 +86,7 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
         setHasOptionsMenu(true);
 
         dateTextView = (TextView) view.findViewById(R.id.date);
-        timeTextView = (TextView) view.findViewById(R.id.time);
+        timeTextView = (TextView) view.findViewById(R.id.date_time);
 
         // initial default datetime as now
         Calendar cal = Calendar.getInstance();

@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="12:00"
-        android:id="@+id/time"
+        android:id="@+id/date_time"
         android:textColor="#000000"
         android:singleLine="true"
         android:layout_below="@+id/addr_b"
@@ -89,7 +89,7 @@
         android:id="@+id/textView13"
         android:textColor="#000000"
         android:singleLine="true"
-        android:layout_below="@+id/time"
+        android:layout_below="@+id/date_time"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true" />
 

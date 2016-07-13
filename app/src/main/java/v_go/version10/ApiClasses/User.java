@@ -448,10 +448,17 @@ public class User {
     }
 
     public static Bitmap DownloadAvatar(){
+
         InputStream inputStream;
+
         try {
             URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
-            inputStream = url.openConnection().getInputStream();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(10 * 1000);
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            inputStream = connection.getInputStream();
         }catch (Exception e){
             e.printStackTrace();
             return null;

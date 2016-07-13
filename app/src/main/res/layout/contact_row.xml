@@ -23,8 +23,7 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:text="Last message"
-        android:textSize="12sp"
-        android:layout_toStartOf="@+id/imageView5" />
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/firstLine"
@@ -37,15 +36,16 @@
         android:gravity="center_vertical"
         android:text="Firstname Lastname"
         android:textSize="16sp"
-        android:layout_toStartOf="@+id/imageView5"
         android:textColor="#000000" />
 
-    <ImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:id="@+id/imageView5"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:src="@drawable/r_a" />
+    <TextView
+        android:id="@+id/date_time"
+        android:layout_width="wrap_content"
+        android:layout_height="26dip"
+        android:singleLine="true"
+        android:text="time"
+        android:textSize="12sp"
+        android:layout_above="@+id/secondLine"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
