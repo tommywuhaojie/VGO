@@ -14,6 +14,7 @@ import android.text.SpannableString;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -279,16 +280,19 @@ public class SignUp2 extends AppCompatActivity {
 
         if(!User.isValidPassword(passwordET.getText().toString())){
             passwordET.setError("Password must contain:\n" +
-                    "at least 8 characters\n" +
-                    "at least 1 number\n" +
-                    "at least 1 lower case letter\n" +
-                    "at least 1 upper case letter\n" +
-                    "no whitespace");
+                    "At least 8 characters\n" +
+                    "At least 1 number\n" +
+                    "At least 1 lower case letter\n" +
+                    "At least 1 upper case letter\n" +
+                    "No whitespaces");
             userInfoOk = false;
         }
 
         if(userSex == -1){
-            Toast.makeText(this, "Please choose a gender.", Toast.LENGTH_LONG).show();
+            Toast toast= Toast.makeText(getApplicationContext(),
+                    "Please choose your gender.", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 450);
+            toast.show();
             userInfoOk = false;
         }
 
