@@ -1,6 +1,7 @@
 package v_go.version10.Chat;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
 import v_go.version10.Chat.widgets.Emoji;
+import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 
@@ -30,7 +32,6 @@ public class ChatListAdapter extends BaseAdapter {
     public ChatListAdapter(ArrayList<ChatMessage> chatMessages, Context context) {
         this.chatMessages = chatMessages;
         this.context = context;
-
     }
 
 
@@ -61,6 +62,7 @@ public class ChatListAdapter extends BaseAdapter {
                 v = LayoutInflater.from(context).inflate(R.layout.chat_user1_item, null, false);
                 holder1 = new ViewHolder1();
 
+                holder1.avatar = (ImageView) v.findViewById(R.id.avatar);
 
                 holder1.messageTextView = (TextView) v.findViewById(R.id.message_text);
                 holder1.timeTextView = (TextView) v.findViewById(R.id.time_text);
@@ -71,8 +73,11 @@ public class ChatListAdapter extends BaseAdapter {
                 holder1 = (ViewHolder1) v.getTag();
 
             }
+            if(Global.other_avatar != null) {
+                holder1.avatar.setImageBitmap(Global.other_avatar);
+            }
 
-            holder1.messageTextView.setText(Emoji.replaceEmoji(message.getMessageText(), holder1.messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16)));
+            holder1.messageTextView.setText(message.getMessageText());
             holder1.timeTextView.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
 
         } else if (message.getUserType() == UserType.OTHER) {
@@ -82,6 +87,7 @@ public class ChatListAdapter extends BaseAdapter {
 
                 holder2 = new ViewHolder2();
 
+                holder2.avatar = (ImageView) v.findViewById(R.id.avatar);
 
                 holder2.messageTextView = (TextView) v.findViewById(R.id.message_text);
                 holder2.timeTextView = (TextView) v.findViewById(R.id.time_text);
@@ -94,8 +100,10 @@ public class ChatListAdapter extends BaseAdapter {
 
             }
 
-            holder2.messageTextView.setText(Emoji.replaceEmoji(message.getMessageText(), holder2.messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16) ));
-            //holder2.messageTextView.setText(message.getMessageText());
+            if(Global.my_avatar != null) {
+                holder2.avatar.setImageBitmap(Global.my_avatar);
+            }
+            holder2.messageTextView.setText(message.getMessageText());
             holder2.timeTextView.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
 
             if (message.getMessageStatus() == Status.DELIVERED) {
@@ -126,12 +134,12 @@ public class ChatListAdapter extends BaseAdapter {
     private class ViewHolder1 {
         public TextView messageTextView;
         public TextView timeTextView;
-
-
+        public ImageView avatar;
     }
 
     private class ViewHolder2 {
         public ImageView messageStatus;
+        public ImageView avatar;
         public TextView messageTextView;
         public TextView timeTextView;
 

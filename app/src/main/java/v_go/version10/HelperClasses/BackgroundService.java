@@ -58,6 +58,7 @@ public class BackgroundService extends Service {
 
         SocketIoHelper socketHelper = new SocketIoHelper();
         Socket mSocket = socketHelper.getSocket();
+        Global.socket = mSocket;
         mSocket.connect();
 
         mSocket.on("chat message", onNewMessage);

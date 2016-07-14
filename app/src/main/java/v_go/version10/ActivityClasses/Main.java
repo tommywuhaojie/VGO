@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -141,10 +142,20 @@ public class Main extends AppCompatActivity{
         }
 
     }
-    private void initializeSocketConnection(){
-       // SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-       // mSocket = socketHelper.getSocket();
-       // mSocket.connect();
+
+    public void downloadCurrentUserAvatar(){
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap bitmap = User.DownloadAvatar();
+                if (bitmap != null) {
+                    Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
+                    userCache.setAvatar(circleBitmap);
+                    Global.my_avatar = circleBitmap;
+                }
+            }
+        });
+        networkThread.start();
     }
 
     @Override
@@ -155,7 +166,9 @@ public class Main extends AppCompatActivity{
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
 
-        initializeSocketConnection();
+        // download necessary user information in a different thread: avatar, name, etc...
+        downloadCurrentUserAvatar();
+        // TO DO: download user info
 
         // lists initialization
         notifStack = new Stack<>();

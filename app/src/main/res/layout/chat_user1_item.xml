@@ -8,72 +8,79 @@
     android:paddingTop="5dp"
     android:gravity="left">
 
-    <ImageView
+    <RelativeLayout
         android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:id="@+id/imageView22"
-        android:src="@drawable/default_avatar"
-        android:minHeight="50dp"
+        android:layout_height="match_parent"
         android:minWidth="50dp"
-        android:maxHeight="50dp"
-        android:maxWidth="50dp"
-        android:layout_marginLeft="5dp"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/relativeLayout2" />
+        android:layout_alignParentEnd="true"
+        android:id="@+id/relativeLayout3">
+
+    </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="wrap_content"  android:background="@drawable/balloon_incoming_normal"
-        android:layout_height="wrap_content"
-        android:id="@+id/relativeLayout2"
-        android:layout_marginTop="5dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/relativeLayout3">
 
-        <LinearLayout
-            android:id="@+id/chat_company_reply_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:orientation="vertical"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true">
-
-            <TextView
-                android:id="@+id/chat_company_reply_author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="20dp"
-                android:paddingRight="8dp"
-                android:paddingTop="5dp"
-                android:textStyle="bold"
-                android:textColor="@color/orange"
-                android:text="User1"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/message_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                style="@style/chat_text_message_style"
-                android:paddingLeft="20dp"
-
-                android:autoLink="web"
-                android:maxWidth="280dp"
-                android:text="Rahul Agrawal is a good boy but he does not know what he wants." />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/time_text"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignBottom="@id/chat_company_reply_text"
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/avatar"
+            android:src="@drawable/default_avatar"
+            android:minHeight="50dp"
+            android:minWidth="50dp"
+            android:maxHeight="50dp"
+            android:maxWidth="50dp"
             android:layout_marginLeft="10dp"
-            style="@style/chat_timings"
-            android:paddingRight="10dp"
-            android:textColor="@color/gray"
-            android:paddingBottom="5dp"
-            android:layout_toRightOf="@id/chat_company_reply_text"
-            android:text="17:10" />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"  android:background="@drawable/balloon_incoming_normal"
+            android:layout_height="wrap_content"
+            android:id="@+id/relativeLayout2"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/avatar"
+            android:layout_marginLeft="5dp">
+
+            <LinearLayout
+                android:id="@+id/chat_company_reply_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:orientation="vertical"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:id="@+id/message_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/chat_text_message_style"
+                    android:paddingLeft="20dp"
+
+                    android:autoLink="web"
+                    android:maxWidth="195dp"
+                    android:text="hi"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/avatar" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/time_text"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignBottom="@id/chat_company_reply_text"
+                android:layout_marginLeft="10dp"
+                style="@style/chat_timings"
+                android:paddingRight="10dp"
+                android:textColor="@color/gray"
+                android:paddingBottom="5dp"
+                android:text="17:10"
+                android:layout_toEndOf="@+id/chat_company_reply_text" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

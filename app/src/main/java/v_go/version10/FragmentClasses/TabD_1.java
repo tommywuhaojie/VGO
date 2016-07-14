@@ -33,27 +33,13 @@ public class TabD_1 extends Fragment   {
     public void onResume() {
         super.onResume();
 
-        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
+        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR){
             Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
-            // download the avatar of current user
-            Thread networkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    final Bitmap bitmap = User.DownloadAvatar();
-                    if (bitmap != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
-                                avatarImageView.setImageBitmap(circleBitmap);
-                                // cache avatar bitmap for quick access
-                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
-                            }
-                        });
-                    }
-                }
-            });
-            networkThread.start();
+            ((Main)getActivity()).downloadCurrentUserAvatar();
+        }
+
+        if(((Main)getActivity()).getUserCache().getAvatar() != null){
+            avatarImageView.setImageBitmap(((Main) getActivity()).getUserCache().getAvatar());
         }
     }
 
@@ -71,30 +57,7 @@ public class TabD_1 extends Fragment   {
 
         avatarImageView = (ImageView) view.findViewById(R.id.avatar);
 
-        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
-            Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
-
-            // download the avatar of current user
-            Thread networkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    final Bitmap bitmap = User.DownloadAvatar();
-                    if (bitmap != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
-                                avatarImageView.setImageBitmap(circleBitmap);
-                                // cache avatar bitmap for quick access
-                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
-                            }
-                        });
-                    }
-                }
-            });
-            networkThread.start();
-        }else{
-            // fetch cached avatar bitmap if it's already there
+        if(((Main)getActivity()).getUserCache().getAvatar() != null){
             avatarImageView.setImageBitmap(((Main)getActivity()).getUserCache().getAvatar());
         }
 

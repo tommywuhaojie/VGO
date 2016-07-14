@@ -124,6 +124,7 @@ public class SignUp3 extends AppCompatActivity {
                     bitmap = Bitmap.createScaledBitmap(bitmap, RESIZE, RESIZE, false);
                     JSONObject jsonObject = User.UploadAvatar(bitmap);
                     System.out.println(jsonObject.toString());
+                    // re-download user avatar
                     Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
 
                     // temporary use the same ui(signUp3) for update avatar

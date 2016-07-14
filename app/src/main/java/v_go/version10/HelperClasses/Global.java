@@ -10,6 +10,9 @@ import android.os.CountDownTimer;
 
 import java.util.Random;
 
+import io.socket.client.Socket;
+import v_go.version10.SocketIo.SocketIoHelper;
+
 public class Global {
 
     public static final String TAB_A  = "tab_a_identifier";
@@ -23,9 +26,13 @@ public class Global {
 
     public static boolean TAB3_NOTIFICATION = false;
     public static boolean IS_LOGED_IN = false;
-    public static boolean NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
+    public static boolean NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
     public static int LATEST_REQ_ID = 0;
     public static int DISPLAYED_NOTIF_NUM = 0;
+
+    public static Socket socket;
+    public static Bitmap my_avatar;
+    public static Bitmap other_avatar;
 
 
 
@@ -37,7 +44,7 @@ public class Global {
 
         TAB3_NOTIFICATION = false;
         IS_LOGED_IN = false;
-        NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;
+        NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
         LATEST_REQ_ID = 0;
         DISPLAYED_NOTIF_NUM = 0;
     }

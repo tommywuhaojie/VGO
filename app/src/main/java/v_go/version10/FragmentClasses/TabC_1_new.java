@@ -1,6 +1,7 @@
 package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -28,15 +29,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Stack;
 
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.User;
 import v_go.version10.Chat.ChatActivity;
 import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.Global;
-import v_go.version10.HelperClasses.MySimpleAdapter;
-import v_go.version10.HelperClasses.Notification;
 import v_go.version10.R;
 
 public class TabC_1_new extends Fragment {
@@ -44,8 +42,12 @@ public class TabC_1_new extends Fragment {
     private View view;
     private SimpleAdapter adapter;
     private ListView contactListView;
-    List<HashMap<String, String>> hashMap = new ArrayList<>();
-    List<Bitmap> avatarList = new ArrayList<>();
+    private List<HashMap<String, String>> hashMap = new ArrayList<>();
+    private List<Bitmap> avatarList = new ArrayList<>();
+    private List<String> userIdList = new ArrayList<>();
+    private List<String> nameList = new ArrayList<>();
+
+    private ProgressDialog pDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,7 +77,11 @@ public class TabC_1_new extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // open up a new chat activity
+                String user_id = userIdList.get(position);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra("user_id", user_id);
+                intent.putExtra("user_name", nameList.get(position));
+                Global.other_avatar = avatarList.get(position);
                 getActivity().startActivity(intent);
             }
         });
@@ -128,7 +134,7 @@ public class TabC_1_new extends Fragment {
     }
 
     /** setup the notification listview **/
-    public void setupAdapter(String first_name_last_name, final String user_id) {
+    public void setupAdapter(final String first_name_last_name, final String user_id) {
         final String[] from = new String[]{"first_name_last_name", "last_message"};
         final int[] to = new int[]{R.id.firstLine, R.id.secondLine};
 
@@ -147,6 +153,10 @@ public class TabC_1_new extends Fragment {
 
                 avatarList.add(0, bitmap);
 
+                nameList.add(0, first_name_last_name);
+
+                userIdList.add(0, user_id);
+
                 hashMap.add(0, map);
 
                 adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList);
@@ -155,6 +165,7 @@ public class TabC_1_new extends Fragment {
                     @Override
                     public void run() {
                         contactListView.setAdapter(adapter);
+                        pDialog.dismiss();
                     }
                 });
             }
@@ -207,6 +218,12 @@ public class TabC_1_new extends Fragment {
 
     private void addToContactList(final String phone_number){
 
+        pDialog = new ProgressDialog(getActivity());
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.setCancelable(false);
+        pDialog.setMessage("Please wait...");
+        pDialog.show();
+
         final String REQUEST_BY_PHONE_NUMBER = "phone_number";
 
         Thread networkThread = new Thread(new Runnable() {
@@ -226,6 +243,7 @@ public class TabC_1_new extends Fragment {
                                 setupAdapter(displayName, user_id);
 
                             }else if(result.getString("code").matches("-1")) {
+                                pDialog.dismiss();
                                 Toast.makeText(getContext(), "User is not found.", Toast.LENGTH_SHORT).show();
                             }
                         }catch (Exception e){
