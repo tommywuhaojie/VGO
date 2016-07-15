@@ -1,16 +1,22 @@
 package v_go.version10.Chat;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -120,41 +126,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    private Emitter.Listener onNewPrivateMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-
-                        JSONObject data = (JSONObject) args[0];
-                        String sender_user_id = data.getString("sender_user_id");
-
-                        // display message only the sender matches the sender we are talking to
-                        if (sender_user_id.equals(other_user_id)) {
-                            String messageText = data.getString("message");
-                            final ChatMessage message = new ChatMessage();
-                            message.setMessageStatus(Status.SENT);
-                            message.setMessageText(messageText);
-                            message.setUserType(UserType.SELF);
-                            message.setMessageTime(new Date().getTime());
-
-                            ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
-
-                            chatMessages.add(message);
-                            listAdapter.notifyDataSetChanged();
-                            scrollToBottom();
-                        }
-
-                    } catch (JSONException e) {
-                        Toast.makeText(getActivity(), "Error occurs.", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,7 +141,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         // setup receiver listener
-        socket.on("private message", onNewPrivateMessage);
+        //socket.on("private message", onNewPrivateMessage);
 
         // setup the other user' id
         other_user_id = getIntent().getStringExtra("user_id");
@@ -199,7 +170,50 @@ public class ChatActivity extends AppCompatActivity {
 
         chatEditText1.addTextChangedListener(watcher1);
 
-        NotificationCenter.getInstance().addObserver(this, NotificationCenter.emojiDidLoaded);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        hideSoftKeyboard();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("private message");
+
+        LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String messageText = intent.getStringExtra("message");
+                String sender_user_id = intent.getStringExtra("sender_user_id");
+
+                // display message only the sender matches the sender we are talking to
+                if (sender_user_id.equals(other_user_id)) {
+                    final ChatMessage message = new ChatMessage();
+                    message.setMessageStatus(Status.SENT);
+                    message.setMessageText(messageText);
+                    message.setUserType(UserType.SELF);
+                    message.setMessageTime(new Date().getTime());
+
+                    ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
+
+                    chatMessages.add(message);
+                    listAdapter.notifyDataSetChanged();
+                    scrollToBottom();
+                }
+
+            }
+        };
+        mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
+    }
+
+    public void hideSoftKeyboard() {
+        if(getCurrentFocus()!=null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
     }
 
     private void scrollToBottom(){

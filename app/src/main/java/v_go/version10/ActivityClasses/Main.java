@@ -5,22 +5,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -29,23 +25,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
-import io.socket.client.Socket;
-import v_go.version10.ApiClasses.Request;
 import v_go.version10.ApiClasses.User;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
-import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.FragmentClasses.TabC_2;
 import v_go.version10.FragmentClasses.TabD_1;
@@ -54,7 +40,6 @@ import v_go.version10.HelperClasses.Notification;
 import v_go.version10.HelperClasses.UserCache;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
-import v_go.version10.SocketIo.SocketIoHelper;
 
 public class Main extends AppCompatActivity{
 
@@ -78,11 +63,11 @@ public class Main extends AppCompatActivity{
     // previously selected tab id
     private int visitedTab = 0;
 
-    // socket.io
-    private Socket mSocket;
-
     // cached object to store current user's infomation
     private UserCache userCache = new UserCache();
+
+    // to receive notification from background service
+    private BroadcastReceiver broadcastReceiver;
 
     public UserCache getUserCache(){
         return userCache;
@@ -108,32 +93,9 @@ public class Main extends AppCompatActivity{
         super.onDestroy();
         Log.d("DEBUG", "Main onDestroy");
 
-        if(mSocket != null) {
-            // turn off all socket listeners
-            //if( !mStacks.get(Global.TAB_C).isEmpty()){
-            //    ((TabC_1_new)mStacks.get(Global.TAB_C).firstElement()).turnOffAllSocketListeners();
-            //}
-            // disconnect from server when Main activity is destroyed
-            mSocket.disconnect();
-        }
 
-        // calling logout to kill session
-        Thread networkThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JSONObject jsonObject = User.Logout();
-                    Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
-                }catch (Exception e){
-                    Log.d("DEBUG", "something went wrong when attempting to logout");
-                    e.printStackTrace();
-                }}});
-        networkThread.start();
     }
 
-    public Socket getScoket(){
-        return mSocket;
-    }
     public void setTabHostVisibility(Boolean visible){
         if(visible) {
             mTabHost.getTabWidget().setVisibility(View.VISIBLE);

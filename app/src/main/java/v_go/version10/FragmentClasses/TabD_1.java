@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,6 +16,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import org.json.JSONObject;
 
 import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
@@ -77,6 +80,19 @@ public class TabD_1 extends Fragment   {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // calling logout to kill session
+                Thread networkThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject jsonObject = User.Logout();
+                            Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
+                        }catch (Exception e){
+                            Log.d("DEBUG", "something went wrong when attempting to logout");
+                            e.printStackTrace();
+                        }}});
+                networkThread.start();
 
                 getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
 

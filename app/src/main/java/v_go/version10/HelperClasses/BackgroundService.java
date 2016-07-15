@@ -17,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
@@ -40,6 +41,8 @@ public class BackgroundService extends Service {
     private boolean onForeground = false;
     private int numberOfPushNotifications = 0;
 
+    private LocalBroadcastManager mLocalBroadcastManager;
+
     public BackgroundService() {
         super();
     }
@@ -48,29 +51,38 @@ public class BackgroundService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        final LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-        // init new intent that we're going to broadcast
-        Intent broadcastIntent = new Intent("new_request");
-        // pass number of new requests to Main
-        //broadcastIntent.putExtra("num_of_new_req", numOfNotification);
-        mLocalBroadcastManager.sendBroadcast(broadcastIntent);
-
+        // setup socket.io
         SocketIoHelper socketHelper = new SocketIoHelper();
         Socket mSocket = socketHelper.getSocket();
         Global.socket = mSocket;
         mSocket.connect();
-
-        mSocket.on("chat message", onNewMessage);
+        mSocket.on("private message", onNewPrivateMessage);
 
     }
 
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+    private Emitter.Listener onNewPrivateMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
 
             sendNotification();
 
+            try {
+
+                JSONObject data = (JSONObject) args[0];
+                String sender_user_id = data.getString("sender_user_id");
+                String message = data.getString("message");
+
+                Intent broadcastIntent = new Intent("private message");
+                broadcastIntent.putExtra("sender_user_id", sender_user_id);
+                broadcastIntent.putExtra("message", message);
+
+                mLocalBroadcastManager.sendBroadcast(broadcastIntent);
+
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
         }
     };
 
