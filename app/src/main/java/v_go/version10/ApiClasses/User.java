@@ -20,6 +20,8 @@ import java.net.URL;
 
 public class User {
 
+    final static int TIME_OUT_IN_SECOND = 10;
+
     public static JSONObject SendVerificationCode(String phone_number){
         String json_text = null;
         String data="phone_number="+phone_number;
@@ -29,7 +31,8 @@ public class User {
             URL url = new URL(ServerUrls.SEND_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -73,7 +76,8 @@ public class User {
             URL url = new URL(ServerUrls.VERIFY_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -154,7 +158,8 @@ public class User {
             URL url = new URL(ServerUrls.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
 
             connection.setUseCaches(false);
             connection.setDoInput(true);
@@ -234,7 +239,8 @@ public class User {
             URL url = new URL(ServerUrls.GET_USER_INFO_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -284,7 +290,8 @@ public class User {
             URL url = new URL(ServerUrls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -330,7 +337,8 @@ public class User {
             URL url = new URL(ServerUrls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -375,6 +383,8 @@ public class User {
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            httpUrlConnection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
 
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
@@ -430,7 +440,8 @@ public class User {
             URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -455,7 +466,8 @@ public class User {
             URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoOutput(true);
             inputStream = connection.getInputStream();
