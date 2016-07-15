@@ -248,6 +248,7 @@ public class TabC_1_new extends Fragment {
                             }
                         }catch (Exception e){
                             e.printStackTrace();
+                            pDialog.dismiss();
                             Toast.makeText(getContext(), "Server error occurs.", Toast.LENGTH_LONG).show();
                         }
                     }
