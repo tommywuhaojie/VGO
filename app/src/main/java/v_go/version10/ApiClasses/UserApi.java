@@ -17,18 +17,15 @@ import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.CookieStore;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ActivityClasses.SignUpAndLoginIn;
-import v_go.version10.Chat.App;
-import v_go.version10.HelperClasses.Global;
 import v_go.version10.PersistentCookieStore.SiCookieStore2;
 
-public class User {
+public class UserApi {
 
     final static int TIME_OUT_IN_SECOND = 10;
 
@@ -41,7 +38,7 @@ public class User {
         HttpURLConnection connection = null;
 
         try {
-            URL url = new URL(ServerUrls.SEND_CODE_URL);
+            URL url = new URL(Urls.SEND_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -89,7 +86,7 @@ public class User {
         HttpURLConnection connection = null;
 
         try {
-            URL url = new URL(ServerUrls.VERIFY_CODE_URL);
+            URL url = new URL(Urls.VERIFY_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -174,7 +171,7 @@ public class User {
 
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerUrls.REGISTER_URL);
+            URL url = new URL(Urls.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -258,7 +255,7 @@ public class User {
         String data =  type + "=" + identification;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerUrls.GET_USER_INFO_URL);
+            URL url = new URL(Urls.GET_USER_INFO_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -319,7 +316,7 @@ public class User {
 
 
         try {
-            URL url = new URL(ServerUrls.LOGIN_URL);
+            URL url = new URL(Urls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -369,7 +366,7 @@ public class User {
         String json_text = null;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerUrls.LOGOUT_URL);
+            URL url = new URL(Urls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -417,7 +414,7 @@ public class User {
         String response;
         String json_text = null;
         try {
-            URL url = new URL(ServerUrls.UPLOAD_AVATAR_URL);
+            URL url = new URL(Urls.UPLOAD_AVATAR_URL);
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
@@ -477,7 +474,7 @@ public class User {
 
         try {
             String data = "user_id=" + user_id;
-            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -505,7 +502,7 @@ public class User {
         InputStream inputStream;
 
         try {
-            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);

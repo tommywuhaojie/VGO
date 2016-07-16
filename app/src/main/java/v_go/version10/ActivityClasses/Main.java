@@ -14,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -30,7 +29,7 @@ import android.widget.TabWidget;
 import java.util.HashMap;
 import java.util.Stack;
 
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
 import v_go.version10.FragmentClasses.TabC_1_new;
@@ -113,7 +112,7 @@ public class Main extends AppCompatActivity{
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                final Bitmap bitmap = User.DownloadAvatar();
+                final Bitmap bitmap = UserApi.DownloadAvatar();
                 if (bitmap != null) {
                     Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
                     userCache.setAvatar(circleBitmap);

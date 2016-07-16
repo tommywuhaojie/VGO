@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +12,6 @@ import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,7 +25,7 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
 
 public class SignUp2 extends AppCompatActivity {
@@ -120,13 +118,13 @@ public class SignUp2 extends AppCompatActivity {
                         + "-" + typeSp.getSelectedItem().toString().trim();
                 String color = colorSp.getSelectedItem().toString().trim();
 
-                final JSONObject registerResult = User.Register(object_id, email, password, first_name, last_name,
+                final JSONObject registerResult = UserApi.Register(object_id, email, password, first_name, last_name,
                         userSex, driver_license, plate_number, model, color, userTypeToggle);
 
                 try {
                     if(registerResult.getString("code").matches("1")){
                         // login right after register succeeded
-                        JSONObject loginResult = User.Login(phone_number, password);
+                        JSONObject loginResult = UserApi.Login(phone_number, password);
                         if(loginResult.getString("code").matches("1")){
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -273,12 +271,12 @@ public class SignUp2 extends AppCompatActivity {
             userInfoOk = false;
         }
 
-        if(!User.isValidEmail(emailET.getText().toString().trim())){
+        if(!UserApi.isValidEmail(emailET.getText().toString().trim())){
             emailET.setError("Invalid Email Address");
             userInfoOk = false;
         }
 
-        if(!User.isValidPassword(passwordET.getText().toString())){
+        if(!UserApi.isValidPassword(passwordET.getText().toString())){
             passwordET.setError("Password must contain:\n" +
                     "At least 8 characters\n" +
                     "At least 1 number\n" +

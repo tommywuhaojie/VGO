@@ -12,7 +12,6 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,12 +19,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import v_go.version10.HelperClasses.Global;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
-import v_go.version10.ApiClasses.User;
 
 public class Login extends AppCompatActivity {
 
@@ -80,7 +76,7 @@ public class Login extends AppCompatActivity {
             protected String doInBackground(Void... params)
             {
                 try {
-                    User user = new User();
+                    UserApi user = new UserApi();
                     result = Integer.parseInt("1");
                 }catch (Exception e){
                     e.printStackTrace();

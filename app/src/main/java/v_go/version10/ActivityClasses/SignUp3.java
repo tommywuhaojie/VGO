@@ -1,19 +1,10 @@
 package v_go.version10.ActivityClasses;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -25,18 +16,15 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.IOException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
@@ -122,7 +110,7 @@ public class SignUp3 extends AppCompatActivity {
                     Bitmap bitmap = getBitmapFromUri(target_uri);
                     final int RESIZE = 256;
                     bitmap = Bitmap.createScaledBitmap(bitmap, RESIZE, RESIZE, false);
-                    JSONObject jsonObject = User.UploadAvatar(bitmap);
+                    JSONObject jsonObject = UserApi.UploadAvatar(bitmap);
                     System.out.println(jsonObject.toString());
                     // re-download user avatar
                     Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = true;

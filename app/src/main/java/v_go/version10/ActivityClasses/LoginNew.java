@@ -14,14 +14,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.socket.client.Socket;
-import v_go.version10.ApiClasses.User;
-import v_go.version10.FragmentClasses.TabA_1;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
-import v_go.version10.SocketIo.SocketIoHelper;
 
 public class LoginNew extends AppCompatActivity{
 
@@ -87,7 +81,7 @@ public class LoginNew extends AppCompatActivity{
                 try {
                     String phone_number = phone.getText().toString().trim();
                     String pwd = password.getText().toString();
-                    if(User.Login(phone_number, pwd).getString("code").equals("1"))
+                    if(UserApi.Login(phone_number, pwd).getString("code").equals("1"))
                     {
                         // if login succeeded save status to local and no more login next time
                         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);

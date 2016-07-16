@@ -1,7 +1,7 @@
 package v_go.version10.ApiClasses;
 
 
-public class ServerUrls {
+public class Urls {
 
     // server URLs
     public static final String HOST_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080";
@@ -13,6 +13,7 @@ public class ServerUrls {
     public static final String VERIFY_CODE_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/account/verify";
     public static final String REGISTER_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/account/register";
     public static final String GET_USER_INFO_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/account/getUserInfo";
+    public static final String GET_CHAT_HISTORY_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/chat_history";
 
     // localhost test URLs
     public static final String LOCAL_HOST_URL = "http://127.0.0.1:8080";

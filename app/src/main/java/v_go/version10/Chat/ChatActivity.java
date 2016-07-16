@@ -13,8 +13,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -22,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,6 +33,7 @@ import java.util.Date;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
@@ -188,6 +192,17 @@ public class ChatActivity extends AppCompatActivity {
 
         chatEditText1.addTextChangedListener(watcher1);
 
+        // load chat history after view created
+        ViewTreeObserver vto = findViewById(R.id.chat_layout).getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // Put your code here.
+                loadChatHistory();
+                findViewById(R.id.chat_layout).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+
     }
 
     @Override
@@ -205,11 +220,17 @@ public class ChatActivity extends AppCompatActivity {
 
         hideSoftKeyboard();
 
-        // register broadcastReceiver only for the first time
-        if(!isFirstTime){
-            return;
+
+        if(isFirstTime) {
+            isFirstTime = false;
+
+            // register broadcastReceiver only for the first time
+            regBroadcastReceiver();
+
         }
-        isFirstTime = false;
+    }
+
+    private void regBroadcastReceiver(){
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("private message");
@@ -230,7 +251,7 @@ public class ChatActivity extends AppCompatActivity {
                     message.setUserType(UserType.SELF);
                     message.setMessageTime(new Date().getTime());
 
-                    ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
+                    ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(300);
 
                     chatMessages.add(message);
                     listAdapter.notifyDataSetChanged();
@@ -242,7 +263,64 @@ public class ChatActivity extends AppCompatActivity {
         mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
     }
 
-    public void hideSoftKeyboard() {
+    private void loadChatHistory(){
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                final int NUMBER_OF_MESSAGES = 10;
+                final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject firstObj = jsonArray.getJSONObject(0);
+                            if(firstObj.getString("code").matches("1")){
+
+                                int numberOfMsgGot = firstObj.getInt("number_of_message");
+
+                                for(int i=1; i<(1+numberOfMsgGot); i++){
+
+                                    JSONObject messageObj = jsonArray.getJSONObject(i);
+                                    String isYours = messageObj.getString("is_your_message"); //you sent -> 1, you received -> 0
+                                    String messageText = messageObj.getString("message");
+                                    String dateTime = messageObj.getString("date_time");
+                                    Log.d("DEBUG", "date_time: " + dateTime);
+
+                                    if(isYours.equals("0")){
+                                        final ChatMessage message = new ChatMessage();
+                                        message.setMessageStatus(Status.SENT);
+                                        message.setMessageText(messageText);
+                                        message.setUserType(UserType.SELF);
+                                        message.setMessageTime(new Date().getTime());
+                                        chatMessages.add(message);
+                                    }else {
+                                        final ChatMessage message = new ChatMessage();
+                                        message.setMessageStatus(Status.SENT);
+                                        message.setMessageText(messageText);
+                                        message.setUserType(UserType.OTHER);
+                                        message.setMessageTime(new Date().getTime());
+                                        chatMessages.add(message);
+                                    }
+
+                                    listAdapter.notifyDataSetChanged();
+                                    scrollToBottomSharp();
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+        networkThread.start();
+
+
+    }
+
+    private void hideSoftKeyboard() {
         if(getCurrentFocus()!=null) {
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);

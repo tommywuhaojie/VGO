@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -24,10 +22,9 @@ import android.widget.ImageView;
 
 import org.json.JSONObject;
 
-import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ActivityClasses.SignUp3;
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
@@ -124,7 +121,7 @@ public class TabD_1 extends Fragment   {
             @Override
             public void run() {
                 try {
-                    JSONObject jsonObject = User.Logout();
+                    JSONObject jsonObject = UserApi.Logout();
                     Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
                 }catch (Exception e){
                     Log.d("DEBUG", "something went wrong when attempting to logout " + e.getMessage());
