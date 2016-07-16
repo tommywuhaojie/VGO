@@ -14,6 +14,8 @@ public class Urls {
     public static final String REGISTER_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/account/register";
     public static final String GET_USER_INFO_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/account/getUserInfo";
     public static final String GET_CHAT_HISTORY_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/chat_history";
+    public static final String GET_CONTACT_LIST_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/get_contact_list";
+    public static final String ADD_CONTACT_URL_ = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080/add_contact";
 
     // localhost test URLs
     public static final String LOCAL_HOST_URL = "http://127.0.0.1:8080";

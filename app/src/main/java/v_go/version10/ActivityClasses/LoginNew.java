@@ -81,7 +81,7 @@ public class LoginNew extends AppCompatActivity{
                 try {
                     String phone_number = phone.getText().toString().trim();
                     String pwd = password.getText().toString();
-                    if(UserApi.Login(phone_number, pwd).getString("code").equals("1"))
+                    if(UserApi.Login(phone_number, pwd, getApplicationContext()).getString("code").equals("1"))
                     {
                         // if login succeeded save status to local and no more login next time
                         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);

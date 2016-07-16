@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,6 +51,11 @@ public class TabC_1_new extends Fragment {
     private List<String> nameList = new ArrayList<>();
 
     private ProgressDialog pDialog;
+
+    private boolean isFirstTime = true;
+
+    private final String REQUEST_BY_PHONE_NUMBER = "phone_number";
+    private final String REQUEST_BY_USER_ID = "user_id";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -129,14 +135,65 @@ public class TabC_1_new extends Fragment {
         return view;
     }
 
-    /** setup adapter here to avoid lagging during changing view **/
+
+
     @Override
     public void onResume() {
         super.onResume();
+
+        // load contact list from server
+        if(isFirstTime){
+            isFirstTime = false;
+
+            if(pDialog == null)
+                pDialog = new ProgressDialog(getActivity());
+            pDialog.setCanceledOnTouchOutside(false);
+            pDialog.setCancelable(false);
+            pDialog.setMessage("Loading contacts...");
+            pDialog.show();
+
+            Thread networkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        JSONArray jsonArray = ChatApi.GetContactList();
+                        JSONObject firstObj = jsonArray.getJSONObject(0);
+
+                        if(firstObj.getString("code").equals("1")){
+
+                            int numberOfContacts = firstObj.getInt("number_of_contact");
+
+                            for(int i=1; i<(1+numberOfContacts); i++){
+
+                                final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
+
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
+                                    }
+                                });
+                            }
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+            networkThread.start();
+            try {
+                networkThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pDialog.dismiss();
+        }
+
     }
 
     /** setup the notification listview **/
-    public void setupAdapter(final String first_name_last_name, final String user_id, final String lastMessage,final String lastMessageDateTime) {
+    public void setupAdapter(final String first_name_last_name, final String user_id, final String lastMessage,final String lastMessageDateTime, final boolean dismissDialog) {
         final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
         final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
 
@@ -168,7 +225,8 @@ public class TabC_1_new extends Fragment {
                     @Override
                     public void run() {
                         contactListView.setAdapter(adapter);
-                        pDialog.dismiss();
+                        if(dismissDialog)
+                            pDialog.dismiss();
                     }
                 });
             }
@@ -202,7 +260,7 @@ public class TabC_1_new extends Fragment {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,int id) {
 
-                                    addToContactList(phoneET.getText().toString());
+                                    addToContactList(phoneET.getText().toString(), REQUEST_BY_PHONE_NUMBER, true, false);
                                 }
                             })
                     .setNegativeButton("Cancel",
@@ -219,46 +277,66 @@ public class TabC_1_new extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void addToContactList(final String phone_number){
+    private void addToContactList(final String phone_number, final String REQUEST_TYPE, final boolean showDialog, final boolean ignoreConflict){
 
-        pDialog = new ProgressDialog(getActivity());
-        pDialog.setCanceledOnTouchOutside(false);
-        pDialog.setCancelable(false);
-        pDialog.setMessage("Please wait...");
-        pDialog.show();
-
-        final String REQUEST_BY_PHONE_NUMBER = "phone_number";
+        if(showDialog) {
+            if(pDialog == null)
+                pDialog = new ProgressDialog(getActivity());
+            pDialog.setCanceledOnTouchOutside(false);
+            pDialog.setCancelable(false);
+            pDialog.setMessage("Loading contacts...");
+            pDialog.show();
+        }
 
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
-                final JSONObject result = UserApi.GetUserInfo(phone_number, REQUEST_BY_PHONE_NUMBER);
+                final JSONObject getUserInfoResult = UserApi.GetUserInfo(phone_number, REQUEST_TYPE);
+                try {
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            if(result.getString("code").matches("1")){
+                    if (getUserInfoResult.getString("code").matches("1")) {
 
-                                String displayName = result.getString("first_name") + " " + result.getString("last_name");
-                                String user_id = result.getString("user_id");
+                        JSONObject addNewContactResult = ChatApi.AddNewContact(getUserInfoResult.getString("user_id"));
 
+                        if(ignoreConflict){
+                            try {
+                                String displayName = getUserInfoResult.getString("first_name") + " " + getUserInfoResult.getString("last_name");
+                                String user_id = getUserInfoResult.getString("user_id");
                                 LastMessage lastMessage = getLastMessage(user_id);
-
-                                setupAdapter(displayName, user_id, lastMessage.message, lastMessage.dateTime);
-
-                            }else if(result.getString("code").matches("-1")) {
-                                pDialog.dismiss();
-                                Toast.makeText(getContext(), "User is not found.", Toast.LENGTH_SHORT).show();
+                                setupAdapter(displayName, user_id, lastMessage.message, lastMessage.dateTime, showDialog);
+                            }catch (Exception e){
+                                e.printStackTrace();
                             }
-                        }catch (Exception e){
-                            e.printStackTrace();
+
+                        }else if(addNewContactResult.getString("code").matches("1")){
+                            try {
+                                String displayName = getUserInfoResult.getString("first_name") + " " + getUserInfoResult.getString("last_name");
+                                String user_id = getUserInfoResult.getString("user_id");
+                                LastMessage lastMessage = getLastMessage(user_id);
+                                setupAdapter(displayName, user_id, lastMessage.message, lastMessage.dateTime, showDialog);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else if(addNewContactResult.getString("code").matches("-3")){
                             pDialog.dismiss();
-                            Toast.makeText(getContext(), "Server error occurs.", Toast.LENGTH_LONG).show();
+                            makeToast("You cannot add yourself as a new contact.");
+                            return;
+
+                        }else if(addNewContactResult.getString("code").matches("-5")){
+                            pDialog.dismiss();
+                            makeToast("You've already added this contact.");
+                            return;
                         }
+                    }else if(getUserInfoResult.getString("code").matches("-1")) {
+                        pDialog.dismiss();
+                        makeToast("User is not found.");
                     }
-                });
+                }catch (Exception e){
+                    e.printStackTrace();
+                    pDialog.dismiss();
+                    Toast.makeText(getContext(), "Server error occurs.", Toast.LENGTH_LONG).show();
+                }
             }
         });
         networkThread.start();
@@ -281,16 +359,20 @@ public class TabC_1_new extends Fragment {
                     if (firstObj.getString("code").matches("1")) {
 
                         final int LAST_MESSAGE = 1;
-                        JSONObject messageObj = jsonArray.getJSONObject(LAST_MESSAGE);
-                        String message = messageObj.getString("message");
-                        String dateTime = messageObj.getString("date_time");
+                        if(jsonArray.length() > 1) {
 
-                        lastMessage.message = message;
-                        lastMessage.dateTime = dateTime;
+                            JSONObject messageObj = jsonArray.getJSONObject(LAST_MESSAGE);
+                            String message = messageObj.getString("message");
+                            String dateTime = messageObj.getString("date_time");
+
+                            lastMessage.message = message;
+                            lastMessage.dateTime = dateTime;
+                        }
 
                     }
                 }catch (Exception e){
                     e.printStackTrace();
+                    pDialog.dismiss();
                 }
             }
         });
@@ -308,5 +390,14 @@ public class TabC_1_new extends Fragment {
     private class LastMessage{
         public String message = "";
         public String dateTime = "";
+    }
+
+    private void makeToast(final String toastMsg){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), toastMsg, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

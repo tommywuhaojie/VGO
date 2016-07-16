@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -124,11 +125,18 @@ public class SignUp2 extends AppCompatActivity {
                 try {
                     if(registerResult.getString("code").matches("1")){
                         // login right after register succeeded
-                        JSONObject loginResult = UserApi.Login(phone_number, password);
+                        JSONObject loginResult = UserApi.Login(phone_number, password, getApplicationContext());
                         if(loginResult.getString("code").matches("1")){
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+
+                                    // if login succeeded save status to local and no more login next time
+                                    SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+                                    SharedPreferences.Editor editor = settings.edit();
+                                    editor.putBoolean("is_logged_in", true);
+                                    editor.apply();
+
                                     Intent intent = new Intent(SignUp2.this, SignUp3.class);
                                     startActivity(intent);
                                     pDialog.dismiss();

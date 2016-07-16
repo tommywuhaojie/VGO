@@ -1,6 +1,7 @@
 package v_go.version10.ApiClasses;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,8 +31,6 @@ public class UserApi {
     final static int TIME_OUT_IN_SECOND = 10;
 
     public static JSONObject SendVerificationCode(String phone_number){
-
-        settingUpPersistentCookie();
 
         String json_text = null;
         String data="phone_number="+phone_number;
@@ -78,8 +77,6 @@ public class UserApi {
     }
 
     public static JSONObject VerifyCode(String phone_number, String code){
-
-        settingUpPersistentCookie();
 
         String json_text = null;
         String data="phone_number="+phone_number+"&code="+code;
@@ -154,8 +151,6 @@ public class UserApi {
 
     public static JSONObject Register(String object_id,String email,String password, String first_name, String last_name,
                                       int sex, String driver_license, String plate_number, String car_model, String colour, int isDriver){
-
-        settingUpPersistentCookie();
 
         String json_text = null;
 
@@ -249,8 +244,6 @@ public class UserApi {
     // type: "phone_number" or "user_id"
     public static JSONObject GetUserInfo(String identification, String type){
 
-        settingUpPersistentCookie();
-
         String json_text = null;
         String data =  type + "=" + identification;
         HttpURLConnection connection = null;
@@ -299,18 +292,13 @@ public class UserApi {
     * -1    : fail to login
     *  1    : successfully login
     * */
-    public static JSONObject Login(String phone_number,String password){
-
-        settingUpPersistentCookie();
+    public static JSONObject Login(String phone_number,String password, Context context){
 
         String json_text = null;
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
 
-        //CookieManager cookieManager = new CookieManager();
-        //CookieHandler.setDefault(cookieManager);
-
-        SiCookieStore2 siCookieStore = new SiCookieStore2(LoginNew.getAppContext());
+        SiCookieStore2 siCookieStore = new SiCookieStore2(context);
         CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
@@ -361,8 +349,6 @@ public class UserApi {
     * */
     public static JSONObject Logout(){
 
-        settingUpPersistentCookie();
-
         String json_text = null;
         HttpURLConnection connection = null;
         try {
@@ -402,8 +388,6 @@ public class UserApi {
     }
 
     public static JSONObject UploadAvatar(Bitmap bitmap) {
-
-        settingUpPersistentCookie();
 
         String attachmentName = "avatar";
         String attachmentFileName = ".jpg";
@@ -468,8 +452,6 @@ public class UserApi {
 
     public static Bitmap DownloadAvatar(String user_id){
 
-        settingUpPersistentCookie();
-
         InputStream inputStream;
 
         try {
@@ -497,8 +479,6 @@ public class UserApi {
 
     public static Bitmap DownloadAvatar(){
 
-        settingUpPersistentCookie();
-
         InputStream inputStream;
 
         try {
@@ -515,21 +495,6 @@ public class UserApi {
             return null;
         }
         return BitmapFactory.decodeStream(inputStream);
-    }
-
-    private static void settingUpPersistentCookie(){
-
-        SharedPreferences sp;
-
-        if(Main.getSharedPreferences() != null){
-            sp = Main.getSharedPreferences();
-        }else{
-            sp = SignUpAndLoginIn.getSharedPreferences();
-        }
-
-        SiCookieStore2 siCookieStore = new SiCookieStore2(sp);
-        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
-        CookieHandler.setDefault(cookieManager);
     }
 
     public static boolean isValidEmail(CharSequence target) {

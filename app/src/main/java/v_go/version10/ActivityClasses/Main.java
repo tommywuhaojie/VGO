@@ -26,6 +26,9 @@ import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -70,10 +73,6 @@ public class Main extends AppCompatActivity{
     // to receive notification from background service
     private BroadcastReceiver broadcastReceiver;
 
-    private static SharedPreferences sp;
-    public static SharedPreferences getSharedPreferences(){
-        return sp;
-    }
     public UserCache getUserCache(){
         return userCache;
     }
@@ -128,8 +127,10 @@ public class Main extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize SharePreferences for local cookie store
-        sp = getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0);
+        // load SharePreferences for cookie store
+        SiCookieStore2 siCookieStore = new SiCookieStore2(getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0));
+        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
 
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
