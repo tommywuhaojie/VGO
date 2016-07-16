@@ -5,21 +5,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -28,32 +25,25 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.HashMap;
 import java.util.Stack;
 
-import io.socket.client.Socket;
-import v_go.version10.ApiClasses.Request;
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
-import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.FragmentClasses.TabC_2;
 import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.HelperClasses.UserCache;
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
-import v_go.version10.SocketIo.SocketIoHelper;
 
 public class Main extends AppCompatActivity{
 
@@ -77,11 +67,11 @@ public class Main extends AppCompatActivity{
     // previously selected tab id
     private int visitedTab = 0;
 
-    // socket.io
-    private Socket mSocket;
-
     // cached object to store current user's infomation
     private UserCache userCache = new UserCache();
+
+    // to receive notification from background service
+    private BroadcastReceiver broadcastReceiver;
 
     public UserCache getUserCache(){
         return userCache;
@@ -106,33 +96,8 @@ public class Main extends AppCompatActivity{
     public void onDestroy() {
         super.onDestroy();
         Log.d("DEBUG", "Main onDestroy");
-
-        if(mSocket != null) {
-            // turn off all socket listeners
-            if( !mStacks.get(Global.TAB_C).isEmpty()){
-                ((TabC_1_new)mStacks.get(Global.TAB_C).firstElement()).turnOffAllSocketListeners();
-            }
-            // disconnect from server when Main activity is destroyed
-            mSocket.disconnect();
-        }
-
-        // calling logout to kill session
-        Thread networkThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JSONObject jsonObject = User.Logout();
-                    Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
-                }catch (Exception e){
-                    Log.d("DEBUG", "something went wrong when attempting to logout");
-                    e.printStackTrace();
-                }}});
-        networkThread.start();
     }
 
-    public Socket getScoket(){
-        return mSocket;
-    }
     public void setTabHostVisibility(Boolean visible){
         if(visible) {
             mTabHost.getTabWidget().setVisibility(View.VISIBLE);
@@ -141,10 +106,20 @@ public class Main extends AppCompatActivity{
         }
 
     }
-    private void initializeSocketConnection(){
-        SocketIoHelper socketHelper = (SocketIoHelper) getApplication();
-        mSocket = socketHelper.getSocket();
-        mSocket.connect();
+
+    public void downloadCurrentUserAvatar(){
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap bitmap = UserApi.DownloadAvatar();
+                if (bitmap != null) {
+                    Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
+                    userCache.setAvatar(circleBitmap);
+                    Global.my_avatar = circleBitmap;
+                }
+            }
+        });
+        networkThread.start();
     }
 
     @Override
@@ -152,10 +127,17 @@ public class Main extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // load SharePreferences for cookie store
+        SiCookieStore2 siCookieStore = new SiCookieStore2(getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0));
+        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
+
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
 
-        initializeSocketConnection();
+        // download necessary user information in a different thread: avatar, name, etc...
+        downloadCurrentUserAvatar();
+        // TO DO: download user info
 
         // lists initialization
         notifStack = new Stack<>();
@@ -196,90 +178,6 @@ public class Main extends AppCompatActivity{
         //Log.d("DEBUG", "set current tab");
     }
 
-    // push new notification to stack
-    private void pushToNotifStack(Intent intent){
-        int req_id[] = intent.getIntArrayExtra("req_id_array");
-        int trip_id[] = intent.getIntArrayExtra("trip_id_array");
-        int type[] = intent.getIntArrayExtra("notif_type_array");
-        int rec_flag[] = intent.getIntArrayExtra("receive_flag_array");
-        String start_loc[] = intent.getStringArrayExtra("start_loc_array");
-        String end_loc[] = intent.getStringArrayExtra("end_loc_array");
-        String name[] = intent.getStringArrayExtra("sender_name_array");
-
-        for(int i=req_id.length-1; i>=0; i--){
-            notifStack.push(new Notification(req_id[i], trip_id[i], type[i], rec_flag[i],
-                                             start_loc[i], end_loc[i], name[i]));
-        }
-    }
-    // fetch the request list from server again
-    public void refreshNotifStack(){
-
-        // clear the stack
-        notifStack.clear();
-        // fetch the list again
-       Thread networkThread = new Thread(new Runnable() {
-          @Override
-           public void run() {
-                final String NUM_OF_NOTIF_RECEIVED_ALREADY = "1000";
-                Request request = new Request();
-                JSONArray jsonArray = request.RequestList(NUM_OF_NOTIF_RECEIVED_ALREADY);
-
-                try {
-                    for (int j = jsonArray.length() - 1; j >= 0; j--) {
-                        int type = -1;
-                        // notification type and results
-                        if (jsonArray.getJSONObject(j).has("accept") && jsonArray.getJSONObject(j).getInt("accept") != 2) {
-                            int result = jsonArray.getJSONObject(j).getInt("accept");
-                            // denied
-                            if (result == 0) {
-                                type = 2;
-                                // accepted
-                            } else if (result == 1) {
-                                type = 3;
-                                // pending
-                            } else if (result == 2) {
-                                type = 4;
-                            }
-                        } else if (jsonArray.getJSONObject(j).has("reg_as")) {
-                            type = jsonArray.getJSONObject(j).getInt("reg_as");
-                        }
-
-                        // handle type of -1
-                        if(type == -1)
-                            throw new Exception("notif type return -1");
-
-                        notifStack.push(new Notification(
-                                        jsonArray.getJSONObject(j).getInt("request_id"),
-                                        jsonArray.getJSONObject(j).getInt("trip_id"),
-                                        type,
-                                        jsonArray.getJSONObject(j).getInt("received_flag"),
-                                        jsonArray.getJSONObject(j).getString("start_location"),
-                                        jsonArray.getJSONObject(j).getString("end_location"),
-                                        jsonArray.getJSONObject(j).getString("name"))
-                        );
-                    }
-
-                    // when finish loading
-                    ((TabC_2)getCurrentFragment()).setupAdapter();
-
-                    Log.d("DEBUG", "Notif list refresh! # of notif: "+ notifStack.size());
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Log.d("DEBUG", "EXCEPTION!");
-                }
-
-            }
-        });
-       networkThread.start();
-        /*
-       try {
-           networkThread.join();
-       } catch (InterruptedException e) {
-            e.printStackTrace();
-       }
-       */
-
-    }
     public Stack<Notification> getNotifStack(){
         return notifStack;
     }
@@ -341,7 +239,7 @@ public class Main extends AppCompatActivity{
             mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
         }
 
-        // initialize socket for chat message first
+        // default tab
         mTabHost.setCurrentTab(0);
     }
 
@@ -349,25 +247,6 @@ public class Main extends AppCompatActivity{
     /*Comes here when user switch tab, or we do programmatically*/
     TabHost.OnTabChangeListener listener    =   new TabHost.OnTabChangeListener() {
         public void onTabChanged(String tabId) {
-
-            Log.d("DEBUG", "TAB CHANGE!!!" + tabId);
-
-            // get rid of the switch tab delay for now
-            /*
-            if(!allow){
-                mTabHost.setCurrentTabByTag(mCurrentTab);
-                return;
-            }
-            allow = false;
-
-            // allow to change tab before wait 0.2 second
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run() {
-                    allow = true;
-                }
-            }, 200);
-            */
 
             /*Set current tab..*/
             mCurrentTab = tabId;

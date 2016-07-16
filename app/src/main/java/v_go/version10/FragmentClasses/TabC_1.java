@@ -1,11 +1,9 @@
 package v_go.version10.FragmentClasses;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
@@ -16,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TableLayout;
@@ -136,7 +133,7 @@ public class TabC_1 extends Fragment  {
                                 TextView addr_a = (TextView) tableRow.findViewById(R.id.addr_a);
                                 TextView addr_b = (TextView) tableRow.findViewById(R.id.addr_b);
                                 TextView start_date = (TextView) tableRow.findViewById(R.id.date);
-                                TextView start_time = (TextView) tableRow.findViewById(R.id.time);
+                                TextView start_time = (TextView) tableRow.findViewById(R.id.date_time);
                                 TextView duration = (TextView) tableRow.findViewById(R.id.duration);
                                 TextView distance = (TextView) tableRow.findViewById(R.id.distance);
                                 TextView type = (TextView) tableRow.findViewById(R.id.type);

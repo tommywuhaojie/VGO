@@ -1,10 +1,9 @@
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.*;
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 
 public class Register_Tests {
@@ -29,12 +28,12 @@ public class Register_Tests {
     @Test
     public void Repeated_Phone_Number() throws Exception
     {
-        JSONObject result1 = User.Register(PhoneNumber,Email,Password,FirstName,LastName);
+        JSONObject result1 = UserApi.Register(PhoneNumber, Email, Password, FirstName, LastName);
         System.out.println("-->Register Result: " + result1.toString());
         Assert.assertEquals("1" , result1.getString("code"));
         uuid = UUID.randomUUID();
         String Email2 = uuid.toString()+"@gmail.com";
-        JSONObject result2 = User.Register(PhoneNumber,Email2,Password,FirstName,LastName);
+        JSONObject result2 = UserApi.Register(PhoneNumber, Email2, Password, FirstName, LastName);
         System.out.println("-->Register Result: " + result2.toString());
         Assert.assertNotEquals("1" , result2.getString("code"));
     }
@@ -44,10 +43,10 @@ public class Register_Tests {
     {
         long Number2 = (long) Math.floor(Math.random() * 9000000000L) + 1000000000L;
         String PhoneNumber2 = Number2 + "";
-        JSONObject result1 = User.Register(PhoneNumber,Email,Password,FirstName,LastName);
+        JSONObject result1 = UserApi.Register(PhoneNumber, Email, Password, FirstName, LastName);
         System.out.println("-->Register Result: " + result1.toString());
         Assert.assertEquals("1" , result1.getString("code"));
-        JSONObject result2 = User.Register(PhoneNumber2,Email,Password,FirstName,LastName);
+        JSONObject result2 = UserApi.Register(PhoneNumber2, Email, Password, FirstName, LastName);
         System.out.println("-->Register Result: " + result2.toString());
         Assert.assertNotEquals("1" , result2.getString("code"));
     }
@@ -68,7 +67,7 @@ public class Register_Tests {
         {
             uuid = UUID.randomUUID();
             String email = uuid.toString()+"@hotmail.com";
-            JSONObject result = User.Register(Number_list.get(index),email,Password, FirstName,LastName);
+            JSONObject result = UserApi.Register(Number_list.get(index), email, Password, FirstName, LastName);
             System.out.println("-->Register Result: " + result.toString());
             Assert.assertNotEquals("1" , result.getString("code"));
         }
@@ -86,7 +85,7 @@ public class Register_Tests {
         {
             long number = (long) Math.floor(Math.random() * 9000000000L) + 1000000000L;
             String phone_number = number + "";
-            JSONObject result = User.Register(phone_number,Email_list.get(index), Password, FirstName,LastName);
+            JSONObject result = UserApi.Register(phone_number, Email_list.get(index), Password, FirstName, LastName);
             System.out.println("-->Register Result: " + result.toString());
             Assert.assertNotEquals("1" , result.getString("code"));
         }

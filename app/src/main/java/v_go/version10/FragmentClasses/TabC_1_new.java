@@ -1,18 +1,15 @@
 package v_go.version10.FragmentClasses;
 
-import android.content.Context;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,444 +18,386 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TabHost;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.Main;
+import v_go.version10.ApiClasses.ChatApi;
+import v_go.version10.ApiClasses.UserApi;
+import v_go.version10.Chat.ChatActivity;
+import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.Global;
-import v_go.version10.InstantMessage.Message;
-import v_go.version10.InstantMessage.MessageAdapter;
 import v_go.version10.R;
 
-public class TabC_1_new extends Fragment   {
+public class TabC_1_new extends Fragment {
 
-    private static final int REQUEST_LOGIN = 0;
+    private View view;
+    private SimpleAdapter adapter;
+    private ListView contactListView;
+    private List<HashMap<String, String>> hashMap = new ArrayList<>();
+    private List<Bitmap> avatarList = new ArrayList<>();
+    private List<String> userIdList = new ArrayList<>();
+    private List<String> nameList = new ArrayList<>();
 
-    private static final int TYPING_TIMER_LENGTH = 600;
+    private ProgressDialog pDialog;
 
-    private RecyclerView mMessagesView;
-    private EditText mInputMessageView;
-    private List<Message> mMessages = new ArrayList<Message>();
-    private RecyclerView.Adapter mAdapter;
-    private boolean mTyping = false;
-    private Handler mTypingHandler = new Handler();
-    private String mUsername;
-    private Socket mSocket;
+    private boolean isFirstTime = true;
 
-    private Boolean isConnected = true;
-    private int onAttachCounter = 0;
-
-    private FragmentActivity m_activity;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if(onAttachCounter == 0) {
-            mAdapter = new MessageAdapter(context, mMessages);
-        }
-        onAttachCounter++;
-
-        m_activity = getActivity();
-
-        getActivity().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        getActivity().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-    }
-
-    public void turnOffAllSocketListeners(){
-        mSocket.off(Socket.EVENT_CONNECT, onConnect);
-        mSocket.off(Socket.EVENT_DISCONNECT, onDisconnect);
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("chat message", onNewMessage);
-        mSocket.off("user joined", onUserJoined);
-        mSocket.off("user left", onUserLeft);
-        mSocket.off("typing", onTyping);
-        mSocket.off("stop typing", onStopTyping);
-    }
-    private void scrollToBottom() {
-        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
-        Log.d("DEBUG", "scroll to buttom");
-    }
+    private final String REQUEST_BY_PHONE_NUMBER = "phone_number";
+    private final String REQUEST_BY_USER_ID = "user_id";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.tab_c_1_new, container, false);
+        // inflate the layout for this fragment
+        view = inflater.inflate(R.layout.tab_c_1_new, container, false);
 
         // set status bar color to black
         Window window = getActivity().getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        //window.setStatusBarColor(Color.BLACK);
 
         // change toolbar title
-        ((Main) getActivity()).enableBackButton(false);
         setHasOptionsMenu(true);
 
-        // setup socket only once when attaching this fragment the first time
-        if(onAttachCounter == 1) {
+        // set up the notification list
+        contactListView = (ListView) view.findViewById(R.id.listView);
 
-            // temp solution
-            Random ran = new Random();
-            mUsername = "AndroidClient #" + ran.nextInt(101) + ":";
-
-            // socket.io setup
-            mSocket = ((Main) getActivity()).getScoket();
-            mSocket.on(Socket.EVENT_CONNECT, onConnect);
-            mSocket.on(Socket.EVENT_DISCONNECT, onDisconnect);
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on("chat message", onNewMessage);
-            mSocket.on("user joined", onUserJoined);
-            mSocket.on("user left", onUserLeft);
-            mSocket.on("typing", onTyping);
-            mSocket.on("stop typing", onStopTyping);
+        // retrieve ListView
+        if(adapter != null) {
+            contactListView.setAdapter(adapter);
         }
 
-        mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
-        mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mMessagesView.setAdapter(mAdapter);
-
-        mInputMessageView = (EditText) view.findViewById(R.id.message_input);
-        mInputMessageView.setOnClickListener(new View.OnClickListener() {
+        // on listView item clicked
+        contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View view) {
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // open up a new chat activity
+                String user_id = userIdList.get(position);
+                Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra("user_id", user_id);
+                intent.putExtra("user_name", nameList.get(position));
+                Global.other_avatar = avatarList.get(position);
+                getActivity().startActivity(intent);
+            }
+        });
+
+        // Setup swipe refresh
+        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_red_light,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_orange_light);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // disable tab when loading notification
+                ((Main) getActivity()).getTabWidget().setEnabled(false);
+
+                //setupAdapter();
+                //contactListView.setAdapter(adapter);
+                Toast.makeText(getActivity(), "Everything is up to date.", Toast.LENGTH_SHORT).show();
+                // enable tab
+                ((Main) getActivity()).getTabWidget().setEnabled(true);
+
+                // refresh animation
+                swipeRefreshLayout.setRefreshing(true);
+                new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        scrollToBottom();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
-                }, 300);
+                }, 2000);
             }
         });
-        mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        // refresh only at the top of the ListView mechanism
+        contactListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public boolean onEditorAction(TextView v, int id, KeyEvent event) {
-                if (id == R.id.send || id == EditorInfo.IME_NULL) {
-                    attemptSend();
-                    return true;
-                }
-                return false;
-            }
-        });
-        mInputMessageView.addTextChangedListener(new TextWatcher() {
+            public void onScrollStateChanged(AbsListView view, int scrollState) {}
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (null == mUsername) return;
-                if (!mSocket.connected()) return;
-
-                if (!mTyping) {
-                    mTyping = true;
-                    mSocket.emit("typing");
-                }
-                mTypingHandler.removeCallbacks(onTypingTimeout);
-                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
-            }
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptSend();
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                int topRowVerticalPosition = (contactListView == null || contactListView.getChildCount() == 0) ? 0 : contactListView.getChildAt(0).getTop();
+                swipeRefreshLayout.setEnabled(firstVisibleItem == 0 && topRowVerticalPosition >= 0);
             }
         });
 
         return view;
     }
 
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // load contact list from server
+        if(isFirstTime){
+            isFirstTime = false;
+
+            if(pDialog == null)
+                pDialog = new ProgressDialog(getActivity());
+            pDialog.setCanceledOnTouchOutside(false);
+            pDialog.setCancelable(false);
+            pDialog.setMessage("Loading contacts...");
+            pDialog.show();
+
+            Thread networkThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        JSONArray jsonArray = ChatApi.GetContactList();
+                        JSONObject firstObj = jsonArray.getJSONObject(0);
+
+                        if(firstObj.getString("code").equals("1")){
+
+                            int numberOfContacts = firstObj.getInt("number_of_contact");
+
+                            for(int i=1; i<(1+numberOfContacts); i++){
+
+                                final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
+
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
+                                    }
+                                });
+                            }
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+            networkThread.start();
+            try {
+                networkThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            pDialog.dismiss();
+        }
+
+    }
+
+    /** setup the notification listview **/
+    public void setupAdapter(final String first_name_last_name, final String user_id, final String lastMessage,final String lastMessageDateTime, final boolean dismissDialog) {
+        final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
+        final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
+
+        final HashMap<String, String> map = new HashMap<>();
+
+        map.put("first_name_last_name", first_name_last_name);
+        map.put("last_message", lastMessage);
+        map.put("date_time", lastMessageDateTime);
+
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Bitmap bitmap = UserApi.DownloadAvatar(user_id);
+
+                bitmap = Global.getCircularBitmap(bitmap);
+
+                avatarList.add(0, bitmap);
+
+                nameList.add(0, first_name_last_name);
+
+                userIdList.add(0, user_id);
+
+                hashMap.add(0, map);
+
+                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        contactListView.setAdapter(adapter);
+                        if(dismissDialog)
+                            pDialog.dismiss();
+                    }
+                });
+            }
+        });
+        networkThread.start();
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_chat_contacts, menu);
         super.onCreateOptionsMenu(menu, inflater);
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        if(id == android.R.id.home) {
+        if (id == R.id.add) {
+            // get prompts.xml view
+            LayoutInflater li = LayoutInflater.from(getContext());
+            View promptsView = li.inflate(R.layout.add_contact_dialog, null);
+            final EditText phoneET = (EditText)promptsView.findViewById(R.id.add_contact_phone_number);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+            // set prompts.xml to alertdialog builder
+            alertDialogBuilder.setView(promptsView);
+            // set dialog message
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Add",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+
+                                    addToContactList(phoneET.getText().toString(), REQUEST_BY_PHONE_NUMBER, true, false);
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            // show it
+            alertDialog.show();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void addLog(String message) {
-        mMessages.add(new Message.Builder(Message.TYPE_LOG)
-                .message(message).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
+    private void addToContactList(final String phone_number, final String REQUEST_TYPE, final boolean showDialog, final boolean ignoreConflict){
 
-    private void addParticipantsLog(int numUsers) {
-        addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
-    }
+        if(showDialog) {
+            if(pDialog == null)
+                pDialog = new ProgressDialog(getActivity());
+            pDialog.setCanceledOnTouchOutside(false);
+            pDialog.setCancelable(false);
+            pDialog.setMessage("Loading contacts...");
+            pDialog.show();
+        }
 
-    private void addMessage(String username, String message) {Log.d("DEBUG", "add message!!!!!!!!!!!!");
-        mMessages.add(new Message.Builder(Message.TYPE_MESSAGE)
-                .username(username).message(message).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-    private void addTyping(String username) {
-        mMessages.add(new Message.Builder(Message.TYPE_ACTION)
-                .username(username).build());
-        mAdapter.notifyItemInserted(mMessages.size() - 1);
-        scrollToBottom();
-    }
+                final JSONObject getUserInfoResult = UserApi.GetUserInfo(phone_number, REQUEST_TYPE);
+                try {
 
-    private void removeTyping(String username) {
-        for (int i = mMessages.size() - 1; i >= 0; i--) {
-            Message message = mMessages.get(i);
-            if (message.getType() == Message.TYPE_ACTION && message.getUsername().equals(username)) {
-                mMessages.remove(i);
-                mAdapter.notifyItemRemoved(i);
+                    if (getUserInfoResult.getString("code").matches("1")) {
+
+                        JSONObject addNewContactResult = ChatApi.AddNewContact(getUserInfoResult.getString("user_id"));
+
+                        if(ignoreConflict){
+                            try {
+                                String displayName = getUserInfoResult.getString("first_name") + " " + getUserInfoResult.getString("last_name");
+                                String user_id = getUserInfoResult.getString("user_id");
+                                LastMessage lastMessage = getLastMessage(user_id);
+                                setupAdapter(displayName, user_id, lastMessage.message, lastMessage.dateTime, showDialog);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+                        }else if(addNewContactResult.getString("code").matches("1")){
+                            try {
+                                String displayName = getUserInfoResult.getString("first_name") + " " + getUserInfoResult.getString("last_name");
+                                String user_id = getUserInfoResult.getString("user_id");
+                                LastMessage lastMessage = getLastMessage(user_id);
+                                setupAdapter(displayName, user_id, lastMessage.message, lastMessage.dateTime, showDialog);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }else if(addNewContactResult.getString("code").matches("-3")){
+                            pDialog.dismiss();
+                            makeToast("You cannot add yourself as a new contact.");
+                            return;
+
+                        }else if(addNewContactResult.getString("code").matches("-5")){
+                            pDialog.dismiss();
+                            makeToast("You've already added this contact.");
+                            return;
+                        }
+                    }else if(getUserInfoResult.getString("code").matches("-1")) {
+                        pDialog.dismiss();
+                        makeToast("User is not found.");
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    pDialog.dismiss();
+                    Toast.makeText(getContext(), "Server error occurs.", Toast.LENGTH_LONG).show();
+                }
             }
-        }
+        });
+        networkThread.start();
     }
 
-    private void attemptSend() {
-        //if (null == mUsername) return;
-        if (!mSocket.connected()){
-            Toast.makeText(getActivity().getApplicationContext(),
-                    "Error Occurs: You are not connect to server", Toast.LENGTH_LONG).show();
-            return;
+    private LastMessage getLastMessage(final String other_user_id){
+
+        final LastMessage lastMessage = new LastMessage();
+
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                final int NUMBER_OF_MESSAGES = 1;
+                final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES);
+
+
+                try {
+                    JSONObject firstObj = jsonArray.getJSONObject(0);
+                    if (firstObj.getString("code").matches("1")) {
+
+                        final int LAST_MESSAGE = 1;
+                        if(jsonArray.length() > 1) {
+
+                            JSONObject messageObj = jsonArray.getJSONObject(LAST_MESSAGE);
+                            String message = messageObj.getString("message");
+                            String dateTime = messageObj.getString("date_time");
+
+                            lastMessage.message = message;
+                            lastMessage.dateTime = dateTime;
+                        }
+
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    pDialog.dismiss();
+                }
+            }
+        });
+        networkThread.start();
+        try {
+            networkThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        mTyping = false;
-
-        String message = mInputMessageView.getText().toString().trim();
-        if (TextUtils.isEmpty(message)) {
-            mInputMessageView.requestFocus();
-            return;
-        }
-
-        mInputMessageView.setText("");
-        //addMessage(mUsername, message);
-
-        // perform the sending message attempt.
-        mSocket.emit("chat message", mUsername + " " + message);
+        return lastMessage;
     }
 
-    /*
-    private void startSignIn() {
-        mUsername = null;
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
-        startActivityForResult(intent, REQUEST_LOGIN);
+
+    private class LastMessage{
+        public String message = "";
+        public String dateTime = "";
     }
 
-
-    private void leave() {
-        mUsername = null;
-        mSocket.disconnect();
-        mSocket.connect();
-        startSignIn();
+    private void makeToast(final String toastMsg){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), toastMsg, Toast.LENGTH_LONG).show();
+            }
+        });
     }
-    */
-
-    private Emitter.Listener onConnect = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            if(getActivity() == null)
-                return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if(!isConnected) {
-                        if(null!=mUsername)
-                            mSocket.emit("add user", mUsername);
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                "Connected", Toast.LENGTH_LONG).show();
-                        isConnected = true;
-                    }
-                }
-            });
-        }
-    };
-
-
-
-    private Emitter.Listener onDisconnect = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            if(getActivity() == null)
-                return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    isConnected = false;
-                    Toast.makeText(getActivity().getApplicationContext(),
-                            "Disconnected, Please check your internet connection", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
-
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getActivity().getApplicationContext(),
-                            "Failed to connect", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            m_activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    /*
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    try {
-                        username = data.getString("username");
-                        message = data.getString("message");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    removeTyping(username);
-                    */
-                    // temp test solution
-                    String username = "->";
-                    String message = args[0].toString();
-
-                    addMessage(username, message);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onUserJoined = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("username");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(username + " joined");
-                    addParticipantsLog(numUsers);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onUserLeft = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("username");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(username + " left");
-                    addParticipantsLog(numUsers);
-                    removeTyping(username);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onTyping = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    addTyping(username);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onStopTyping = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("username");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    removeTyping(username);
-                }
-            });
-        }
-    };
-
-    private Runnable onTypingTimeout = new Runnable() {
-        @Override
-        public void run() {
-            if (!mTyping) return;
-
-            mTyping = false;
-            mSocket.emit("stop typing");
-        }
-    };
 }

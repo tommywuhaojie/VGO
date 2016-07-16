@@ -73,7 +73,7 @@ public class TabA_4 extends Fragment{
 
         TextView addr_a = (TextView)view.findViewById(R.id.addr_a);
         TextView addr_b = (TextView)view.findViewById(R.id.addr_b);
-        TextView time = (TextView)view.findViewById(R.id.time);
+        TextView time = (TextView)view.findViewById(R.id.date_time);
         TextView a_diff = (TextView)view.findViewById(R.id.a_diff);
         TextView b_diff = (TextView)view.findViewById(R.id.b_diff);
         TextView time_diff = (TextView)view.findViewById(R.id.time_diff);

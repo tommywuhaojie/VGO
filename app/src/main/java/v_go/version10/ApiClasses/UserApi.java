@@ -1,6 +1,8 @@
 package v_go.version10.ApiClasses;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
@@ -15,21 +17,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class User {
+import v_go.version10.ActivityClasses.LoginNew;
+import v_go.version10.ActivityClasses.Main;
+import v_go.version10.ActivityClasses.SignUpAndLoginIn;
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
+
+public class UserApi {
+
+    final static int TIME_OUT_IN_SECOND = 10;
 
     public static JSONObject SendVerificationCode(String phone_number){
+
         String json_text = null;
         String data="phone_number="+phone_number;
         HttpURLConnection connection = null;
 
         try {
-            URL url = new URL(ServerUrls.SEND_CODE_URL);
+            URL url = new URL(Urls.SEND_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -65,15 +77,17 @@ public class User {
     }
 
     public static JSONObject VerifyCode(String phone_number, String code){
+
         String json_text = null;
         String data="phone_number="+phone_number+"&code="+code;
         HttpURLConnection connection = null;
 
         try {
-            URL url = new URL(ServerUrls.VERIFY_CODE_URL);
+            URL url = new URL(Urls.VERIFY_CODE_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -137,6 +151,7 @@ public class User {
 
     public static JSONObject Register(String object_id,String email,String password, String first_name, String last_name,
                                       int sex, String driver_license, String plate_number, String car_model, String colour, int isDriver){
+
         String json_text = null;
 
         String data;
@@ -151,10 +166,11 @@ public class User {
 
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerUrls.REGISTER_URL);
+            URL url = new URL(Urls.REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
 
             connection.setUseCaches(false);
             connection.setDoInput(true);
@@ -192,22 +208,107 @@ public class User {
         return jsonObject;
     }
 
+    /* PATH: host_url:8080/account/getUserInfo
+     *
+     * INPUT:
+     * 'phone_number' or 'user_id' (only one input will be accepted at a time)
+     *
+     * OUTPUT: JSON Object that contains
+     *  'code' : respond code
+     *  'msg' : respond message
+     *
+     *   1 -> Get user information successfully
+     *  -1 -> phone_number or user_id does not exist
+     *  -2 -> Either phone_number or user_id is not specified or undefined
+     *  -3 -> You can only specify one user identifications, either phone_number or user_id(object_id)
+     *
+     * ** Upon successful request, you will also be return with:
+     *
+     * 'user_id': String
+     * 'phone_number': String
+     * 'email': String
+     * 'first_name': String
+     * 'last_name': String
+     * 'sex': String 0 -> female, 1 -> male
+     * 'driver_flag': Boolean true -> driver, false -> not-a-driver
+     *
+     * ** The following info will be returned if driver_flag is true,
+     * ** otherwise empty strings will be returned
+     *
+     * 'driver_license': String
+     * 'plate_number': String
+     * 'colour': String
+     * 'car_model': String (eg. "2017-Ferrari-Coupe")
+     *
+     */
+    // type: "phone_number" or "user_id"
+    public static JSONObject GetUserInfo(String identification, String type){
+
+        String json_text = null;
+        String data =  type + "=" + identification;
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(Urls.GET_USER_INFO_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setUseCaches(false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(data);
+            writer.flush();
+            writer.close();
+            //Response
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer();
+            while ((line = rd.readLine())!=null) {
+                response.append(line);
+                response.append("\r");
+            }
+            json_text = response.toString().trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(json_text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
     /*
     * return value:
     * -1    : fail to login
     *  1    : successfully login
     * */
-    public static JSONObject Login(String phone_number,String password){
+    public static JSONObject Login(String phone_number,String password, Context context){
+
         String json_text = null;
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
-        CookieManager cookieManager = new CookieManager();
+
+        SiCookieStore2 siCookieStore = new SiCookieStore2(context);
+        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
+
+
         try {
-            URL url = new URL(ServerUrls.LOGIN_URL);
+            URL url = new URL(Urls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -247,13 +348,15 @@ public class User {
     *  1    : successfully logged out
     * */
     public static JSONObject Logout(){
+
         String json_text = null;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(ServerUrls.LOGOUT_URL);
+            URL url = new URL(Urls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -285,6 +388,7 @@ public class User {
     }
 
     public static JSONObject UploadAvatar(Bitmap bitmap) {
+
         String attachmentName = "avatar";
         String attachmentFileName = ".jpg";
         String crlf = "\r\n";
@@ -294,10 +398,12 @@ public class User {
         String response;
         String json_text = null;
         try {
-            URL url = new URL(ServerUrls.UPLOAD_AVATAR_URL);
+            URL url = new URL(Urls.UPLOAD_AVATAR_URL);
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            httpUrlConnection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
 
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
@@ -350,10 +456,11 @@ public class User {
 
         try {
             String data = "user_id=" + user_id;
-            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(10 * 1000);
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
             connection.setUseCaches(false);
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -371,10 +478,18 @@ public class User {
     }
 
     public static Bitmap DownloadAvatar(){
+
         InputStream inputStream;
+
         try {
-            URL url = new URL(ServerUrls.DOWNLOAD_AVATAR_URL);
-            inputStream = url.openConnection().getInputStream();
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setReadTimeout(TIME_OUT_IN_SECOND * 1000);
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            inputStream = connection.getInputStream();
         }catch (Exception e){
             e.printStackTrace();
             return null;

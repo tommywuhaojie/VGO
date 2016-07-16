@@ -17,8 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
-import v_go.version10.ApiClasses.User;
 
 
 public class Register extends AppCompatActivity {
@@ -189,7 +189,7 @@ public class Register extends AppCompatActivity {
 
 
                     try {
-                        User user = new User();
+                        UserApi user = new UserApi();
                         result = Integer.parseInt("1");
 
                     }catch (Exception e){

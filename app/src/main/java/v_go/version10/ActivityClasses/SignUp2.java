@@ -4,8 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +13,7 @@ import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.method.PasswordTransformationMethod;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
 
 public class SignUp2 extends AppCompatActivity {
@@ -119,17 +119,24 @@ public class SignUp2 extends AppCompatActivity {
                         + "-" + typeSp.getSelectedItem().toString().trim();
                 String color = colorSp.getSelectedItem().toString().trim();
 
-                final JSONObject registerResult = User.Register(object_id, email, password, first_name, last_name,
+                final JSONObject registerResult = UserApi.Register(object_id, email, password, first_name, last_name,
                         userSex, driver_license, plate_number, model, color, userTypeToggle);
 
                 try {
                     if(registerResult.getString("code").matches("1")){
                         // login right after register succeeded
-                        JSONObject loginResult = User.Login(phone_number, password);
+                        JSONObject loginResult = UserApi.Login(phone_number, password, getApplicationContext());
                         if(loginResult.getString("code").matches("1")){
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+
+                                    // if login succeeded save status to local and no more login next time
+                                    SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+                                    SharedPreferences.Editor editor = settings.edit();
+                                    editor.putBoolean("is_logged_in", true);
+                                    editor.apply();
+
                                     Intent intent = new Intent(SignUp2.this, SignUp3.class);
                                     startActivity(intent);
                                     pDialog.dismiss();
@@ -272,23 +279,26 @@ public class SignUp2 extends AppCompatActivity {
             userInfoOk = false;
         }
 
-        if(!User.isValidEmail(emailET.getText().toString().trim())){
+        if(!UserApi.isValidEmail(emailET.getText().toString().trim())){
             emailET.setError("Invalid Email Address");
             userInfoOk = false;
         }
 
-        if(!User.isValidPassword(passwordET.getText().toString())){
+        if(!UserApi.isValidPassword(passwordET.getText().toString())){
             passwordET.setError("Password must contain:\n" +
-                    "at least 8 characters\n" +
-                    "at least 1 number\n" +
-                    "at least 1 lower case letter\n" +
-                    "at least 1 upper case letter\n" +
-                    "no whitespace");
+                    "At least 8 characters\n" +
+                    "At least 1 number\n" +
+                    "At least 1 lower case letter\n" +
+                    "At least 1 upper case letter\n" +
+                    "No whitespaces");
             userInfoOk = false;
         }
 
         if(userSex == -1){
-            Toast.makeText(this, "Please choose a gender.", Toast.LENGTH_LONG).show();
+            Toast toast= Toast.makeText(getApplicationContext(),
+                    "Please choose your gender.", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 450);
+            toast.show();
             userInfoOk = false;
         }
 

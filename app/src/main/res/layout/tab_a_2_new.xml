@@ -130,7 +130,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Pick a Time"
-                android:id="@+id/time"
+                android:id="@+id/date_time"
                 android:gravity="center_vertical"
                 android:textColor="#ffffff"
                 android:layout_marginLeft="20dp"

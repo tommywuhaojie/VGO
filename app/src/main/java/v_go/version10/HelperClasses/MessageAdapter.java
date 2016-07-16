@@ -1,4 +1,4 @@
-package v_go.version10.InstantMessage;
+package v_go.version10.HelperClasses;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

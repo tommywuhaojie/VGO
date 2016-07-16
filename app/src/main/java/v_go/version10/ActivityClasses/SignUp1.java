@@ -17,10 +17,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
@@ -69,7 +68,7 @@ public class SignUp1 extends AppCompatActivity {
             Thread networkThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    final JSONObject jsonObject = User.SendVerificationCode(phone.getText().toString().trim());
+                    final JSONObject jsonObject = UserApi.SendVerificationCode(phone.getText().toString().trim());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -139,7 +138,7 @@ public class SignUp1 extends AppCompatActivity {
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                final JSONObject jsonObject = User.VerifyCode(phone.getText().toString().trim(), code.getText().toString().trim());
+                final JSONObject jsonObject = UserApi.VerifyCode(phone.getText().toString().trim(), code.getText().toString().trim());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

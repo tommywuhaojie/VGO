@@ -1,10 +1,14 @@
 package v_go.version10.FragmentClasses;
 
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,10 +20,11 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import v_go.version10.ActivityClasses.LoginNew;
+import org.json.JSONObject;
+
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ActivityClasses.SignUp3;
-import v_go.version10.ApiClasses.User;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
@@ -33,27 +38,13 @@ public class TabD_1 extends Fragment   {
     public void onResume() {
         super.onResume();
 
-        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
+        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR){
             Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
-            // download the avatar of current user
-            Thread networkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    final Bitmap bitmap = User.DownloadAvatar();
-                    if (bitmap != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
-                                avatarImageView.setImageBitmap(circleBitmap);
-                                // cache avatar bitmap for quick access
-                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
-                            }
-                        });
-                    }
-                }
-            });
-            networkThread.start();
+            ((Main)getActivity()).downloadCurrentUserAvatar();
+        }
+
+        if(((Main)getActivity()).getUserCache().getAvatar() != null){
+            avatarImageView.setImageBitmap(((Main) getActivity()).getUserCache().getAvatar());
         }
     }
 
@@ -71,30 +62,7 @@ public class TabD_1 extends Fragment   {
 
         avatarImageView = (ImageView) view.findViewById(R.id.avatar);
 
-        if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR) {
-            Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
-
-            // download the avatar of current user
-            Thread networkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    final Bitmap bitmap = User.DownloadAvatar();
-                    if (bitmap != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
-                                avatarImageView.setImageBitmap(circleBitmap);
-                                // cache avatar bitmap for quick access
-                                ((Main)getActivity()).getUserCache().setAvatar(circleBitmap);
-                            }
-                        });
-                    }
-                }
-            });
-            networkThread.start();
-        }else{
-            // fetch cached avatar bitmap if it's already there
+        if(((Main)getActivity()).getUserCache().getAvatar() != null){
             avatarImageView.setImageBitmap(((Main)getActivity()).getUserCache().getAvatar());
         }
 
@@ -115,15 +83,25 @@ public class TabD_1 extends Fragment   {
             @Override
             public void onClick(View v) {
 
-                getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
 
-                // reset all user global variables
-                Global.resetAll();
+                                logout();
+                                break;
 
-                Intent intent = new Intent(getActivity(), LoginNew.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("logout", true);
-                startActivity(intent);
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                dialog.dismiss();
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setCancelable(false);
+                builder.setMessage("Are you sure you want to sign out?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
             }
         });
 
@@ -134,6 +112,40 @@ public class TabD_1 extends Fragment   {
 
 
         return view;
+    }
+
+    private void logout(){
+
+        // calling logout to kill session
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject jsonObject = UserApi.Logout();
+                    Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
+                }catch (Exception e){
+                    Log.d("DEBUG", "something went wrong when attempting to logout " + e.getMessage());
+                }}});
+        networkThread.start();
+
+        // stop service & disconnect socket
+        getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
+
+        // clear all notifications if there is any
+        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(BackgroundService.NOTIFICATION_ID);
+
+        // reset all user global variables
+        Global.resetAll();
+
+        // clear local is_logged_in flag
+        SharedPreferences settings = getActivity().getApplicationContext().getSharedPreferences("cache", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("is_logged_in", false);
+        editor.apply();
+
+        // go back to login page
+        getActivity().finish();
     }
 
     @Override
