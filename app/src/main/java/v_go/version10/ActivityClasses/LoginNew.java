@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,11 +28,18 @@ public class LoginNew extends AppCompatActivity{
     private EditText phone;
     private EditText password;
 
+    private static Context context;
+    public static Context getAppContext(){
+        return  context;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_new);
+
+        context = getApplicationContext();
 
         phone = (EditText)findViewById(R.id.phone);
         password = (EditText)findViewById(R.id.password);
@@ -77,9 +85,16 @@ public class LoginNew extends AppCompatActivity{
             @Override
             public void run() {
                 try {
-
-                    if(User.Login(phone.getText().toString().trim(), password.getText().toString()).getString("code").equals("1"))
+                    String phone_number = phone.getText().toString().trim();
+                    String pwd = password.getText().toString();
+                    if(User.Login(phone_number, pwd).getString("code").equals("1"))
                     {
+                        // if login succeeded save status to local and no more login next time
+                        SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putBoolean("is_logged_in", true);
+                        editor.apply();
+
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();

@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <EditText
+            <v_go.version10.HelperClasses.ChatEditText
                 android:id="@+id/chat_edit_text1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -41,9 +41,9 @@
                 android:layout_toStartOf="@+id/enter_chat1"
                 android:hint="@string/type_your_message"
                 android:maxLines="4"
+                android:imeOptions="actionSend"
                 android:singleLine="false"
-                android:inputType="textCapSentences"
-
+                android:inputType="textCapSentences|textMultiLine"
                 android:textSize="18sp"
                 android:paddingLeft="4dp" />
 

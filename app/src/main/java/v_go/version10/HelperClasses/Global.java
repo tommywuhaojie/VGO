@@ -8,9 +8,14 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.CountDownTimer;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.Random;
 
 import io.socket.client.Socket;
+import v_go.version10.Chat.App;
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.SocketIo.SocketIoHelper;
 
 public class Global {
@@ -30,11 +35,8 @@ public class Global {
     public static int LATEST_REQ_ID = 0;
     public static int DISPLAYED_NOTIF_NUM = 0;
 
-    public static Socket socket;
     public static Bitmap my_avatar;
     public static Bitmap other_avatar;
-
-
 
     // Reset all when user is logged out
     public static void resetAll(){

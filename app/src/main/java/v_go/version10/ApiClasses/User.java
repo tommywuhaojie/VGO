@@ -1,6 +1,7 @@
 package v_go.version10.ApiClasses;
 
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
@@ -15,8 +16,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.CookieStore;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import v_go.version10.ActivityClasses.LoginNew;
+import v_go.version10.Chat.App;
+import v_go.version10.HelperClasses.Global;
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
 
 public class User {
 
@@ -284,8 +292,15 @@ public class User {
         String json_text = null;
         String data="phone_number="+phone_number+"&password="+password;
         HttpURLConnection connection = null;
-        CookieManager cookieManager = new CookieManager();
+
+        //CookieManager cookieManager = new CookieManager();
+        //CookieHandler.setDefault(cookieManager);
+
+        SiCookieStore2 siCookieStore = new SiCookieStore2(LoginNew.getAppContext());
+        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
+
+
         try {
             URL url = new URL(ServerUrls.LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
@@ -431,7 +446,9 @@ public class User {
         return jsonObject;
     }
 
-    public static Bitmap DownloadAvatar(String user_id){
+    public static Bitmap DownloadAvatar(String user_id, SharedPreferences sp){
+
+        settingUpPersistentCookie(sp);
 
         InputStream inputStream;
 
@@ -458,7 +475,9 @@ public class User {
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public static Bitmap DownloadAvatar(){
+    public static Bitmap DownloadAvatar(SharedPreferences sp){
+
+        settingUpPersistentCookie(sp);
 
         InputStream inputStream;
 
@@ -476,6 +495,12 @@ public class User {
             return null;
         }
         return BitmapFactory.decodeStream(inputStream);
+    }
+
+    private static void settingUpPersistentCookie(SharedPreferences sp){
+        SiCookieStore2 siCookieStore = new SiCookieStore2(sp);
+        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
     }
 
     public static boolean isValidEmail(CharSequence target) {

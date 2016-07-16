@@ -2,6 +2,7 @@ package v_go.version10.ActivityClasses;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -16,6 +17,13 @@ public class SignUpAndLoginIn extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_and_login_in);
+
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+
+        if(settings.getBoolean("is_logged_in", false)){
+            Intent intent = new Intent(this, Main.class);
+            //startActivity(intent);
+        }
     }
 
     // sign up

@@ -94,7 +94,7 @@ public class TabD_1 extends Fragment   {
                         }}});
                 networkThread.start();
 
-                getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
+                //getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
 
                 // reset all user global variables
                 Global.resetAll();

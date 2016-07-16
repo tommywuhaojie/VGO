@@ -33,6 +33,7 @@ import io.socket.emitter.Emitter;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
+import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
@@ -44,9 +45,33 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatMessages;
     private ImageView enterChatView1;
     private ChatListAdapter listAdapter;
-
-    private Socket socket;
     private String other_user_id;
+    private boolean isFirstTime = true;
+
+    // to check if this activity is visible to user and who is user talking to
+    private static boolean activityVisible;
+    private static String target_user_id;
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static boolean isUserIdMatched(String user_id){
+        if(user_id != null && target_user_id != null){
+            return user_id.equals(target_user_id);
+        }
+        return false;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
+    }
+
+
 
     // on send
     private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
@@ -55,9 +80,9 @@ public class ChatActivity extends AppCompatActivity {
 
             // If the event is a key-down event on the "enter" button
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                // Perform action on key press
+                    (keyCode == KeyEvent.KEYCODE_ENTER) ) {
 
+                // Perform action on key press
                 EditText editText = (EditText) v;
 
                 if(v==chatEditText1)
@@ -135,16 +160,9 @@ public class ChatActivity extends AppCompatActivity {
         // setup actionbar title
         getSupportActionBar().setTitle(getIntent().getStringExtra("user_name"));
 
-        // setup socket.io
-        if(Global.socket != null) {
-            socket = Global.socket;
-        }
-
-        // setup receiver listener
-        //socket.on("private message", onNewPrivateMessage);
-
         // setup the other user' id
         other_user_id = getIntent().getStringExtra("user_id");
+        target_user_id = other_user_id;
 
 
         getActivity().getWindow().setSoftInputMode(
@@ -173,10 +191,25 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        ChatActivity.activityPaused();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
+        ChatActivity.activityResumed();
+
         hideSoftKeyboard();
+
+        // register broadcastReceiver only for the first time
+        if(!isFirstTime){
+            return;
+        }
+        isFirstTime = false;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("private message");
@@ -238,7 +271,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         // sent message!
-        socket.emit("private message", otherUser);
+        BackgroundService.getSocket().emit("private message", otherUser);
 
         if(messageText.trim().length()==0)
             return;
@@ -283,8 +316,4 @@ public class ChatActivity extends AppCompatActivity {
         return result;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 }

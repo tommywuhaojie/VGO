@@ -20,9 +20,6 @@ import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 
-/**
- * Created by madhur on 17/01/15.
- */
 public class ChatListAdapter extends BaseAdapter {
 
     private ArrayList<ChatMessage> chatMessages;

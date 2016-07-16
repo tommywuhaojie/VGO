@@ -92,8 +92,6 @@ public class Main extends AppCompatActivity{
     public void onDestroy() {
         super.onDestroy();
         Log.d("DEBUG", "Main onDestroy");
-
-
     }
 
     public void setTabHostVisibility(Boolean visible){
@@ -232,7 +230,7 @@ public class Main extends AppCompatActivity{
             mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
         }
 
-        // initialize socket for chat message first
+        // default tab
         mTabHost.setCurrentTab(0);
     }
 
@@ -240,25 +238,6 @@ public class Main extends AppCompatActivity{
     /*Comes here when user switch tab, or we do programmatically*/
     TabHost.OnTabChangeListener listener    =   new TabHost.OnTabChangeListener() {
         public void onTabChanged(String tabId) {
-
-            Log.d("DEBUG", "TAB CHANGE!!!" + tabId);
-
-            // get rid of the switch tab delay for now
-            /*
-            if(!allow){
-                mTabHost.setCurrentTabByTag(mCurrentTab);
-                return;
-            }
-            allow = false;
-
-            // allow to change tab before wait 0.2 second
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run() {
-                    allow = true;
-                }
-            }, 200);
-            */
 
             /*Set current tab..*/
             mCurrentTab = tabId;
