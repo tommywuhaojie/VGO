@@ -42,6 +42,8 @@ public class BackgroundService extends Service {
         return socket;
     }
 
+    public final static int NOTIFICATION_ID = 12345;
+
     public BackgroundService() {
         super();
     }
@@ -146,7 +148,6 @@ public class BackgroundService extends Service {
         }
 
         Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        final int NOTIFICATION_ID = 12345;
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
@@ -160,6 +161,7 @@ public class BackgroundService extends Service {
         Intent targetIntent = new Intent(this, Main.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
 
@@ -188,8 +190,13 @@ public class BackgroundService extends Service {
         return START_STICKY;
     }
 
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        // disconnect from server
+        socket.disconnect();
     }
 }

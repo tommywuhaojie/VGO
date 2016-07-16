@@ -1,6 +1,11 @@
 package v_go.version10.FragmentClasses;
 
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -81,28 +86,25 @@ public class TabD_1 extends Fragment   {
             @Override
             public void onClick(View v) {
 
-                // calling logout to kill session
-                Thread networkThread = new Thread(new Runnable() {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
-                    public void run() {
-                        try {
-                            JSONObject jsonObject = User.Logout();
-                            Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
-                        }catch (Exception e){
-                            Log.d("DEBUG", "something went wrong when attempting to logout");
-                            e.printStackTrace();
-                        }}});
-                networkThread.start();
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
 
-                //getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
+                                logout();
+                                break;
 
-                // reset all user global variables
-                Global.resetAll();
-
-                Intent intent = new Intent(getActivity(), LoginNew.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("logout", true);
-                startActivity(intent);
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                dialog.dismiss();
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setCancelable(false);
+                builder.setMessage("Are you sure you want to sign out?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
             }
         });
 
@@ -113,6 +115,40 @@ public class TabD_1 extends Fragment   {
 
 
         return view;
+    }
+
+    private void logout(){
+
+        // calling logout to kill session
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject jsonObject = User.Logout();
+                    Log.d("DEBUG", "logout msg: " + jsonObject.getString("msg"));
+                }catch (Exception e){
+                    Log.d("DEBUG", "something went wrong when attempting to logout " + e.getMessage());
+                }}});
+        networkThread.start();
+
+        // stop service & disconnect socket
+        getActivity().stopService(new Intent(getActivity().getBaseContext(), BackgroundService.class));
+
+        // clear all notifications if there is any
+        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(BackgroundService.NOTIFICATION_ID);
+
+        // reset all user global variables
+        Global.resetAll();
+
+        // clear local is_logged_in flag
+        SharedPreferences settings = getActivity().getApplicationContext().getSharedPreferences("cache", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("is_logged_in", false);
+        editor.apply();
+
+        // go back to login page
+        getActivity().finish();
     }
 
     @Override

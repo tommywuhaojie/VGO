@@ -9,20 +9,29 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 
 public class SignUpAndLoginIn extends AppCompatActivity {
+
+    private static SharedPreferences sp;
+    public static SharedPreferences getSharedPreferences(){
+        return sp;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_and_login_in);
 
+        // initialize SharePreferences for local cookie store
+        sp = getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0);
+
         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
 
         if(settings.getBoolean("is_logged_in", false)){
             Intent intent = new Intent(this, Main.class);
-            //startActivity(intent);
+            startActivity(intent);
         }
     }
 

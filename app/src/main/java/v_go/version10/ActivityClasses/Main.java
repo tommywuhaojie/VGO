@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -38,6 +39,7 @@ import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.HelperClasses.UserCache;
+import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
 
@@ -69,6 +71,10 @@ public class Main extends AppCompatActivity{
     // to receive notification from background service
     private BroadcastReceiver broadcastReceiver;
 
+    private static SharedPreferences sp;
+    public static SharedPreferences getSharedPreferences(){
+        return sp;
+    }
     public UserCache getUserCache(){
         return userCache;
     }
@@ -122,6 +128,9 @@ public class Main extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initialize SharePreferences for local cookie store
+        sp = getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0);
 
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
