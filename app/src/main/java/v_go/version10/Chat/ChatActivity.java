@@ -268,11 +268,9 @@ public class ChatActivity extends AppCompatActivity {
             chatEditText1.clearFocus();
         }
 
-
+        // register broadcastReceiver only for the first time
         if(isFirstTime) {
             isFirstTime = false;
-
-            // register broadcastReceiver only for the first time
             regBroadcastReceiver();
         }
 

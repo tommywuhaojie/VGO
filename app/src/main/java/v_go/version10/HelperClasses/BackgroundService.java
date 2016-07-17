@@ -21,12 +21,14 @@ import org.json.JSONObject;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.HashMap;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.Chat.ChatActivity;
+import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 import v_go.version10.SocketIo.SocketIoHelper;
@@ -43,6 +45,8 @@ public class BackgroundService extends Service {
     }
 
     public final static int NOTIFICATION_ID = 12345;
+
+    public static HashMap<String, Integer> unReadMessage = new HashMap<>();
 
     public BackgroundService() {
         super();
@@ -118,6 +122,15 @@ public class BackgroundService extends Service {
                 Intent broadcastIntent = new Intent("private message");
                 broadcastIntent.putExtra("sender_user_id", sender_user_id);
                 broadcastIntent.putExtra("message", message);
+
+                if(!TabC_1_new.isInitialize){
+                    if(unReadMessage.containsKey(sender_user_id)){
+                        int currentValue = unReadMessage.get(sender_user_id);
+                        unReadMessage.put(sender_user_id, currentValue + 1);
+                    }else{
+                        unReadMessage.put(sender_user_id, 1);
+                    }
+                }
 
                 mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 

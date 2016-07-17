@@ -2,12 +2,16 @@ package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,12 +56,18 @@ public class TabC_1_new extends Fragment {
     private List<Bitmap> avatarList = new ArrayList<>();
     private List<String> userIdList = new ArrayList<>();
     private List<String> nameList = new ArrayList<>();
+    private List<Integer> badgeList = new ArrayList<>();
 
     private ProgressDialog pDialog;
     private ProgressDialog proDialog;
     private int totalContactsToLoad = 0;
 
     private boolean isFirstTime = true;
+    private boolean isPageVisible;
+    public static boolean isInitialize;
+
+    private final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
+    private final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
 
     private final String REQUEST_BY_PHONE_NUMBER = "phone_number";
     private final String REQUEST_BY_USER_ID = "user_id";
@@ -65,6 +75,8 @@ public class TabC_1_new extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        isInitialize = true;
+
         // inflate the layout for this fragment
         view = inflater.inflate(R.layout.tab_c_1_new, container, false);
 
@@ -89,12 +101,23 @@ public class TabC_1_new extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                // open up a new chat activity
+                // send needed information to chat activity
                 String user_id = userIdList.get(position);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra("user_id", user_id);
                 intent.putExtra("full_name", nameList.get(position));
                 Global.other_avatar = avatarList.get(position);
+                // clear up badge
+                badgeList.set(position, 0);
+                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                contactListView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+                isPageVisible = false;
+                // clear up badge number in BG service
+                if(BackgroundService.unReadMessage.containsKey(userIdList.get(position))){
+                    BackgroundService.unReadMessage.put(userIdList.get(position), 0);
+                }
+                // new activity
                 getActivity().startActivity(intent);
             }
         });
@@ -139,69 +162,131 @@ public class TabC_1_new extends Fragment {
             }
         });
 
-        // load contact list from server only for the first time
-        ViewTreeObserver vto = view.findViewById(R.id.swipeRefreshLayout).getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if(isFirstTime){
-                    isFirstTime = false;
-
-                    proDialog = new ProgressDialog(getActivity());
-                    proDialog.setCanceledOnTouchOutside(false);
-                    proDialog.setCancelable(false);
-                    proDialog.setMessage("Loading contacts...");
-                    proDialog.show();
-
-                    Thread networkThread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            try {
-                                JSONArray jsonArray = ChatApi.GetContactList();
-                                JSONObject firstObj = jsonArray.getJSONObject(0);
-
-                                if(firstObj.getString("code").equals("1")){
-
-                                    int numberOfContacts = firstObj.getInt("number_of_contact");
-                                    totalContactsToLoad = numberOfContacts;
-
-                                    for(int i=1; i<(1+numberOfContacts); i++){
-
-                                        final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
-
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
-                                            }
-                                        });
-                                    }
-                                }else{
-                                    proDialog.dismiss();
-                                }
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    networkThread.start();
-                    try {
-                        networkThread.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
         return view;
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        isPageVisible = true;
+        if(isFirstTime) {
+            isFirstTime = false;
+            // load contact list for the first time
+            loadInitialContactList();
+            // init receiver for contact update
+            regBroadcastReceiver();
+        }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        isInitialize = false;
+    }
+
+    private void loadInitialContactList(){
+        proDialog = new ProgressDialog(getActivity());
+        proDialog.setCanceledOnTouchOutside(false);
+        proDialog.setCancelable(false);
+        proDialog.setMessage("Loading contacts...");
+        proDialog.show();
+
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    JSONArray jsonArray = ChatApi.GetContactList();
+                    JSONObject firstObj = jsonArray.getJSONObject(0);
+
+                    if(firstObj.getString("code").equals("1")){
+
+                        int numberOfContacts = firstObj.getInt("number_of_contact");
+                        totalContactsToLoad = numberOfContacts;
+
+                        for(int i=1; i<(1+numberOfContacts); i++){
+
+                            final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
+                                }
+                            });
+                        }
+                    }else{
+                        proDialog.dismiss();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        networkThread.start();
+    }
+
+    private void regBroadcastReceiver(){
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("private message");
+
+        LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String messageText = intent.getStringExtra("message");
+                String sender_user_id = intent.getStringExtra("sender_user_id");
+
+                int positionToUpdate = userIdList.indexOf(sender_user_id);
+
+                if(positionToUpdate != -1) {
+                    // update the last message
+                    hashMap.get(positionToUpdate).put("last_message", messageText);
+                    // update the badge icon only if this page is visible
+                    if(isPageVisible) {
+                        int currentValue = badgeList.get(positionToUpdate);
+                        badgeList.set(positionToUpdate, currentValue + 1);
+                    }
+                    // update listview
+                    adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                    contactListView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
+
+            }
+        };
+        mLocalBroadcastManager.registerReceiver(broadcastReceiver, filter);
+    }
+
+    private void initUnReadMessage(){
+        HashMap<String, Integer> unReadMessage = BackgroundService.unReadMessage;
+        Log.d("DEBUG", "here!!!");
+        if(unReadMessage != null){
+            Log.d("DEBUG", "here2!!!");
+            // update listview
+            for(int i=0; i<userIdList.size(); i++) {
+                Log.d("DEBUG", userIdList.get(i));
+                if(unReadMessage.containsKey(userIdList.get(i))) {
+                    int num = unReadMessage.get(userIdList.get(i));
+                    int currentValue = badgeList.get(i);
+                    badgeList.set(i, currentValue + num);
+                }
+            }
+            adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+            contactListView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     /** setup the notification listview **/
-    public void setupAdapter(final String first_name_last_name, final String user_id, final String lastMessage,final String lastMessageDateTime, final boolean dismissDialog) {
-        final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
-        final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
+    private void setupAdapter(final String first_name_last_name, final String user_id, final String lastMessage,final String lastMessageDateTime, final boolean dismissDialog) throws InterruptedException {
 
         final HashMap<String, String> map = new HashMap<>();
 
@@ -221,11 +306,13 @@ public class TabC_1_new extends Fragment {
 
                 nameList.add(0, first_name_last_name);
 
+                badgeList.add(0, 0);
+
                 userIdList.add(0, user_id);
 
                 hashMap.add(0, map);
 
-                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList);
+                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -233,8 +320,11 @@ public class TabC_1_new extends Fragment {
                         contactListView.setAdapter(adapter);
                         if(dismissDialog)
                             pDialog.dismiss();
-                        else if(hashMap.size() == totalContactsToLoad)
+                        else if(hashMap.size() == totalContactsToLoad) {
                             proDialog.dismiss();
+                            // update the initial unRead message after all contacts have been loaded
+                            initUnReadMessage();
+                        }
                     }
                 });
             }

@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.readystatesoftware.viewbadger.BadgeView;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import org.json.JSONObject;

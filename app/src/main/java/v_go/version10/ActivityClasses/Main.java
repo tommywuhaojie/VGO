@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -73,6 +74,8 @@ public class Main extends AppCompatActivity{
     // to receive notification from background service
     private BroadcastReceiver broadcastReceiver;
 
+    public static FragmentActivity activity;
+
     public UserCache getUserCache(){
         return userCache;
     }
@@ -126,6 +129,8 @@ public class Main extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        activity = this;
 
         // load SharePreferences for cookie store
         SiCookieStore2 siCookieStore = new SiCookieStore2(getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0));

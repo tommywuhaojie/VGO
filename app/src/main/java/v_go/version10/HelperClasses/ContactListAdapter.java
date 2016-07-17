@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 
+import com.readystatesoftware.viewbadger.BadgeView;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,10 +33,14 @@ public class ContactListAdapter extends SimpleAdapter {
      */
 
     private List<Bitmap> avatarList;
+    private List<Integer> badgeList;
+    private Context context;
 
-    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to, List<Bitmap> avatarList) {
+    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to, List<Bitmap> avatarList, List<Integer> badgeList) {
         super(context, data, resource, from, to);
+        this.context = context;
         this.avatarList = avatarList;
+        this.badgeList = badgeList;
     }
 
     // this function gets called once each row is revealed
@@ -47,6 +53,12 @@ public class ContactListAdapter extends SimpleAdapter {
             ImageView imageView = ((ImageView) view.findViewById(R.id.icon));
             if(imageView != null){
                 imageView.setImageBitmap(bitmap);
+                // update badge
+                if(badgeList.get(position) != 0) {
+                    BadgeView badge = new BadgeView(context, imageView);
+                    badge.setText(badgeList.get(position).toString());
+                    badge.show();
+                }
             }
         }
 
