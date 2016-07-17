@@ -177,6 +177,8 @@ public class TabC_1_new extends Fragment {
                                             }
                                         });
                                     }
+                                }else{
+                                    proDialog.dismiss();
                                 }
                             }catch (Exception e){
                                 e.printStackTrace();

@@ -57,6 +57,7 @@ public class ChatActivity extends AppCompatActivity {
     private Handler mTypingHandler = new Handler();
 
     private static final int TYPING_TIMER_LENGTH = 600;
+    private static final int NUMBER_OF_MESSAGES = 100;
 
     // to check if this activity is visible to user and who is user talking to
     private static boolean activityVisible;
@@ -97,6 +98,11 @@ public class ChatActivity extends AppCompatActivity {
 
                 if(v==chatEditText1)
                 {
+                    // cannot send empty message
+                    if(chatEditText1.getText().toString().trim().equals("")) {
+                        chatEditText1.setText("");
+                        return true;
+                    }
                     sendMessage(editText.getText().toString(), UserType.OTHER);
                 }
 
@@ -115,6 +121,11 @@ public class ChatActivity extends AppCompatActivity {
 
             if(v==enterChatView1)
             {
+                // cannot send empty message
+                if(chatEditText1.getText().toString().trim().equals("")) {
+                    chatEditText1.setText("");
+                    return;
+                }
                 sendMessage(chatEditText1.getText().toString(), UserType.OTHER);
             }
 
@@ -253,7 +264,9 @@ public class ChatActivity extends AppCompatActivity {
 
         ChatActivity.activityResumed();
 
-        hideSoftKeyboard();
+        if(chatEditText1.isFocused()){
+            chatEditText1.clearFocus();
+        }
 
 
         if(isFirstTime) {
@@ -363,7 +376,6 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                final int NUMBER_OF_MESSAGES = 10;
                 final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES);
 
                 runOnUiThread(new Runnable() {
@@ -415,13 +427,6 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    private void hideSoftKeyboard() {
-        if(getCurrentFocus()!=null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        }
-    }
-
     private void scrollToBottom(){
         chatListView.smoothScrollToPosition(listAdapter.getCount() - 1);
     }
@@ -446,7 +451,7 @@ public class ChatActivity extends AppCompatActivity {
         // sent message!
         BackgroundService.getSocket().emit("private message", otherUser);
 
-        if(messageText.trim().length()==0)
+        if(messageText.trim().length() == 0)
             return;
 
         final ChatMessage message = new ChatMessage();
@@ -456,11 +461,11 @@ public class ChatActivity extends AppCompatActivity {
         message.setMessageTime(new Date().getTime());
         chatMessages.add(message);
 
-        if(listAdapter!=null)
+        if(listAdapter!= null)
             listAdapter.notifyDataSetChanged();
         scrollToBottom();
 
-        message.setMessageStatus(Status.DELIVERED);
+        message.setMessageStatus(Status.SENT);
 
     }
 

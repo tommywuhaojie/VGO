@@ -9,12 +9,14 @@ import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import v_go.version10.ApiClasses.UserApi;
+import v_go.version10.Chat.model.UserType;
 import v_go.version10.R;
 
 public class LoginNew extends AppCompatActivity{
@@ -40,12 +42,30 @@ public class LoginNew extends AppCompatActivity{
 
         // set hint color match background
         phone.setHintTextColor(Color.parseColor("#50B9AC"));
-
         password.setHintTextColor(Color.parseColor("#50B9AC"));
+
+        password.setOnKeyListener(keyListener);
     }
 
-    public void onLoginClicked(View view){
+    private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
 
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER) ) {
+                login();
+                return true;
+            }
+            return false;
+
+        }
+    };
+    public void onLoginClicked(View view){
+        login();
+    }
+
+    private void login(){
         boolean error = true;
 
         if(phone.getText().toString().trim().length() == 0) {
