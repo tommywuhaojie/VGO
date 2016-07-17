@@ -22,7 +22,7 @@
 
     <LinearLayout
         android:id="@+id/bottomlayout"
-        android:background="@android:color/white"
+        android:background="#00000000"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
@@ -30,7 +30,25 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:background="#00000000">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Other person is typing..."
+                android:id="@+id/is_typing"
+                android:visibility="gone"
+                android:textColor="#ffffff"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff">
 
             <v_go.version10.HelperClasses.ChatEditText
                 android:id="@+id/chat_edit_text1"
@@ -61,7 +79,6 @@
                 android:src="@drawable/ic_chat_send" />
 
         </RelativeLayout>
-
 
 
     </LinearLayout>

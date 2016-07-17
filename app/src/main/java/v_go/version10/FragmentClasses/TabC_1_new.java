@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
@@ -32,10 +33,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.Chat.ChatActivity;
+import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
@@ -51,6 +54,8 @@ public class TabC_1_new extends Fragment {
     private List<String> nameList = new ArrayList<>();
 
     private ProgressDialog pDialog;
+    private ProgressDialog proDialog;
+    private int totalContactsToLoad = 0;
 
     private boolean isFirstTime = true;
 
@@ -88,7 +93,7 @@ public class TabC_1_new extends Fragment {
                 String user_id = userIdList.get(position);
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra("user_id", user_id);
-                intent.putExtra("user_name", nameList.get(position));
+                intent.putExtra("full_name", nameList.get(position));
                 Global.other_avatar = avatarList.get(position);
                 getActivity().startActivity(intent);
             }
@@ -124,7 +129,9 @@ public class TabC_1_new extends Fragment {
         // refresh only at the top of the ListView mechanism
         contactListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {}
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 int topRowVerticalPosition = (contactListView == null || contactListView.getChildCount() == 0) ? 0 : contactListView.getChildAt(0).getTop();
@@ -132,64 +139,61 @@ public class TabC_1_new extends Fragment {
             }
         });
 
-        return view;
-    }
+        // load contact list from server only for the first time
+        ViewTreeObserver vto = view.findViewById(R.id.swipeRefreshLayout).getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if(isFirstTime){
+                    isFirstTime = false;
 
+                    proDialog = new ProgressDialog(getActivity());
+                    proDialog.setCanceledOnTouchOutside(false);
+                    proDialog.setCancelable(false);
+                    proDialog.setMessage("Loading contacts...");
+                    proDialog.show();
 
+                    Thread networkThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
 
-    @Override
-    public void onResume() {
-        super.onResume();
+                            try {
+                                JSONArray jsonArray = ChatApi.GetContactList();
+                                JSONObject firstObj = jsonArray.getJSONObject(0);
 
-        // load contact list from server
-        if(isFirstTime){
-            isFirstTime = false;
+                                if(firstObj.getString("code").equals("1")){
 
-            if(pDialog == null)
-                pDialog = new ProgressDialog(getActivity());
-            pDialog.setCanceledOnTouchOutside(false);
-            pDialog.setCancelable(false);
-            pDialog.setMessage("Loading contacts...");
-            pDialog.show();
+                                    int numberOfContacts = firstObj.getInt("number_of_contact");
+                                    totalContactsToLoad = numberOfContacts;
 
-            Thread networkThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
+                                    for(int i=1; i<(1+numberOfContacts); i++){
 
-                    try {
-                        JSONArray jsonArray = ChatApi.GetContactList();
-                        JSONObject firstObj = jsonArray.getJSONObject(0);
+                                        final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
 
-                        if(firstObj.getString("code").equals("1")){
-
-                            int numberOfContacts = firstObj.getInt("number_of_contact");
-
-                            for(int i=1; i<(1+numberOfContacts); i++){
-
-                                final String other_user_id = jsonArray.getJSONObject(i).getString("other_user_id");
-
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                addToContactList(other_user_id, REQUEST_BY_USER_ID, false, true);
+                                            }
+                                        });
                                     }
-                                });
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
                             }
                         }
-                    }catch (Exception e){
+                    });
+                    networkThread.start();
+                    try {
+                        networkThread.join();
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-            });
-            networkThread.start();
-            try {
-                networkThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-            pDialog.dismiss();
-        }
+        });
 
+        return view;
     }
 
     /** setup the notification listview **/
@@ -227,6 +231,8 @@ public class TabC_1_new extends Fragment {
                         contactListView.setAdapter(adapter);
                         if(dismissDialog)
                             pDialog.dismiss();
+                        else if(hashMap.size() == totalContactsToLoad)
+                            proDialog.dismiss();
                     }
                 });
             }
@@ -284,7 +290,7 @@ public class TabC_1_new extends Fragment {
                 pDialog = new ProgressDialog(getActivity());
             pDialog.setCanceledOnTouchOutside(false);
             pDialog.setCancelable(false);
-            pDialog.setMessage("Loading contacts...");
+            pDialog.setMessage("Loading contact...");
             pDialog.show();
         }
 

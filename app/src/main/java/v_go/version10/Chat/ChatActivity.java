@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -50,7 +51,12 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView enterChatView1;
     private ChatListAdapter listAdapter;
     private String other_user_id;
+    private String first_name;
     private boolean isFirstTime = true;
+    private boolean mTyping = false;
+    private Handler mTypingHandler = new Handler();
+
+    private static final int TYPING_TIMER_LENGTH = 600;
 
     // to check if this activity is visible to user and who is user talking to
     private static boolean activityVisible;
@@ -141,7 +147,6 @@ public class ChatActivity extends AppCompatActivity {
 
             } else {
                 enterChatView1.setImageResource(R.drawable.ic_chat_send);
-
             }
         }
 
@@ -162,12 +167,14 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         // setup actionbar title
-        getSupportActionBar().setTitle(getIntent().getStringExtra("user_name"));
+        String fullName = getIntent().getStringExtra("full_name");
+        getSupportActionBar().setTitle(fullName);
 
         // setup the other user' id
         other_user_id = getIntent().getStringExtra("user_id");
         target_user_id = other_user_id;
 
+        first_name = fullName.substring(0, fullName.trim().indexOf(" "));
 
         getActivity().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -203,6 +210,34 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        // create isTyping text change listener
+        chatEditText1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(BackgroundService.getSocket() == null){
+                    return;
+                }else if (!BackgroundService.getSocket().connected()){
+                    return;
+                }
+
+                if (!mTyping) {
+                    mTyping = true;
+                    BackgroundService.getSocket().emit("is typing", other_user_id);
+                }
+                mTypingHandler.removeCallbacks(onTypingTimeout);
+                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
     }
 
     @Override
@@ -226,9 +261,69 @@ public class ChatActivity extends AppCompatActivity {
 
             // register broadcastReceiver only for the first time
             regBroadcastReceiver();
+        }
 
+        // enable isTyping listener
+        if(BackgroundService.getSocket() != null) {
+            BackgroundService.getSocket().on("is typing", onTyping);
+            BackgroundService.getSocket().on("stop typing", onStopTyping);
         }
     }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+
+        // turn off isTyping listener when fragment is not visible to user
+        if(BackgroundService.getSocket() != null) {
+            BackgroundService.getSocket().off("is typing", onTyping);
+            BackgroundService.getSocket().off("stop typing", onStopTyping);
+        }
+    }
+
+    private Emitter.Listener onTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String id = args[0].toString();
+                    if (id.equals(other_user_id)) {
+                        TextView isTyping = (TextView) findViewById(R.id.is_typing);
+                        isTyping.setText(first_name + " is typing...");
+                        isTyping.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+        }
+    };
+    private Emitter.Listener onStopTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("DEBUG", "on receive stop typing");
+                    String id = args[0].toString();
+                    if (id.equals(other_user_id)) {
+                        TextView isTyping = (TextView) findViewById(R.id.is_typing);
+                        isTyping.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }
+    };
+
+    private Runnable onTypingTimeout = new Runnable() {
+        @Override
+        public void run() {
+            if (!mTyping) return;
+            mTyping = false;
+            if(BackgroundService.getSocket() != null) {
+                BackgroundService.getSocket().emit("stop typing", other_user_id);
+            }
+        }
+    };
 
     private void regBroadcastReceiver(){
 
