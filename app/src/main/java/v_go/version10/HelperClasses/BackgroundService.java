@@ -77,7 +77,7 @@ public class BackgroundService extends Service {
         socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         socket.on("private message", onNewPrivateMessage);
-        socket.on("server error", onServerError);
+        //socket.on("server error", onServerError);
 
         notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -103,6 +103,7 @@ public class BackgroundService extends Service {
         }
     };
 
+    /*
     private Emitter.Listener onServerError = new Emitter.Listener(){
         @Override
         public void call(final Object... args) {
@@ -114,6 +115,7 @@ public class BackgroundService extends Service {
             }
         }
     };
+    */
 
     private Emitter.Listener onNewPrivateMessage = new Emitter.Listener() {
         @Override

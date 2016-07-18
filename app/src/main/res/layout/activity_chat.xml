@@ -6,8 +6,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@drawable/background"
     tools:context=".MainActivity"
-    android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusable="false"
+    android:focusableInTouchMode="false">
 
 
     <ListView
@@ -51,8 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#ffffff"
-            android:clickable="true"
-            android:onClick="onBottomLayoutClicked">
+            android:clickable="false">
 
             <v_go.version10.HelperClasses.ChatEditText
                 android:id="@+id/chat_edit_text1"

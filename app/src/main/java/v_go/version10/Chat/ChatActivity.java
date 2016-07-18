@@ -282,6 +282,9 @@ public class ChatActivity extends AppCompatActivity {
 
         // register broadcastReceiver only for the first time
         if(isFirstTime) {
+            if(BackgroundService.getSocket() != null) {
+                BackgroundService.getSocket().on("delivery confirmation", onDeliveryConfirm);
+            }
             isFirstTime = false;
             regBroadcastReceiver();
         }
@@ -293,6 +296,13 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    private Emitter.Listener onDeliveryConfirm = new Emitter.Listener(){
+        @Override
+        public void call(final Object... args) {
+            Log.d("DEBUG", args[0].toString());
+            Log.d("DEBUG", "delivered");
+        }
+    };
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {

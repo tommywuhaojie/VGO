@@ -22,7 +22,7 @@ public class ChatApi {
         HttpURLConnection connection = null;
 
         try {
-            URL url = new URL(Urls.ADD_CONTACT_URL_);
+            URL url = new URL(URLs.ADD_CONTACT_URL_);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -67,7 +67,7 @@ public class ChatApi {
         JSONArray jsonArray = null;
         String jsonarray_string = null;
 
-        String url_string = Urls.GET_CONTACT_LIST_URL;
+        String url_string = URLs.GET_CONTACT_LIST_URL;
 
         try {
             URL url = new URL(url_string);
@@ -116,7 +116,7 @@ public class ChatApi {
         JSONArray jsonArray = null;
         String jsonarray_string = null;
 
-        String url_string = Urls.GET_CHAT_HISTORY_URL;
+        String url_string = URLs.GET_CHAT_HISTORY_URL;
 
         String data = "other_user_id="+other_user_id+"&number_of_message="+number_of_message;
 

@@ -46,7 +46,7 @@ public class Trip implements TripInterface {
         String jsonarray_string = null;
         Boolean flag = true;
         try {
-            String url_string = Urls.HOST_URL + "/trip/tripInfo.php?trip_id=";
+            String url_string = URLs.TARGET_ROOT_URL + "/trip/tripInfo.php?trip_id=";
             URL url = new URL(url_string);
             urlconnet = (HttpURLConnection) url.openConnection();
             urlconnet.setRequestMethod("GET");
@@ -156,7 +156,7 @@ public class Trip implements TripInterface {
                                double estimate_distance, int type){
         String text = null;
 
-        String url_string = Urls.HOST_URL+"/create/tripRegister.php";
+        String url_string = URLs.TARGET_ROOT_URL+"/create/tripRegister.php";
 
         String data="date_id="+time+"&start_lat="+start_latitude+"&start_lng="+start_longitude
                 +"&start_location="+start_location+"&end_lat="+end_latitude+"&end_lng="+end_longitude
@@ -226,7 +226,7 @@ public class Trip implements TripInterface {
         JSONArray json = null;
         String jsonarray_string = null;
 
-        String url_string = Urls.HOST_URL + "/search/byMonth.php";
+        String url_string = URLs.TARGET_ROOT_URL + "/search/byMonth.php";
 
         String data="yearMonth="+yearmonth;
         URL url = null;
@@ -315,7 +315,7 @@ public class Trip implements TripInterface {
         JSONArray json = null;
         String jsonarray_string = null;
 
-        String url_string =  Urls.HOST_URL + "/match/matchTrip.php";
+        String url_string =  URLs.TARGET_ROOT_URL + "/match/matchTrip.php";
 
         String data = "start_lat="+start_lat+"&start_lng="+start_lng+"&end_lat="+end_lat+"&end_lng="+end_lng+"&time="+start_time+"&reg_as="+reg_as+"&multi_allow="+mult_allow;
         try {
