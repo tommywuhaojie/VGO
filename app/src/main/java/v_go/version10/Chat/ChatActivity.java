@@ -27,15 +27,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
+
+import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
-import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabC_1_new;
-import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.R;
+import v_go.version10.SocketIo.SocketIoHelper;
 
 
 public class ChatActivity extends AppCompatActivity {
@@ -52,6 +53,8 @@ public class ChatActivity extends AppCompatActivity {
     private boolean mTyping = false;
     private int messageCount = -1;
     private Handler mTypingHandler = new Handler();
+
+    private Socket socket;
 
     private static final int TYPING_TIMER_LENGTH = 600;
     private static final int NUMBER_OF_MESSAGES = 100;
@@ -174,6 +177,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        SocketIoHelper app = (SocketIoHelper) getApplication();
+        socket = app.getSocket();
 
         // enable back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -230,15 +235,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(BackgroundService.getSocket() == null){
-                    return;
-                }else if (!BackgroundService.getSocket().connected()){
+                if (!socket.connected()){
                     return;
                 }
 
                 if (!mTyping) {
                     mTyping = true;
-                    BackgroundService.getSocket().emit("is typing", other_user_id);
+                    socket.emit("is typing", other_user_id);
                 }
                 mTypingHandler.removeCallbacks(onTypingTimeout);
                 mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
@@ -257,10 +260,8 @@ public class ChatActivity extends AppCompatActivity {
         ChatActivity.activityPaused();
 
         // turn off isTyping listener when fragment is not visible to user
-        if(BackgroundService.getSocket() != null) {
-            BackgroundService.getSocket().off("is typing", onTyping);
-            BackgroundService.getSocket().off("stop typing", onStopTyping);
-        }
+        socket.off("is typing", onTyping);
+        socket.off("stop typing", onStopTyping);
 
         // update last message in previous view when go back
         if(messageCount == chatMessages.size()){
@@ -278,18 +279,16 @@ public class ChatActivity extends AppCompatActivity {
 
         // register broadcastReceiver only for the first time
         if(isFirstTime) {
-            if(BackgroundService.getSocket() != null) {
-                BackgroundService.getSocket().on("delivery confirmation", onDeliveryConfirm);
-            }
             isFirstTime = false;
+
+            socket.on("delivery confirmation", onDeliveryConfirm);
+
             regBroadcastReceiver();
         }
 
         // enable isTyping listener
-        if(BackgroundService.getSocket() != null) {
-            BackgroundService.getSocket().on("is typing", onTyping);
-            BackgroundService.getSocket().on("stop typing", onStopTyping);
-        }
+        socket.on("is typing", onTyping);
+        socket.on("stop typing", onStopTyping);
     }
 
     private Emitter.Listener onDeliveryConfirm = new Emitter.Listener(){
@@ -337,9 +336,7 @@ public class ChatActivity extends AppCompatActivity {
         public void run() {
             if (!mTyping) return;
             mTyping = false;
-            if(BackgroundService.getSocket() != null) {
-                BackgroundService.getSocket().emit("stop typing", other_user_id);
-            }
+            socket.emit("stop typing", other_user_id);
         }
     };
 
@@ -453,7 +450,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         // sent message!
-        BackgroundService.getSocket().emit("private message", otherUser);
+        socket.emit("private message", otherUser);
 
         if(messageText.trim().length() == 0)
             return;

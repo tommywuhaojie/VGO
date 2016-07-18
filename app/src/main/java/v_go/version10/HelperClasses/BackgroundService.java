@@ -42,11 +42,7 @@ public class BackgroundService extends Service {
     }
 
     private LocalBroadcastManager mLocalBroadcastManager;
-
-    private static Socket socket;
-    public static Socket getSocket(){
-        return socket;
-    }
+    private Socket socket;
 
     public final static int NOTIFICATION_ID = 12345;
     private Uri notificationSound;
@@ -69,15 +65,15 @@ public class BackgroundService extends Service {
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         // setup socket.io
-        SocketIoHelper socketHelper = new SocketIoHelper();
-        socket = socketHelper.getSocket();
+        SocketIoHelper app = (SocketIoHelper) getApplication();
+        socket = app.getSocket();
         socket.connect();
         socket.on(Socket.EVENT_CONNECT, onConnect);
         socket.on(Socket.EVENT_DISCONNECT, onDisconnect);
         socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         socket.on("private message", onNewPrivateMessage);
-        //socket.on("server error", onServerError);
+        socket.on("server error", onServerError);
 
         notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -95,15 +91,12 @@ public class BackgroundService extends Service {
             Log.d("DEBUG", "socket disconnected");
         }
     };
-
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             Log.d("DEBUG", "socket failed to connect");
         }
     };
-
-    /*
     private Emitter.Listener onServerError = new Emitter.Listener(){
         @Override
         public void call(final Object... args) {
@@ -115,7 +108,6 @@ public class BackgroundService extends Service {
             }
         }
     };
-    */
 
     private Emitter.Listener onNewPrivateMessage = new Emitter.Listener() {
         @Override
