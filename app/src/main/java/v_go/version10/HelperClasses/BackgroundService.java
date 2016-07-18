@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
@@ -35,7 +36,10 @@ import v_go.version10.SocketIo.SocketIoHelper;
 
 public class BackgroundService extends Service {
 
-    private int numberOfPushNotifications = 0;
+    private static int numberOfPushNotifications = 0;
+    public static void resetNumberOfPushNotification(){
+        numberOfPushNotifications = 0;
+    }
 
     private LocalBroadcastManager mLocalBroadcastManager;
 
@@ -45,6 +49,7 @@ public class BackgroundService extends Service {
     }
 
     public final static int NOTIFICATION_ID = 12345;
+    private Uri notificationSound;
 
     public static HashMap<String, Integer> unReadMessage = new HashMap<>();
 
@@ -74,6 +79,7 @@ public class BackgroundService extends Service {
         socket.on("private message", onNewPrivateMessage);
         socket.on("server error", onServerError);
 
+        notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
     }
     private Emitter.Listener onConnect = new Emitter.Listener() {
@@ -134,8 +140,14 @@ public class BackgroundService extends Service {
 
                 mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 
-                if(!ChatActivity.isActivityVisible() || !ChatActivity.isUserIdMatched(sender_user_id)){
+                // send push notification
+                if(!TabC_1_new.isVisible || !ChatActivity.isUserIdMatched(sender_user_id)){
                     sendNotification("chat message");
+                }else{
+                    // play sound and vibrate but no push notification
+                    Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
+                    ringtone.play();
+                    ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(300);
                 }
 
 
@@ -160,8 +172,6 @@ public class BackgroundService extends Service {
             // TO DO: trip notification, request, etc
         }
 
-        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.vgo_logo_small)
@@ -172,6 +182,7 @@ public class BackgroundService extends Service {
         ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
 
         Intent targetIntent = new Intent(this, Main.class);
+        targetIntent.putExtra("toTab", 2);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
 
@@ -202,9 +213,6 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
     }
-
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();

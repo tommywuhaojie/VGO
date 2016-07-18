@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -15,31 +14,27 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Date;
-
-import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
+import v_go.version10.FragmentClasses.TabC_1;
+import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.HelperClasses.BackgroundService;
-import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 
@@ -52,8 +47,10 @@ public class ChatActivity extends AppCompatActivity {
     private ChatListAdapter listAdapter;
     private String other_user_id;
     private String first_name;
+    private String last_message;
     private boolean isFirstTime = true;
     private boolean mTyping = false;
+    private int messageCount = -1;
     private Handler mTypingHandler = new Handler();
 
     private static final int TYPING_TIMER_LENGTH = 600;
@@ -177,6 +174,11 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+
+        // enable back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         // setup actionbar title
         String fullName = getIntent().getStringExtra("full_name");
         getSupportActionBar().setTitle(fullName);
@@ -254,8 +256,18 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
         ChatActivity.activityPaused();
+
+        // turn off isTyping listener when fragment is not visible to user
+        if(BackgroundService.getSocket() != null) {
+            BackgroundService.getSocket().off("is typing", onTyping);
+            BackgroundService.getSocket().off("stop typing", onStopTyping);
+        }
+
+        // update last message in previous view when go back
+        if(messageCount == chatMessages.size()){
+            TabC_1_new.updateLastMessage(other_user_id, last_message, true);
+        }
     }
 
     @Override
@@ -278,17 +290,6 @@ public class ChatActivity extends AppCompatActivity {
         if(BackgroundService.getSocket() != null) {
             BackgroundService.getSocket().on("is typing", onTyping);
             BackgroundService.getSocket().on("stop typing", onStopTyping);
-        }
-    }
-
-    @Override
-    public void onStop(){
-        super.onStop();
-
-        // turn off isTyping listener when fragment is not visible to user
-        if(BackgroundService.getSocket() != null) {
-            BackgroundService.getSocket().off("is typing", onTyping);
-            BackgroundService.getSocket().off("stop typing", onStopTyping);
         }
     }
 
@@ -391,7 +392,6 @@ public class ChatActivity extends AppCompatActivity {
                                     String isYours = messageObj.getString("is_your_message"); //you sent -> 1, you received -> 0
                                     String messageText = messageObj.getString("message");
                                     String dateTime = messageObj.getString("date_time");
-                                    Log.d("DEBUG", "date_time: " + dateTime);
 
                                     if(isYours.equals("0")){
                                         final ChatMessage message = new ChatMessage();
@@ -465,24 +465,16 @@ public class ChatActivity extends AppCompatActivity {
 
         message.setMessageStatus(Status.SENT);
 
+        messageCount = chatMessages.size();
+        last_message = messageText;
     }
+
 
     private Activity getActivity()
     {
         return this;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        NotificationCenter.getInstance().removeObserver(this, NotificationCenter.emojiDidLoaded);
-    }
-
-    /**
-     * Get the system status bar height
-     * @return
-     */
     public int getStatusBarHeight() {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -490,6 +482,15 @@ public class ChatActivity extends AppCompatActivity {
             result = getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == android.R.id.home){
+            this.onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

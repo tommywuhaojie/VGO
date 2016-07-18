@@ -244,8 +244,10 @@ public class Main extends AppCompatActivity{
             mTabHost.getTabWidget().getChildAt(i).setPadding(0,0,0,0);
         }
 
-        // default tab
-        mTabHost.setCurrentTab(0);
+        // get default tab# from intent
+        int toTab = getIntent().getIntExtra("toTab", 0);
+
+        mTabHost.setCurrentTab(toTab);
     }
 
 

@@ -24,8 +24,8 @@
         android:layout_toStartOf="@+id/relativeLayout3">
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:id="@+id/avatar"
             android:src="@drawable/default_avatar"
             android:minHeight="50dp"
@@ -62,9 +62,11 @@
 
                     android:autoLink="web"
                     android:maxWidth="195dp"
-                    android:text="hi"
+                    android:text="测试测试测试"
                     android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/avatar" />
+                    android:layout_toEndOf="@+id/avatar"
+                    android:minHeight="40dp"
+                    android:gravity="left|center" />
             </LinearLayout>
 
             <TextView

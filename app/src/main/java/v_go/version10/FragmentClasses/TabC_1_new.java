@@ -1,6 +1,7 @@
 package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -63,14 +64,26 @@ public class TabC_1_new extends Fragment {
     private int totalContactsToLoad = 0;
 
     private boolean isFirstTime = true;
-    private boolean isPageVisible;
+    private boolean isInChatActivity = false;
+    private String userIdIsTalkingTo = "";
     public static boolean isInitialize;
+    public static boolean isVisible;
 
     private final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
     private final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
 
     private final String REQUEST_BY_PHONE_NUMBER = "phone_number";
     private final String REQUEST_BY_USER_ID = "user_id";
+
+    private static String o_user_id;
+    private static String my_last_msg;
+    private static boolean needToUpdateLastMsg;
+
+    public static void updateLastMessage(String other_user_id, String message, Boolean need){
+        o_user_id = other_user_id;
+        my_last_msg = message;
+        needToUpdateLastMsg = need;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -112,13 +125,14 @@ public class TabC_1_new extends Fragment {
                 adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
                 contactListView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
-                isPageVisible = false;
+                userIdIsTalkingTo = user_id;
+                isInChatActivity = true;
                 // clear up badge number in BG service
                 if(BackgroundService.unReadMessage.containsKey(userIdList.get(position))){
                     BackgroundService.unReadMessage.put(userIdList.get(position), 0);
                 }
-                // new activity
-                getActivity().startActivity(intent);
+                // new activity and wait for last message result
+                getActivity().startActivityForResult(intent, 1);
             }
         });
 
@@ -168,7 +182,15 @@ public class TabC_1_new extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
-        isPageVisible = true;
+
+        isInChatActivity = false;
+        isVisible = true;
+
+        // clear up notification
+        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(BackgroundService.NOTIFICATION_ID);
+        BackgroundService.resetNumberOfPushNotification();
+
         if(isFirstTime) {
             isFirstTime = false;
             // load contact list for the first time
@@ -176,11 +198,25 @@ public class TabC_1_new extends Fragment {
             // init receiver for contact update
             regBroadcastReceiver();
         }
+
+        if(needToUpdateLastMsg){
+            int positionToUpdate = userIdList.indexOf(o_user_id);
+            if(positionToUpdate != -1) {
+                // update the last message
+                hashMap.get(positionToUpdate).put("last_message", my_last_msg);
+                // update listview
+                adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                contactListView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+            }
+        }
     }
 
     @Override
     public void onPause(){
         super.onPause();
+        isVisible = false;
+        needToUpdateLastMsg = false;
     }
 
     @Override
@@ -250,7 +286,8 @@ public class TabC_1_new extends Fragment {
                     // update the last message
                     hashMap.get(positionToUpdate).put("last_message", messageText);
                     // update the badge icon only if this page is visible
-                    if(isPageVisible) {
+                    // or user is in ChatActivity but receives a message from a different user
+                    if(!isInChatActivity || (isInChatActivity && !sender_user_id.equals(userIdIsTalkingTo))) {
                         int currentValue = badgeList.get(positionToUpdate);
                         badgeList.set(positionToUpdate, currentValue + 1);
                     }
