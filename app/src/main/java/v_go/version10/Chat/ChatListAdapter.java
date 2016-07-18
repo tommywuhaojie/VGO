@@ -1,7 +1,6 @@
 package v_go.version10.Chat;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
-import v_go.version10.Chat.widgets.Emoji;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 

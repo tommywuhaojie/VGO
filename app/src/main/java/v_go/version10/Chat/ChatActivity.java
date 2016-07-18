@@ -192,8 +192,6 @@ public class ChatActivity extends AppCompatActivity {
         getActivity().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        AndroidUtilities.statusBarHeight = getStatusBarHeight();
-
         chatMessages = new ArrayList<>();
 
         chatListView = (ListView) findViewById(R.id.chat_list_view);
@@ -276,9 +274,7 @@ public class ChatActivity extends AppCompatActivity {
 
         ChatActivity.activityResumed();
 
-        if(chatEditText1.isFocused()){
-            chatEditText1.clearFocus();
-        }
+        chatEditText1.clearFocus();
 
         // register broadcastReceiver only for the first time
         if(isFirstTime) {

@@ -8,15 +8,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.CountDownTimer;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.Random;
-
-import io.socket.client.Socket;
-import v_go.version10.Chat.App;
-import v_go.version10.PersistentCookieStore.SiCookieStore2;
-import v_go.version10.SocketIo.SocketIoHelper;
 
 public class Global {
 
