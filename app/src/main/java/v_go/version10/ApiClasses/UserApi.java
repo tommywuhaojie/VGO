@@ -25,13 +25,13 @@ public class UserApi {
 
     public static JSONObject SendVerificationCode(String phone_number){
         String data="phone_number="+phone_number;
-        return REST.PerformPostRequestForJSONObject(URLs.SEND_CODE_URL, data);
+        return REST.PerformPostRequestForJSONObject(Urls.SEND_CODE_URL, data);
     }
 
     public static JSONObject VerifyCode(String phone_number, String code){
 
         String data="phone_number="+phone_number+"&code="+code;
-        return REST.PerformPostRequestForJSONObject(URLs.VERIFY_CODE_URL, data);
+        return REST.PerformPostRequestForJSONObject(Urls.VERIFY_CODE_URL, data);
     }
     /* INPUT:
     *
@@ -72,7 +72,7 @@ public class UserApi {
                     +last_name+"&sex="+sex+"&driver_license="+driver_license+"&plate_number="+plate_number+"&car_model="+car_model
                     +"&colour="+colour;
         }
-        return REST.PerformPostRequestForJSONObject(URLs.REGISTER_URL, data);
+        return REST.PerformPostRequestForJSONObject(Urls.REGISTER_URL, data);
     }
 
     /* PATH: host_url:8080/account/getUserInfo
@@ -111,7 +111,7 @@ public class UserApi {
     // type: "phone_number" or "user_id"
     public static JSONObject GetUserInfo(String identification, String type){
         String data = type + "=" + identification;
-        return REST.PerformPostRequestForJSONObject(URLs.GET_USER_INFO_URL, data);
+        return REST.PerformPostRequestForJSONObject(Urls.GET_USER_INFO_URL, data);
     }
 
     /*
@@ -124,7 +124,7 @@ public class UserApi {
         SiCookieStore2 siCookieStore = new SiCookieStore2(context);
         CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
-        return REST.PerformPostRequestForJSONObject(URLs.LOGIN_URL, data);
+        return REST.PerformPostRequestForJSONObject(Urls.LOGIN_URL, data);
     }
 
     /*
@@ -132,7 +132,7 @@ public class UserApi {
     *  1    : successfully logged out
     * */
     public static JSONObject Logout(){
-       return REST.PerformDeleteRequest(URLs.LOGOUT_URL);
+       return REST.PerformDeleteRequest(Urls.LOGOUT_URL);
     }
 
     public static JSONObject UploadAvatar(Bitmap bitmap) {
@@ -146,7 +146,7 @@ public class UserApi {
         String response;
         String json_text = null;
         try {
-            URL url = new URL(URLs.UPLOAD_AVATAR_URL);
+            URL url = new URL(Urls.UPLOAD_AVATAR_URL);
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
@@ -204,7 +204,7 @@ public class UserApi {
 
         try {
             String data = "user_id=" + user_id;
-            URL url = new URL(URLs.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
@@ -230,7 +230,7 @@ public class UserApi {
         InputStream inputStream;
 
         try {
-            URL url = new URL(URLs.DOWNLOAD_AVATAR_URL);
+            URL url = new URL(Urls.DOWNLOAD_AVATAR_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);

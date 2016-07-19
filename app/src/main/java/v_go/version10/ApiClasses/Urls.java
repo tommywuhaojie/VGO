@@ -1,7 +1,7 @@
 package v_go.version10.ApiClasses;
 
 
-public class URLs {
+public class Urls {
 
     private static final String SERVER_ROOT_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080";
     private static final String LOCALHOST_ROOT_URL = "http://192.168.1.70:8080";

@@ -20,7 +20,7 @@ public class LocalHostApi {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(URLs.LOCAL_REGISTER_URL);
+            url = new URL(Urls.LOCAL_REGISTER_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
 
@@ -67,7 +67,7 @@ public class LocalHostApi {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(URLs.LOCAL_LOGIN_URL);
+            url = new URL(Urls.LOCAL_LOGIN_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setUseCaches(false);
@@ -110,7 +110,7 @@ public class LocalHostApi {
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
         try {
-            url = new URL(URLs.LOCAL_LOGOUT_URL);
+            url = new URL(Urls.LOCAL_LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setUseCaches(false);

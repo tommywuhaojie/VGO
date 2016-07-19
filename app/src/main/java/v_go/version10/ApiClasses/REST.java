@@ -112,7 +112,7 @@ public class REST {
         String json_text = null;
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(URLs.LOGOUT_URL);
+            URL url = new URL(Urls.LOGOUT_URL);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("DELETE");
             connection.setConnectTimeout(TIME_OUT_IN_SECOND * 1000);
