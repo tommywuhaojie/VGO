@@ -6,7 +6,7 @@ public class URLs {
     private static final String SERVER_ROOT_URL = "http://ec2-52-40-59-253.us-west-2.compute.amazonaws.com:8080";
     private static final String LOCALHOST_ROOT_URL = "http://192.168.1.70:8080";
 
-    // current target root url
+    // current target root URL
     public static final String TARGET_ROOT_URL = SERVER_ROOT_URL;
 
     // server URLs
@@ -19,8 +19,10 @@ public class URLs {
     public static final String REGISTER_URL = TARGET_ROOT_URL + "/account/register";
     public static final String GET_USER_INFO_URL = TARGET_ROOT_URL + "/account/getUserInfo";
     public static final String GET_CHAT_HISTORY_URL = TARGET_ROOT_URL + "/chat_history";
+    public static final String GET_SINGLE_CONTACT_URL = TARGET_ROOT_URL + "/get_single_contact";
     public static final String GET_CONTACT_LIST_URL = TARGET_ROOT_URL + "/get_contact_list";
-    public static final String ADD_CONTACT_URL_ = TARGET_ROOT_URL + "/add_contact";
+    public static final String ADD_CONTACT_URL = TARGET_ROOT_URL + "/add_contact";
+    public static final String READ_ALL_MESSAGE_URL = TARGET_ROOT_URL + "/read_all_message";
 
     // localhost API test URLs
     public static final String LOCAL_HOST_URL = "http://127.0.0.1:8080";

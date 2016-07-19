@@ -26,6 +26,4 @@ public class SizeNotifierRelativeLayout extends RelativeLayout {
     public SizeNotifierRelativeLayout(Context context, android.util.AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
-
-
 }

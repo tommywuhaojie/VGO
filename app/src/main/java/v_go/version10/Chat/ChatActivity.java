@@ -25,6 +25,9 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -53,19 +56,12 @@ public class ChatActivity extends AppCompatActivity {
     private boolean mTyping = false;
     private int messageCount = -1;
     private Handler mTypingHandler = new Handler();
-
     private Socket socket;
 
     private static final int TYPING_TIMER_LENGTH = 600;
-    private static final int NUMBER_OF_MESSAGES = 100;
+    private static final int NUMBER_OF_MESSAGES_TO_LOAD = 50;
 
-    // to check if this activity is visible to user and who is user talking to
-    private static boolean activityVisible;
     private static String target_user_id;
-
-    public static boolean isActivityVisible() {
-        return activityVisible;
-    }
 
     public static boolean isUserIdMatched(String user_id){
         if(user_id != null && target_user_id != null){
@@ -73,16 +69,6 @@ public class ChatActivity extends AppCompatActivity {
         }
         return false;
     }
-
-    public static void activityResumed() {
-        activityVisible = true;
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;
-    }
-
-
 
     // on send
     private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
@@ -143,7 +129,7 @@ public class ChatActivity extends AppCompatActivity {
                 public void run() {
                     scrollToBottomSharp();
                 }
-            }, 200);
+            }, 50);
         }
     };
 
@@ -176,6 +162,8 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        System.gc();
 
         SocketIoHelper app = (SocketIoHelper) getApplication();
         socket = app.getSocket();
@@ -215,6 +203,21 @@ public class ChatActivity extends AppCompatActivity {
 
         chatEditText1.addTextChangedListener(watcher1);
 
+        chatEditText1.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            scrollToBottomSharp();
+                        }
+                    }, 50);
+                }
+            }
+        });
+
         // load chat history after view created
         ViewTreeObserver vto = findViewById(R.id.chat_layout).getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -222,6 +225,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 // Put your code here.
                 loadChatHistory();
+
                 findViewById(R.id.chat_layout).getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
@@ -255,9 +259,25 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JSONObject result = ChatApi.ReadAllMessage(other_user_id);
+                try{
+                    Log.d("DEBUG", result.getString("msg"));
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        networkThread.start();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        ChatActivity.activityPaused();
 
         // turn off isTyping listener when fragment is not visible to user
         socket.off("is typing", onTyping);
@@ -272,8 +292,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        ChatActivity.activityResumed();
 
         chatEditText1.clearFocus();
 
@@ -290,6 +308,8 @@ public class ChatActivity extends AppCompatActivity {
         socket.on("is typing", onTyping);
         socket.on("stop typing", onStopTyping);
     }
+
+
 
     private Emitter.Listener onDeliveryConfirm = new Emitter.Listener(){
         @Override
@@ -349,7 +369,6 @@ public class ChatActivity extends AppCompatActivity {
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
                 String messageText = intent.getStringExtra("message");
                 String sender_user_id = intent.getStringExtra("sender_user_id");
 
@@ -378,7 +397,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES);
+                final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES_TO_LOAD);
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -396,19 +415,21 @@ public class ChatActivity extends AppCompatActivity {
                                     String messageText = messageObj.getString("message");
                                     String dateTime = messageObj.getString("date_time");
 
+                                    Long time = Long.parseLong(dateTime);
+
                                     if(isYours.equals("0")){
                                         final ChatMessage message = new ChatMessage();
                                         message.setMessageStatus(Status.SENT);
                                         message.setMessageText(messageText);
                                         message.setUserType(UserType.SELF);
-                                        message.setMessageTime(new Date().getTime());
+                                        message.setMessageTime(time);
                                         chatMessages.add(message);
                                     }else {
                                         final ChatMessage message = new ChatMessage();
                                         message.setMessageStatus(Status.SENT);
                                         message.setMessageText(messageText);
                                         message.setUserType(UserType.OTHER);
-                                        message.setMessageTime(new Date().getTime());
+                                        message.setMessageTime(time);
                                         chatMessages.add(message);
                                     }
 
@@ -476,15 +497,6 @@ public class ChatActivity extends AppCompatActivity {
     private Activity getActivity()
     {
         return this;
-    }
-
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 
     @Override

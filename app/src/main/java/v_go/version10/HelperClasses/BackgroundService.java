@@ -123,15 +123,6 @@ public class BackgroundService extends Service {
                 broadcastIntent.putExtra("sender_user_id", sender_user_id);
                 broadcastIntent.putExtra("message", message);
 
-                if(!TabC_1_new.isInitialize){
-                    if(unReadMessage.containsKey(sender_user_id)){
-                        int currentValue = unReadMessage.get(sender_user_id);
-                        unReadMessage.put(sender_user_id, currentValue + 1);
-                    }else{
-                        unReadMessage.put(sender_user_id, 1);
-                    }
-                }
-
                 mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 
                 // send push notification
@@ -143,7 +134,6 @@ public class BackgroundService extends Service {
                     ringtone.play();
                     ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(300);
                 }
-
 
             }catch (JSONException e){
                 e.printStackTrace();
