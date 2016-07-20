@@ -35,7 +35,7 @@ package="v_go.version10">
 
         <service android:name=".HelperClasses.BackgroundService" />
 
-        <activity android:name=".ActivityClasses.SignUpAndLoginIn" android:label="@string/VGO"
+        <activity android:name=".ActivityClasses.FirstPage" android:label="@string/VGO"
             android:screenOrientation="portrait" android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN" />

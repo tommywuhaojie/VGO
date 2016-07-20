@@ -45,6 +45,11 @@ public class LoginNew extends AppCompatActivity{
         password.setHintTextColor(Color.parseColor("#50B9AC"));
 
         password.setOnKeyListener(keyListener);
+
+        // apply cache credentials
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+        phone.setText(settings.getString("phone_number", ""));
+        password.setText(settings.getString("password", ""));
     }
 
     private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
@@ -101,20 +106,38 @@ public class LoginNew extends AppCompatActivity{
                 try {
                     String phone_number = phone.getText().toString().trim();
                     String pwd = password.getText().toString();
-                    if(UserApi.Login(phone_number, pwd, getApplicationContext()).getString("code").equals("1"))
+                    String result = UserApi.Login(phone_number, pwd, getApplicationContext()).getString("code");
+                    if(result.equals("1"))
                     {
                         // if login succeeded save status to local and no more login next time
                         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putBoolean("is_logged_in", true);
+                        editor.putString("phone_number", phone_number);
+                        editor.putString("password", pwd);
                         editor.apply();
 
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();
                     }
-                    else
-                    {
+                    else if(result.equals("-3")){
+                        pDialog.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertDialog.setMessage("You've already logged in from another device. Please logout first.");
+                                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                                        "OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            }
+                                        });
+                                alertDialog.show();
+                            }
+                        });
+                    } else{
                         pDialog.dismiss();
                         runOnUiThread(new Runnable() {
                             @Override

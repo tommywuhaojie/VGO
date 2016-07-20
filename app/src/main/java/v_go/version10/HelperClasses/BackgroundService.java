@@ -95,6 +95,11 @@ public class BackgroundService extends Service {
         @Override
         public void call(Object... args) {
             Log.d("DEBUG", "socket failed to connect");
+            // clear local is_logged_in flag
+            SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("is_logged_in", false);
+            editor.apply();
         }
     };
     private Emitter.Listener onServerError = new Emitter.Listener(){

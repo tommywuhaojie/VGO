@@ -37,6 +37,7 @@ import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
+import v_go.version10.FragmentClasses.TabC_1;
 import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.R;
 import v_go.version10.SocketIo.SocketIoHelper;
@@ -51,7 +52,8 @@ public class ChatActivity extends AppCompatActivity {
     private ChatListAdapter listAdapter;
     private String other_user_id;
     private String first_name;
-    private String last_message;
+    private String last_message = "";
+    private Long last_send_time = 0l;
     private boolean isFirstTime = true;
     private boolean mTyping = false;
     private int messageCount = -1;
@@ -129,7 +131,7 @@ public class ChatActivity extends AppCompatActivity {
                 public void run() {
                     scrollToBottomSharp();
                 }
-            }, 50);
+            }, 200);
         }
     };
 
@@ -213,7 +215,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void run() {
                             scrollToBottomSharp();
                         }
-                    }, 50);
+                    }, 200);
                 }
             }
         });
@@ -239,6 +241,10 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
+                if(s.length() == 0){
+                    return;
+                }
+
                 if (!socket.connected()){
                     return;
                 }
@@ -259,8 +265,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy(){
         super.onDestroy();
+
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -273,6 +285,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         networkThread.start();
+
+        socket.off("delivery confirmation", onDeliveryConfirm);
     }
 
     @Override
@@ -283,9 +297,9 @@ public class ChatActivity extends AppCompatActivity {
         socket.off("is typing", onTyping);
         socket.off("stop typing", onStopTyping);
 
-        // update last message in previous view when go back
+        // update contact row when go back
         if(messageCount == chatMessages.size()){
-            TabC_1_new.updateLastMessage(other_user_id, last_message, true);
+            TabC_1_new.updateContactRowInfo(last_message, last_send_time);
         }
     }
 
@@ -340,7 +354,6 @@ public class ChatActivity extends AppCompatActivity {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("DEBUG", "on receive stop typing");
                     String id = args[0].toString();
                     if (id.equals(other_user_id)) {
                         TextView isTyping = (TextView) findViewById(R.id.is_typing);
@@ -480,7 +493,10 @@ public class ChatActivity extends AppCompatActivity {
         message.setMessageStatus(Status.SENT);
         message.setMessageText(messageText);
         message.setUserType(userType);
-        message.setMessageTime(new Date().getTime());
+        Long time = new Date().getTime();
+        message.setMessageTime(time);
+        last_send_time = time;
+
         chatMessages.add(message);
 
         if(listAdapter!= null)

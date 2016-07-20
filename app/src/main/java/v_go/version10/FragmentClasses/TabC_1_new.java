@@ -56,21 +56,24 @@ public class TabC_1_new extends Fragment {
     private View view;
     private SimpleAdapter adapter;
     private ListView contactListView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private List<HashMap<String, String>> hashMap = new ArrayList<>();
     private List<Bitmap> avatarList = new ArrayList<>();
     private List<String> userIdList = new ArrayList<>();
     private List<String> nameList = new ArrayList<>();
     private List<Integer> badgeList = new ArrayList<>();
 
-    private ProgressDialog pDialog;
-    private ProgressDialog proDialog;
+    //private ProgressDialog proDialog;
     private int totalContactsToLoad = 0;
+    private int positionToUpdate;
 
     private boolean isFirstTime = true;
     private boolean isInChatActivity = false;
-    private String userIdIsTalkingTo = "";
+
     public static boolean isInitialize;
     public static boolean isVisible;
+    private static boolean needToUpdateContactRow;
 
     private final String[] from = new String[]{"first_name_last_name", "last_message", "date_time"};
     private final int[] to = new int[]{R.id.firstLine, R.id.secondLine, R.id.date_time};
@@ -78,15 +81,7 @@ public class TabC_1_new extends Fragment {
     private final String REQUEST_BY_PHONE_NUMBER = "phone_number";
     private final String REQUEST_BY_USER_ID = "user_id";
 
-    private static String o_user_id;
-    private static String my_last_msg;
-    private static boolean needToUpdateLastMsg;
-
-    public static void updateLastMessage(String other_user_id, String message, Boolean need){
-        o_user_id = other_user_id;
-        my_last_msg = message;
-        needToUpdateLastMsg = need;
-    }
+    private String userIdIsTalkingTo = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -135,15 +130,17 @@ public class TabC_1_new extends Fragment {
                     BackgroundService.unReadMessage.put(userIdList.get(position), 0);
                 }
                 // new activity and wait for last message result
-                getActivity().startActivityForResult(intent, 1);
+                positionToUpdate = position;
+                getActivity().startActivity(intent);
             }
         });
 
         // Setup swipe refresh
-        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_red_light,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_orange_light);
+        swipeRefreshLayout.setDistanceToTriggerSync(300);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -153,8 +150,6 @@ public class TabC_1_new extends Fragment {
                 //setupAdapter();
                 //contactListView.setAdapter(adapter);
                 Toast.makeText(getActivity(), "Everything is up to date.", Toast.LENGTH_SHORT).show();
-                // enable tab
-                ((Main) getActivity()).getTabWidget().setEnabled(true);
 
                 // refresh animation
                 swipeRefreshLayout.setRefreshing(true);
@@ -162,6 +157,8 @@ public class TabC_1_new extends Fragment {
                     @Override
                     public void run() {
                         swipeRefreshLayout.setRefreshing(false);
+                        // enable tab
+                        ((Main) getActivity()).getTabWidget().setEnabled(true);
                     }
                 }, 2000);
             }
@@ -202,24 +199,33 @@ public class TabC_1_new extends Fragment {
             regBroadcastReceiver();
         }
 
-        if(needToUpdateLastMsg){
-            int positionToUpdate = userIdList.indexOf(o_user_id);
-            if(positionToUpdate != -1) {
-                // update the last message
-                hashMap.get(positionToUpdate).put("last_message", my_last_msg);
-                // update listview
-                adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
-                contactListView.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-            }
+        // update the last message and its send time of message sent by you
+        if(needToUpdateContactRow && hashMap.size() != 0) {
+            hashMap.get(positionToUpdate).put("last_message", last_message_sent);
+            hashMap.get(positionToUpdate).put("date_time", last_sent_time);
+            // update listview
+            adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+            contactListView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
         }
+
+    }
+
+    public static String last_message_sent = "";
+    public static String last_sent_time = "";
+    public static void updateContactRowInfo(String last_message, Long last_time_long){
+        needToUpdateContactRow = true;
+        last_message_sent = last_message;
+        Date date = new Date(last_time_long);
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
+        last_sent_time = formatter.format(date).trim();
     }
 
     @Override
     public void onPause(){
         super.onPause();
         isVisible = false;
-        needToUpdateLastMsg = false;
+        needToUpdateContactRow = false;
     }
 
     @Override
@@ -228,12 +234,40 @@ public class TabC_1_new extends Fragment {
         isInitialize = false;
     }
 
+    private void startLoading(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // disable switching tab
+                ((Main) getActivity()).getTabWidget().setEnabled(false);
+                swipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(true);
+                    }
+                });
+            }
+        });
+    }
+    private void stopLoading(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // enable switching tab
+                ((Main) getActivity()).getTabWidget().setEnabled(true);
+                swipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+            }
+        });
+    }
+
     private void loadInitialContactList(){
-        proDialog = new ProgressDialog(getActivity());
-        proDialog.setCanceledOnTouchOutside(false);
-        proDialog.setCancelable(false);
-        proDialog.setMessage("Loading contacts...");
-        proDialog.show();
+
+        startLoading();
 
         Thread networkThread = new Thread(new Runnable() {
             @Override
@@ -256,10 +290,11 @@ public class TabC_1_new extends Fragment {
 
                         }
                     }else{
-                        proDialog.dismiss();
+                        stopLoading();
                     }
                 }catch (Exception e){
                     e.printStackTrace();
+                    stopLoading();
                 }
             }
         });
@@ -284,6 +319,13 @@ public class TabC_1_new extends Fragment {
                 if(positionToUpdate != -1) {
                     // update the last message
                     hashMap.get(positionToUpdate).put("last_message", messageText);
+
+                    // update the last message received time
+                    Date date = new Date();
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
+                    String last_time = formatter.format(date).trim();
+                    hashMap.get(positionToUpdate).put("date_time", last_time);
+
                     // update the badge icon only if this page is visible
                     // or user is in ChatActivity but receives a message from a different user
                     if(!isInChatActivity || (isInChatActivity && !sender_user_id.equals(userIdIsTalkingTo))) {
@@ -334,12 +376,7 @@ public class TabC_1_new extends Fragment {
                     @Override
                     public void run() {
                         contactListView.setAdapter(adapter);
-                        if(dismissDialog)
-                            pDialog.dismiss();
-                        else if(hashMap.size() == totalContactsToLoad) {
-                            proDialog.dismiss();
-                            // update the initial unRead message after all contacts have been loaded
-                        }
+                        stopLoading();
                     }
                 });
             }
@@ -395,12 +432,7 @@ public class TabC_1_new extends Fragment {
             @Override
             public void run() {
                 if (showDialog) {
-                    if (pDialog == null)
-                        pDialog = new ProgressDialog(getActivity());
-                    pDialog.setCanceledOnTouchOutside(false);
-                    pDialog.setCancelable(false);
-                    pDialog.setMessage("Loading contact...");
-                    pDialog.show();
+                    startLoading();
                 }
 
                 Thread networkThread = new Thread(new Runnable() {
@@ -425,11 +457,12 @@ public class TabC_1_new extends Fragment {
                                     last_msg = getSingleContactResult.getString("last_msg");
                                     last_time = getSingleContactResult.getString("last_msg_date_time");
 
-                                    Long time = Long.parseLong(last_time);
-                                    Date date = new Date(time);
-                                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
-                                    last_time = formatter.format(date).trim();
-
+                                    if(!last_time.equals("")) {
+                                        Long time = Long.parseLong(last_time);
+                                        Date date = new Date(time);
+                                        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
+                                        last_time = formatter.format(date).trim();
+                                    }
                                     num_of_unread_message = getSingleContactResult.getInt("number_of_unread_msg");
                                 }
 
@@ -446,31 +479,23 @@ public class TabC_1_new extends Fragment {
 
                                 } else if (addNewContactResult.getString("code").matches("-3")) {
                                     if(showDialog){
-                                        pDialog.dismiss();
+                                        stopLoading();
                                     }
                                     makeToast("You cannot add yourself as a new contact.");
 
                                 } else if (addNewContactResult.getString("code").matches("-5")) {
                                     if(showDialog){
-                                        pDialog.dismiss();
+                                        stopLoading();
                                     }
                                     makeToast("You've already added this contact.");
                                 }
                             } else if (getUserInfoResult.getString("code").matches("-1")) {
-                                if(showDialog){
-                                    pDialog.dismiss();
-                                }else{
-                                    proDialog.dismiss();
-                                }
+                                stopLoading();
                                 makeToast("User is not found.");
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            if(showDialog){
-                                pDialog.dismiss();
-                            }else{
-                                proDialog.dismiss();
-                            }
+                            stopLoading();
                             makeToast("Server error occurs!");
                         }
                     }
