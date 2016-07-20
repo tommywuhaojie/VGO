@@ -126,7 +126,7 @@ public class LoginNew extends AppCompatActivity{
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                alertDialog.setMessage("You've already logged in from another device. Please logout first.");
+                                alertDialog.setMessage("You've already logged in from another device. Please log out first.");
                                 alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
                                         "OK", new DialogInterface.OnClickListener() {
                                             @Override
