@@ -22,6 +22,9 @@ import org.json.JSONObject;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import io.socket.client.Socket;
@@ -81,20 +84,21 @@ public class BackgroundService extends Service {
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket connected");
+            Log.d("DEBUG", "socket connected "  + logTime());
         }
     };
 
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket disconnected");
+            Log.d("DEBUG", "socket disconnected "  + logTime());
         }
     };
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket failed to connect");
+            Log.d("DEBUG", "socket failed to connect " + logTime());
+
             // clear local is_logged_in flag
             SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
             SharedPreferences.Editor editor = settings.edit();
@@ -107,10 +111,11 @@ public class BackgroundService extends Service {
         public void call(final Object... args) {
             JSONObject error = (JSONObject) args[0];
             try {
-                Log.d("DEBUG", error.getString("msg"));
+                Log.d("DEBUG", error.getString("msg") + " " + logTime());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
         }
     };
 
@@ -143,6 +148,8 @@ public class BackgroundService extends Service {
             }catch (JSONException e){
                 e.printStackTrace();
             }
+
+            Log.d("DEBUG", "new message " + logTime());
         }
     };
 
@@ -191,6 +198,13 @@ public class BackgroundService extends Service {
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyCpuLock");
             wl_cpu.acquire(5000);
         }
+    }
+
+    private String logTime(){
+        Date date = new Date();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
+        String now = formatter.format(date);
+        return now;
     }
 
     @Override
