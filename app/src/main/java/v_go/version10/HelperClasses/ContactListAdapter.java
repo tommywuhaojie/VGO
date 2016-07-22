@@ -56,6 +56,7 @@ public class ContactListAdapter extends SimpleAdapter {
         if(avatarBitmap != null){
             ImageView imageView = ((ImageView) view.findViewById(R.id.icon));
             if(imageView != null){
+                avatarBitmap = UserApi.getCircularBitmap(avatarBitmap);
                 imageView.setImageBitmap(avatarBitmap);
                 // update badge
                 if(badgeList.get(position) != 0) {

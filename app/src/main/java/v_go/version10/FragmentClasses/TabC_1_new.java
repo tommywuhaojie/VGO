@@ -2,7 +2,6 @@ package v_go.version10.FragmentClasses;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,14 +13,12 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
@@ -41,11 +38,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import io.socket.emitter.Emitter;
 import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.ApiClasses.UserApi;
-import v_go.version10.Chat.ChatActivity;
 import v_go.version10.HelperClasses.BackgroundService;
 import v_go.version10.HelperClasses.ContactListAdapter;
 import v_go.version10.HelperClasses.Global;
@@ -90,6 +85,12 @@ public class TabC_1_new extends Fragment {
         // inflate the layout for this fragment
         view = inflater.inflate(R.layout.tab_c_1_new, container, false);
 
+        // set title
+        ((Main)getActivity()).setActionbarTitle("SOCIAL");
+
+        // disable back button
+        ((Main)getActivity()).enableBackButton(false);
+
         // set status bar color to black
         Window window = getActivity().getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -113,9 +114,7 @@ public class TabC_1_new extends Fragment {
 
                 // send needed information to chat activity
                 String user_id = userIdList.get(position);
-                Intent intent = new Intent(getContext(), ChatActivity.class);
-                intent.putExtra("user_id", user_id);
-                intent.putExtra("full_name", nameList.get(position));
+
                 // clear up badge
                 badgeList.set(position, 0);
                 adapter = new ContactListAdapter(getActivity(),
@@ -125,7 +124,7 @@ public class TabC_1_new extends Fragment {
                         to,
                         userIdList,
                         badgeList,
-                        getActivity().getApplicationContext());
+                        Main.getAppContext());
                 contactListView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
                 userIdIsTalkingTo = user_id;
@@ -136,7 +135,16 @@ public class TabC_1_new extends Fragment {
                 }
                 // new activity and wait for last message result
                 positionToUpdate = position;
-                getActivity().startActivity(intent);
+
+                // Pass data arguments to ChatFragment
+                Bundle args = new Bundle();
+                args.putString("user_id", user_id);
+                args.putString("full_name", nameList.get(position));
+
+                // go to next fragment
+                Fragment fragment = new ChatFragment();
+                fragment.setArguments(args);
+                ((Main) getActivity()).pushFragments(Global.TAB_C, fragment, true, true);
             }
         });
 
@@ -149,23 +157,49 @@ public class TabC_1_new extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // disable tab when loading notification
-                ((Main) getActivity()).getTabWidget().setEnabled(false);
 
-                //setupAdapter();
-                //contactListView.setAdapter(adapter);
-                Toast.makeText(getActivity(), "Everything is up to date.", Toast.LENGTH_SHORT).show();
+                if (userIdList == null)
+                    return;
+                if (userIdList.size() == 0)
+                    return;
+
+                startLoading();
+                Thread networkThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        for(int i=0; i<userIdList.size(); i++) {
+                            Bitmap avatarBitmap = UserApi.DownloadAvatar(userIdList.get(i));
+                            if (avatarBitmap != null) {
+                                UserApi.saveAvatarToStorage(avatarBitmap, userIdList.get(i), Main.getAppContext());
+                                avatarBitmap.recycle();
+                            }
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter = new ContactListAdapter(Main.activity,
+                                        hashMap,
+                                        R.layout.contact_row,
+                                        from,
+                                        to,
+                                        userIdList,
+                                        badgeList,
+                                        Main.getAppContext());
+                                contactListView.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+                                Toast.makeText(getActivity(), "Everything is up to date.", Toast.LENGTH_SHORT).show();
+                                stopLoading();
+                            }
+                        });
+                    }
+                });
+                networkThread.start();
 
                 // refresh animation
                 swipeRefreshLayout.setRefreshing(true);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
-                        // enable tab
-                        ((Main) getActivity()).getTabWidget().setEnabled(true);
-                    }
-                }, 2000);
+
             }
         });
         // refresh only at the top of the ListView mechanism
@@ -187,6 +221,9 @@ public class TabC_1_new extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
+
+        // show tabs
+        ((Main)getActivity()).hideBottomTab(false);
 
         isInChatActivity = false;
         isVisible = true;
@@ -216,7 +253,7 @@ public class TabC_1_new extends Fragment {
                     to,
                     userIdList,
                     badgeList,
-                    getActivity().getApplicationContext());
+                    Main.getAppContext());
             contactListView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         }
@@ -339,7 +376,7 @@ public class TabC_1_new extends Fragment {
                     hashMap.get(positionToUpdate).put("date_time", last_time);
 
                     // update the badge icon only if this page is visible
-                    // or user is in ChatActivity but receives a message from a different user
+                    // or user is in ChatFragment but receives a message from a different user
                     if(!isInChatActivity || (isInChatActivity && !sender_user_id.equals(userIdIsTalkingTo))) {
                         int currentValue = badgeList.get(positionToUpdate);
                         badgeList.set(positionToUpdate, currentValue + 1);
@@ -352,7 +389,7 @@ public class TabC_1_new extends Fragment {
                             to,
                             userIdList,
                             badgeList,
-                            getActivity().getApplicationContext());
+                            Main.getAppContext());
                     contactListView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                 }
@@ -375,10 +412,13 @@ public class TabC_1_new extends Fragment {
             @Override
             public void run() {
 
-                Bitmap bitmap = UserApi.DownloadAvatar(user_id);
-                if(bitmap != null) {
-                    UserApi.saveAvatarToStorage(bitmap, user_id, getActivity().getApplicationContext());
-                    bitmap.recycle();
+                Bitmap avatarBitmap = UserApi.loadAvatarFromStorage(user_id, Main.getAppContext());
+                if(avatarBitmap == null) {
+                    avatarBitmap = UserApi.DownloadAvatar(user_id);
+                    if (avatarBitmap != null) {
+                        UserApi.saveAvatarToStorage(avatarBitmap, user_id, Main.getAppContext());
+                        avatarBitmap.recycle();
+                    }
                 }
 
                 nameList.add(0, first_name_last_name);
@@ -396,7 +436,7 @@ public class TabC_1_new extends Fragment {
                         to,
                         userIdList,
                         badgeList,
-                        getActivity().getApplicationContext());
+                        Main.getAppContext());
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

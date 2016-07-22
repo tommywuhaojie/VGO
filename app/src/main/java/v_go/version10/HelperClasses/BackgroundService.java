@@ -29,9 +29,8 @@ import java.util.HashMap;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
-import v_go.version10.Chat.ChatActivity;
+import v_go.version10.FragmentClasses.ChatFragment;
 import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
@@ -136,7 +135,7 @@ public class BackgroundService extends Service {
                 mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 
                 // send push notification
-                if(!TabC_1_new.isVisible || !ChatActivity.isUserIdMatched(sender_user_id)){
+                if(!TabC_1_new.isVisible && !ChatFragment.target_user_id.equals(sender_user_id)){
                     sendNotification("chat message");
                 }else{
                     // play sound and vibrate but no push notification

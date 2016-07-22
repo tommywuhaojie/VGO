@@ -1,4 +1,4 @@
-package v_go.version10.Chat;
+package v_go.version10.FragmentClasses;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -6,15 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +42,10 @@ import java.util.Date;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import v_go.version10.ActivityClasses.Main;
 import v_go.version10.ApiClasses.ChatApi;
 import v_go.version10.ApiClasses.UserApi;
+import v_go.version10.Chat.ChatListAdapter;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
@@ -48,8 +55,9 @@ import v_go.version10.R;
 import v_go.version10.SocketIo.SocketIoHelper;
 
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatFragment extends Fragment {
 
+    private View view = null; // This view
     private ListView chatListView;
     private EditText chatEditText1;
     private ArrayList<ChatMessage> chatMessages;
@@ -71,14 +79,9 @@ public class ChatActivity extends AppCompatActivity {
     private static final int TYPING_TIMER_LENGTH = 600;
     private static final int NUMBER_OF_MESSAGES_TO_LOAD = 50;
 
-    private static String target_user_id;
+    public static String target_user_id = "";
+    private boolean isThisInStack;
 
-    public static boolean isUserIdMatched(String user_id){
-        if(user_id != null && target_user_id != null){
-            return user_id.equals(target_user_id);
-        }
-        return false;
-    }
 
     // on send
     private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
@@ -169,44 +172,60 @@ public class ChatActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.activity_chat, container, false);
+        this.view = view;
+        isThisInStack = true;
 
-        SocketIoHelper app = (SocketIoHelper) getApplication();
+        // hide tabs
+        ((Main)getActivity()).hideBottomTab(true);
+
+        SocketIoHelper app = (SocketIoHelper) getActivity().getApplication();
         socket = app.getSocket();
 
         // enable back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        ((Main)getActivity()).enableBackButton(true);
 
         // setup actionbar title
-        String fullName = getIntent().getStringExtra("full_name");
-        getSupportActionBar().setTitle(fullName);
+        String fullName = getArguments().getString("full_name");
+        ((Main)getActivity()).setActionbarTitle(fullName);
 
         // setup the other user' id
-        other_user_id = getIntent().getStringExtra("user_id");
+        other_user_id = getArguments().getString("user_id");
         target_user_id = other_user_id;
 
         first_name = fullName.substring(0, fullName.trim().indexOf(" "));
 
-        getWindow().setSoftInputMode(
+        getActivity().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         chatMessages = new ArrayList<>();
 
-        chatListView = (ListView) findViewById(R.id.chat_list_view);
+        chatListView = (ListView) view.findViewById(R.id.chat_list_view);
 
-        my_avatar_bitmap = UserApi.loadMyAvatar(getApplicationContext());
-        other_avatar_bitmap = UserApi.loadAvatarFromStorage(other_user_id, getApplicationContext());
+        my_avatar_bitmap = UserApi.loadMyAvatar(((Main)getActivity()).getAppContext());
+        if(my_avatar_bitmap != null) {
+            my_avatar_bitmap = UserApi.getCircularBitmap(my_avatar_bitmap);
+        }else{
+            my_avatar_bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_avatar);
+        }
 
-        listAdapter = new ChatListAdapter(chatMessages, my_avatar_bitmap, other_avatar_bitmap, this);
+        other_avatar_bitmap = UserApi.loadAvatarFromStorage(other_user_id, ((Main)getActivity()).getAppContext());
+        if(other_avatar_bitmap != null) {
+            other_avatar_bitmap = UserApi.getCircularBitmap(other_avatar_bitmap);
+        }else{
+            my_avatar_bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_avatar);
+        }
+
+        listAdapter = new ChatListAdapter(chatMessages, my_avatar_bitmap, other_avatar_bitmap, getActivity());
 
         chatListView.setAdapter(listAdapter);
 
-        chatEditText1 = (EditText) findViewById(R.id.chat_edit_text1);
+        chatEditText1 = (EditText) view.findViewById(R.id.chat_edit_text1);
 
-        enterChatView1 = (ImageView) findViewById(R.id.enter_chat1);
+        enterChatView1 = (ImageView) view.findViewById(R.id.enter_chat1);
 
         chatEditText1.setOnKeyListener(keyListener);
 
@@ -231,15 +250,17 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        final View sameView = view;
+
         // load chat history after view created
-        ViewTreeObserver vto = findViewById(R.id.chat_layout).getViewTreeObserver();
+        ViewTreeObserver vto = view.findViewById(R.id.chat_layout).getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 // Put your code here.
                 loadChatHistory();
 
-                findViewById(R.id.chat_layout).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                sameView.findViewById(R.id.chat_layout).getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
 
@@ -273,17 +294,13 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        return view;
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         super.onDestroy();
-
+        isThisInStack = false;
 
         Thread networkThread = new Thread(new Runnable() {
             @Override
@@ -303,9 +320,17 @@ public class ChatActivity extends AppCompatActivity {
 
         // clean up bitmap to free memory
         listAdapter.recycleBitmaps();
-        my_avatar_bitmap.recycle();
-        other_avatar_bitmap.recycle();
-        unbindDrawables(findViewById(R.id.chat_layout));
+        if(my_avatar_bitmap != null){
+            if(!my_avatar_bitmap.isRecycled()){
+                my_avatar_bitmap.recycle();
+            }
+        }
+        if(other_avatar_bitmap != null){
+            if(!other_avatar_bitmap.isRecycled()){
+                other_avatar_bitmap.recycle();
+            }
+        }
+        unbindDrawables(view.findViewById(R.id.chat_layout));
         System.gc();
     }
     private void unbindDrawables(View view)
@@ -325,7 +350,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
 
         // turn off isTyping listener when fragment is not visible to user
@@ -339,14 +364,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         // clear focus & hide keyboard
         chatEditText1.clearFocus();
-        View view = this.getCurrentFocus();
+        View view = getActivity().getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
 
@@ -376,12 +401,12 @@ public class ChatActivity extends AppCompatActivity {
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String id = args[0].toString();
                     if (id.equals(other_user_id)) {
-                        TextView isTyping = (TextView) findViewById(R.id.is_typing);
+                        TextView isTyping = (TextView) getActivity().findViewById(R.id.is_typing);
                         isTyping.setText(first_name + " is typing...");
                         isTyping.setVisibility(View.VISIBLE);
                     }
@@ -392,12 +417,12 @@ public class ChatActivity extends AppCompatActivity {
     private Emitter.Listener onStopTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String id = args[0].toString();
                     if (id.equals(other_user_id)) {
-                        TextView isTyping = (TextView) findViewById(R.id.is_typing);
+                        TextView isTyping = (TextView) view.findViewById(R.id.is_typing);
                         isTyping.setVisibility(View.GONE);
                     }
                 }
@@ -419,10 +444,15 @@ public class ChatActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("private message");
 
-        LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+
+                if(!isThisInStack){
+                    return;
+                }
+
                 String messageText = intent.getStringExtra("message");
                 String sender_user_id = intent.getStringExtra("sender_user_id");
 
@@ -434,7 +464,7 @@ public class ChatActivity extends AppCompatActivity {
                     message.setUserType(UserType.SELF);
                     message.setMessageTime(new Date().getTime());
 
-                    ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(300);
+                    ((Vibrator) getActivity().getSystemService(getActivity().VIBRATOR_SERVICE)).vibrate(300);
 
                     chatMessages.add(message);
                     listAdapter.notifyDataSetChanged();
@@ -453,16 +483,16 @@ public class ChatActivity extends AppCompatActivity {
 
                 final JSONArray jsonArray = ChatApi.GetChatHistory(other_user_id, NUMBER_OF_MESSAGES_TO_LOAD);
 
-                runOnUiThread(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             JSONObject firstObj = jsonArray.getJSONObject(0);
-                            if(firstObj.getString("code").matches("1")){
+                            if (firstObj.getString("code").matches("1")) {
 
                                 int numberOfMsgGot = firstObj.getInt("number_of_message");
 
-                                for(int i=1; i<(1+numberOfMsgGot); i++){
+                                for (int i = 1; i < (1 + numberOfMsgGot); i++) {
 
                                     JSONObject messageObj = jsonArray.getJSONObject(i);
                                     String isYours = messageObj.getString("is_your_message"); //you sent -> 1, you received -> 0
@@ -471,14 +501,14 @@ public class ChatActivity extends AppCompatActivity {
 
                                     Long time = Long.parseLong(dateTime);
 
-                                    if(isYours.equals("0")){
+                                    if (isYours.equals("0")) {
                                         final ChatMessage message = new ChatMessage();
                                         message.setMessageStatus(Status.SENT);
                                         message.setMessageText(messageText);
                                         message.setUserType(UserType.SELF);
                                         message.setMessageTime(time);
                                         chatMessages.add(message);
-                                    }else {
+                                    } else {
                                         final ChatMessage message = new ChatMessage();
                                         message.setMessageStatus(Status.SENT);
                                         message.setMessageText(messageText);
@@ -491,7 +521,7 @@ public class ChatActivity extends AppCompatActivity {
                                     scrollToBottomSharp();
                                 }
                             }
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -549,12 +579,21 @@ public class ChatActivity extends AppCompatActivity {
         messageCount = chatMessages.size();
         last_message = messageText;
     }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
+        Log.d("DEBUG", "selected " + id);
         if(id == android.R.id.home){
-            this.onBackPressed();
+            Log.d("DEBUG", "back icon press");
+            ((Main)getActivity()).popFragments();
         }
         return super.onOptionsItemSelected(item);
     }

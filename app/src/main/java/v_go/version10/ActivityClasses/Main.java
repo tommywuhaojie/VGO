@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -85,6 +86,8 @@ public class Main extends AppCompatActivity{
 
     public static FragmentActivity activity;
 
+    private boolean allowBackPress;
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -102,17 +105,46 @@ public class Main extends AppCompatActivity{
         Log.d("DEBUG", "Main onDestroy");
     }
 
+    public static Context appContext;
+    public static Context getAppContext(){
+        return appContext;
+    }
+
+    public void hideBottomTab(boolean b){
+        if(b)
+            mTabHost.getTabWidget().setVisibility(View.GONE);
+        else
+            mTabHost.getTabWidget().setVisibility(View.VISIBLE);
+    }
+    private String getCachedUserId(Context AppContext){
+        SharedPreferences settings = AppContext.getSharedPreferences("cache", 0);
+        return settings.getString("user_id", "");
+    }
+    private void downloadCurrentUserAvatar(){
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap avatarBitmap = UserApi.DownloadAvatar();
+                if (avatarBitmap != null) {
+                    UserApi.saveAvatarToStorage(avatarBitmap,
+                            getCachedUserId(getApplicationContext()),
+                            getApplicationContext());
+                    Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
+                }
+            }
+        });
+        networkThread.start();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        appContext = getApplicationContext();
         activity = this;
 
-        // load SharePreferences for cookie store
-        SiCookieStore2 siCookieStore = new SiCookieStore2(getSharedPreferences(SiCookieStore2.COOKIE_PREFS, 0));
-        CookieManager cookieManager = new CookieManager(siCookieStore, CookiePolicy.ACCEPT_ALL);
-        CookieHandler.setDefault(cookieManager);
+        // download avatar
+        downloadCurrentUserAvatar();
 
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
@@ -293,6 +325,17 @@ public class Main extends AppCompatActivity{
      *                      true in all other cases.
      */
     public void pushFragments(String tag, Fragment fragment,boolean shouldAnimate, boolean shouldAdd){
+
+        // lock back button for 0.5 second
+        allowBackPress = false;
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                allowBackPress = true;
+            }
+        }, 500);
+
         if(shouldAdd) {
             mStacks.get(tag).push(fragment);
         }
@@ -321,6 +364,11 @@ public class Main extends AppCompatActivity{
 
 
     public void popFragments(){
+
+        if(!allowBackPress){
+            return;
+        }
+
       /*
        *    Select the second last fragment in current tab's stack..
        *    which will be shown after the fragment transaction given below
@@ -347,6 +395,11 @@ public class Main extends AppCompatActivity{
     }
 
     public void popFragments(int n){
+
+        if(!allowBackPress){
+            return;
+        }
+
       /*
        *    Select the second last fragment in current tab's stack..
        *    which will be shown after the fragment transaction given below
@@ -376,6 +429,7 @@ public class Main extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
+
         // We are already showing first fragment of current tab, so when back pressed, we will finish this activity..
         if(mStacks.get(mCurrentTab).size() == 1){
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -437,6 +491,9 @@ public class Main extends AppCompatActivity{
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        if(id == android.R.id.home){
+            onBackPressed();
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
