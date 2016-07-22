@@ -267,6 +267,9 @@ public class TabA_1 extends Fragment implements LoaderManager.LoaderCallbacks<Cu
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         //window.setStatusBarColor(Color.BLACK);
 
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
         // turn on option menu
         setHasOptionsMenu(true);
 

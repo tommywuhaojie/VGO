@@ -199,7 +199,7 @@ public class ChatFragment extends Fragment {
         first_name = fullName.substring(0, fullName.trim().indexOf(" "));
 
         getActivity().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         chatMessages = new ArrayList<>();
 
