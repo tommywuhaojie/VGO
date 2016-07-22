@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -33,6 +34,7 @@ public class TabD_1 extends Fragment   {
 
     private View view;
     private ImageView avatarImageView;
+    private Bitmap avatarBitmap;
 
     @Override
     public void onResume() {
@@ -40,12 +42,52 @@ public class TabD_1 extends Fragment   {
 
         if(Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR){
             Global.NEED_TO_DOWNLOAD_TAB_D_AVATAR = false;
-            ((Main)getActivity()).downloadCurrentUserAvatar();
+            downloadCurrentUserAvatar();
+        }else{
+            avatarBitmap = UserApi.loadAvatarFromStorage(
+                    getCachedUserId(getActivity().getApplicationContext()),
+                    getActivity().getApplicationContext());
+            if(avatarBitmap != null){
+                avatarBitmap = UserApi.getCircularBitmap(avatarBitmap);
+                avatarImageView.setImageBitmap(avatarBitmap);
+            }
         }
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if (avatarBitmap != null && !avatarBitmap.isRecycled()) {
+            avatarBitmap.recycle();
+            avatarBitmap = null;
+            System.gc();
+        }
+    }
+    private void downloadCurrentUserAvatar(){
+        Thread networkThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                avatarBitmap = UserApi.DownloadAvatar();
+                if (avatarBitmap != null) {
+                    UserApi.saveAvatarToStorage(avatarBitmap,
+                            getCachedUserId(getActivity().getApplicationContext()),
+                            getActivity().getApplicationContext());
+                    avatarBitmap = UserApi.getCircularBitmap(avatarBitmap);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            avatarImageView.setImageBitmap(avatarBitmap);
+                        }
+                    });
 
-        if(((Main)getActivity()).getUserCache().getAvatar() != null){
-            avatarImageView.setImageBitmap(((Main) getActivity()).getUserCache().getAvatar());
-        }
+                }
+            }
+        });
+        networkThread.start();
+    }
+
+    private String getCachedUserId(Context AppContext){
+        SharedPreferences settings = AppContext.getSharedPreferences("cache", 0);
+        return settings.getString("user_id", "");
     }
 
     @Override
@@ -135,16 +177,15 @@ public class TabD_1 extends Fragment   {
         NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(BackgroundService.NOTIFICATION_ID);
 
-        // reset all user global variables
-        Global.resetAll();
-
         // clear local is_logged_in flag
         SharedPreferences settings = getActivity().getApplicationContext().getSharedPreferences("cache", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("is_logged_in", false);
         editor.apply();
 
-        // go back to login page
+        // reset all user global variables
+        Global.resetAll();
+
         getActivity().finish();
     }
 

@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.readystatesoftware.viewbadger.BadgeView;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import org.json.JSONObject;
@@ -85,7 +86,7 @@ public class SignUp3 extends AppCompatActivity {
         File mediaFile;
 
         mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                "AVATAR_"+ timeStamp + ".jpg");
+                "avatar_"+ timeStamp + ".jpg");
         return mediaFile;
     }
 
@@ -175,7 +176,7 @@ public class SignUp3 extends AppCompatActivity {
                         target_uri = result.getUri();
 
                         Bitmap bitmap = getBitmapFromUri(target_uri);
-                        bitmap = Global.getCircularBitmap(bitmap);
+                        bitmap = UserApi.getCircularBitmap(bitmap);
                         imgView.setImageBitmap(bitmap);
 
                         isPicturePicked = true;

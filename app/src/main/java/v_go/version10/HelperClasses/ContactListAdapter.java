@@ -7,10 +7,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 
+import com.readystatesoftware.viewbadger.BadgeView;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.R;
 
 public class ContactListAdapter extends SimpleAdapter {
@@ -30,11 +33,18 @@ public class ContactListAdapter extends SimpleAdapter {
      *                 TextViews. The first N views in this list are given the values of the first N columns
      */
 
-    private List<Bitmap> avatarList;
+    private List<Integer> badgeList;
+    private List<String> userIdList;
+    private Context context;
+    private Context appContext;
+    private Bitmap avatarBitmap;
 
-    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to, List<Bitmap> avatarList) {
+    public ContactListAdapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to, List<String> userIdList, List<Integer> badgeList, Context appContext) {
         super(context, data, resource, from, to);
-        this.avatarList = avatarList;
+        this.context = context;
+        this.appContext = appContext;
+        this.userIdList = userIdList;
+        this.badgeList = badgeList;
     }
 
     // this function gets called once each row is revealed
@@ -42,14 +52,29 @@ public class ContactListAdapter extends SimpleAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
 
-        Bitmap bitmap = avatarList.get(position);
-        if(bitmap != null){
+        avatarBitmap = UserApi.loadAvatarFromStorage(userIdList.get(position), appContext);
+        if(avatarBitmap != null){
             ImageView imageView = ((ImageView) view.findViewById(R.id.icon));
             if(imageView != null){
-                imageView.setImageBitmap(bitmap);
+                avatarBitmap = UserApi.getCircularBitmap(avatarBitmap);
+                imageView.setImageBitmap(avatarBitmap);
+                // update badge
+                if(badgeList.get(position) != 0) {
+                    BadgeView badge = new BadgeView(context, imageView);
+                    badge.setText(badgeList.get(position).toString());
+                    badge.show();
+                }
             }
         }
 
         return view;
+    }
+
+    public void recycleBitmaps(){
+        if(avatarBitmap != null){
+           if(!avatarBitmap.isRecycled()){
+               avatarBitmap.recycle();
+           }
+        }
     }
 }

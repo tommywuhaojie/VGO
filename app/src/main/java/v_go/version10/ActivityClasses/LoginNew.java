@@ -9,12 +9,16 @@ import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import org.json.JSONObject;
+
 import v_go.version10.ApiClasses.UserApi;
+import v_go.version10.Chat.model.UserType;
 import v_go.version10.R;
 
 public class LoginNew extends AppCompatActivity{
@@ -40,12 +44,35 @@ public class LoginNew extends AppCompatActivity{
 
         // set hint color match background
         phone.setHintTextColor(Color.parseColor("#50B9AC"));
-
         password.setHintTextColor(Color.parseColor("#50B9AC"));
+
+        password.setOnKeyListener(keyListener);
+
+        // apply cache credentials
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+        phone.setText(settings.getString("phone_number", ""));
+        password.setText(settings.getString("password", ""));
     }
 
-    public void onLoginClicked(View view){
+    private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
 
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER) ) {
+                login();
+                return true;
+            }
+            return false;
+
+        }
+    };
+    public void onLoginClicked(View view){
+        login();
+    }
+
+    private void login(){
         boolean error = true;
 
         if(phone.getText().toString().trim().length() == 0) {
@@ -81,20 +108,41 @@ public class LoginNew extends AppCompatActivity{
                 try {
                     String phone_number = phone.getText().toString().trim();
                     String pwd = password.getText().toString();
-                    if(UserApi.Login(phone_number, pwd, getApplicationContext()).getString("code").equals("1"))
+                    JSONObject result = UserApi.Login(phone_number, pwd, getApplicationContext());
+                    if(result.getString("code").equals("1"))
                     {
+                        String user_id = result.getString("user_id");
+
                         // if login succeeded save status to local and no more login next time
                         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putBoolean("is_logged_in", true);
+                        editor.putString("user_id", user_id);
+                        editor.putString("phone_number", phone_number);
+                        editor.putString("password", pwd);
                         editor.apply();
 
                         Intent main = new Intent(LoginNew.this, Main.class);
                         startActivity(main);
                         pDialog.dismiss();
                     }
-                    else
-                    {
+                    else if(result.getString("code").equals("-3")){
+                        pDialog.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertDialog.setMessage("You've already logged in from another device. Please log out first.");
+                                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                                        "OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            }
+                                        });
+                                alertDialog.show();
+                            }
+                        });
+                    } else{
                         pDialog.dismiss();
                         runOnUiThread(new Runnable() {
                             @Override

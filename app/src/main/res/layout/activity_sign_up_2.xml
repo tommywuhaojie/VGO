@@ -305,7 +305,8 @@
             android:layout_marginTop="7dp"
             android:layout_alignEnd="@+id/imageView15"
             android:entries="@array/carMake"
-            android:focusable="false" />
+            android:focusable="false"
+            android:spinnerMode="dialog" />
 
         <Spinner
             android:layout_width="220dp"
@@ -315,7 +316,8 @@
             android:layout_below="@+id/brand"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
-            android:entries="@array/type" />
+            android:entries="@array/type"
+            android:spinnerMode="dialog" />
 
         <Spinner
             android:layout_width="220dp"
@@ -325,7 +327,8 @@
             android:layout_below="@+id/type"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
-            android:entries="@array/year"/>
+            android:entries="@array/year"
+            android:spinnerMode="dialog" />
 
         <Spinner
             android:layout_width="220dp"
@@ -335,7 +338,8 @@
             android:layout_below="@+id/year"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="7dp"
-            android:entries="@array/color"/>
+            android:entries="@array/color"
+            android:spinnerMode="dialog" />
 
     </RelativeLayout>
 

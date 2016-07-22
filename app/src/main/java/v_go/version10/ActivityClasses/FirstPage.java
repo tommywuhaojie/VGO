@@ -12,7 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 
-public class SignUpAndLoginIn extends AppCompatActivity {
+public class FirstPage extends AppCompatActivity {
 
     private static SharedPreferences sp;
     public static SharedPreferences getSharedPreferences(){

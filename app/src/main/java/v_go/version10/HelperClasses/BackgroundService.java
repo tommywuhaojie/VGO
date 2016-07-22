@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.IBinder;
@@ -21,28 +22,34 @@ import org.json.JSONObject;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import v_go.version10.ActivityClasses.LoginNew;
 import v_go.version10.ActivityClasses.Main;
-import v_go.version10.Chat.ChatActivity;
+import v_go.version10.FragmentClasses.ChatFragment;
+import v_go.version10.FragmentClasses.TabC_1_new;
 import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 import v_go.version10.SocketIo.SocketIoHelper;
 
 public class BackgroundService extends Service {
 
-    private int numberOfPushNotifications = 0;
-
-    private LocalBroadcastManager mLocalBroadcastManager;
-
-    private static Socket socket;
-    public static Socket getSocket(){
-        return socket;
+    private static int numberOfPushNotifications = 0;
+    public static void resetNumberOfPushNotification(){
+        numberOfPushNotifications = 0;
     }
 
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private Socket socket;
+
     public final static int NOTIFICATION_ID = 12345;
+    private Uri notificationSound;
+
+    public static HashMap<String, Integer> unReadMessage = new HashMap<>();
 
     public BackgroundService() {
         super();
@@ -60,8 +67,8 @@ public class BackgroundService extends Service {
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         // setup socket.io
-        SocketIoHelper socketHelper = new SocketIoHelper();
-        socket = socketHelper.getSocket();
+        SocketIoHelper app = (SocketIoHelper) getApplication();
+        socket = app.getSocket();
         socket.connect();
         socket.on(Socket.EVENT_CONNECT, onConnect);
         socket.on(Socket.EVENT_DISCONNECT, onDisconnect);
@@ -70,38 +77,44 @@ public class BackgroundService extends Service {
         socket.on("private message", onNewPrivateMessage);
         socket.on("server error", onServerError);
 
+        notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
     }
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket connected");
+            Log.d("DEBUG", "socket connected "  + logTime());
         }
     };
 
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket disconnected");
+            Log.d("DEBUG", "socket disconnected "  + logTime());
         }
     };
-
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.d("DEBUG", "socket failed to connect");
+            Log.d("DEBUG", "socket failed to connect " + logTime());
+
+            // clear local is_logged_in flag
+            SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("is_logged_in", false);
+            editor.apply();
         }
     };
-
     private Emitter.Listener onServerError = new Emitter.Listener(){
         @Override
         public void call(final Object... args) {
             JSONObject error = (JSONObject) args[0];
             try {
-                Log.d("DEBUG", error.getString("msg"));
+                Log.d("DEBUG", error.getString("msg") + " " + logTime());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
         }
     };
 
@@ -121,14 +134,21 @@ public class BackgroundService extends Service {
 
                 mLocalBroadcastManager.sendBroadcast(broadcastIntent);
 
-                if(!ChatActivity.isActivityVisible() || !ChatActivity.isUserIdMatched(sender_user_id)){
+                // send push notification
+                if(!TabC_1_new.isVisible && !ChatFragment.target_user_id.equals(sender_user_id)){
                     sendNotification("chat message");
+                }else{
+                    // play sound and vibrate but no push notification
+                    Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
+                    ringtone.play();
+                    ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(300);
                 }
-
 
             }catch (JSONException e){
                 e.printStackTrace();
             }
+
+            Log.d("DEBUG", "new message " + logTime());
         }
     };
 
@@ -147,8 +167,6 @@ public class BackgroundService extends Service {
             // TO DO: trip notification, request, etc
         }
 
-        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.vgo_logo_small)
@@ -159,6 +177,7 @@ public class BackgroundService extends Service {
         ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
 
         Intent targetIntent = new Intent(this, Main.class);
+        targetIntent.putExtra("toTab", 2);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
 
@@ -180,6 +199,13 @@ public class BackgroundService extends Service {
         }
     }
 
+    private String logTime(){
+        Date date = new Date();
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd h:mm aa");
+        String now = formatter.format(date);
+        return now;
+    }
+
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -189,9 +215,6 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
     }
-
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();

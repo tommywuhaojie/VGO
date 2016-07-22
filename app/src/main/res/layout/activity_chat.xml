@@ -1,4 +1,4 @@
-<v_go.version10.Chat.widgets.SizeNotifierRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,7 +22,7 @@
 
     <LinearLayout
         android:id="@+id/bottomlayout"
-        android:background="@android:color/white"
+        android:background="#00000000"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
@@ -30,7 +30,28 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="18dp"
+            android:background="#00000000"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Other person is typing..."
+                android:id="@+id/is_typing"
+                android:visibility="gone"
+                android:textColor="#ffffff"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:gravity="center" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:clickable="false">
 
             <v_go.version10.HelperClasses.ChatEditText
                 android:id="@+id/chat_edit_text1"
@@ -63,7 +84,6 @@
         </RelativeLayout>
 
 
-
     </LinearLayout>
 
-</v_go.version10.Chat.widgets.SizeNotifierRelativeLayout>
+</RelativeLayout>
