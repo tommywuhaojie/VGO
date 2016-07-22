@@ -1,14 +1,25 @@
 package v_go.version10.ApiClasses;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.text.TextUtils;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.CookieHandler;
@@ -245,6 +256,81 @@ public class UserApi {
         return BitmapFactory.decodeStream(inputStream);
     }
 
+    public static String saveAvatarToStorage(Bitmap bitmapImage, String user_id, Context applicationContext){
+        ContextWrapper cw = new ContextWrapper(applicationContext);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath = new File(directory, "avatar_" + user_id + ".jpg");
+        try {
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(mypath);
+                // Use the compress method on the BitMap object to write image to the OutputStream
+                bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                fos.close();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+        return mypath.getAbsolutePath();
+    }
+
+    public static Bitmap loadAvatarFromStorage(String user_id, Context applicationContext)
+    {
+        ContextWrapper cw = new ContextWrapper(applicationContext);
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+
+        try {
+            File f = new File(directory, "avatar_" + user_id + ".jpg");
+            return BitmapFactory.decodeStream(new FileInputStream(f));
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static String getMyUserId(Context appContext){
+        SharedPreferences settings = appContext.getSharedPreferences("cache", 0);
+        return settings.getString("user_id", "");
+    }
+    public static Bitmap loadMyAvatar(Context appContext){
+        return loadAvatarFromStorage(getMyUserId(appContext), appContext);
+    }
+
+    public static Bitmap getCircularBitmap(Bitmap bitmap) {
+        Bitmap output;
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            output = Bitmap.createBitmap(bitmap.getHeight(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        } else {
+            output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getWidth(), Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(output);
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        float r = 0;
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            r = bitmap.getHeight() / 2;
+        } else {
+            r = bitmap.getWidth() / 2;
+        }
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
+
     public static boolean isValidEmail(CharSequence target) {
         if (TextUtils.isEmpty(target)) {
             return false;
@@ -257,4 +343,6 @@ public class UserApi {
         String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}";
         return pwd.matches(pattern);
     }
+
+
 }

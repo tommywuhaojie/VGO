@@ -59,7 +59,6 @@ public class TabC_1_new extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<HashMap<String, String>> hashMap = new ArrayList<>();
-    private List<Bitmap> avatarList = new ArrayList<>();
     private List<String> userIdList = new ArrayList<>();
     private List<String> nameList = new ArrayList<>();
     private List<Integer> badgeList = new ArrayList<>();
@@ -117,10 +116,16 @@ public class TabC_1_new extends Fragment {
                 Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra("user_id", user_id);
                 intent.putExtra("full_name", nameList.get(position));
-                Global.other_avatar = avatarList.get(position);
                 // clear up badge
                 badgeList.set(position, 0);
-                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                adapter = new ContactListAdapter(getActivity(),
+                        hashMap,
+                        R.layout.contact_row,
+                        from,
+                        to,
+                        userIdList,
+                        badgeList,
+                        getActivity().getApplicationContext());
                 contactListView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
                 userIdIsTalkingTo = user_id;
@@ -204,7 +209,14 @@ public class TabC_1_new extends Fragment {
             hashMap.get(positionToUpdate).put("last_message", last_message_sent);
             hashMap.get(positionToUpdate).put("date_time", last_sent_time);
             // update listview
-            adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+            adapter = new ContactListAdapter(Main.activity,
+                    hashMap,
+                    R.layout.contact_row,
+                    from,
+                    to,
+                    userIdList,
+                    badgeList,
+                    getActivity().getApplicationContext());
             contactListView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         }
@@ -333,7 +345,14 @@ public class TabC_1_new extends Fragment {
                         badgeList.set(positionToUpdate, currentValue + 1);
                     }
                     // update listview
-                    adapter = new ContactListAdapter(Main.activity, hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                    adapter = new ContactListAdapter(Main.activity,
+                            hashMap,
+                            R.layout.contact_row,
+                            from,
+                            to,
+                            userIdList,
+                            badgeList,
+                            getActivity().getApplicationContext());
                     contactListView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                 }
@@ -357,10 +376,10 @@ public class TabC_1_new extends Fragment {
             public void run() {
 
                 Bitmap bitmap = UserApi.DownloadAvatar(user_id);
-
-                bitmap = Global.getCircularBitmap(bitmap);
-
-                avatarList.add(0, bitmap);
+                if(bitmap != null) {
+                    UserApi.saveAvatarToStorage(bitmap, user_id, getActivity().getApplicationContext());
+                    bitmap.recycle();
+                }
 
                 nameList.add(0, first_name_last_name);
 
@@ -370,7 +389,14 @@ public class TabC_1_new extends Fragment {
 
                 hashMap.add(0, map);
 
-                adapter = new ContactListAdapter(getActivity(), hashMap, R.layout.contact_row, from, to, avatarList, badgeList);
+                adapter = new ContactListAdapter(Main.activity,
+                        hashMap,
+                        R.layout.contact_row,
+                        from,
+                        to,
+                        userIdList,
+                        badgeList,
+                        getActivity().getApplicationContext());
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -16,9 +17,11 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,6 +38,7 @@ import java.util.Date;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import v_go.version10.ApiClasses.ChatApi;
+import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
@@ -60,6 +64,9 @@ public class ChatActivity extends AppCompatActivity {
     private int messageCount = -1;
     private Handler mTypingHandler = new Handler();
     private Socket socket;
+
+    private Bitmap my_avatar_bitmap;
+    private Bitmap other_avatar_bitmap;
 
     private static final int TYPING_TIMER_LENGTH = 600;
     private static final int NUMBER_OF_MESSAGES_TO_LOAD = 50;
@@ -166,8 +173,6 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        System.gc();
-
         SocketIoHelper app = (SocketIoHelper) getApplication();
         socket = app.getSocket();
 
@@ -185,13 +190,18 @@ public class ChatActivity extends AppCompatActivity {
 
         first_name = fullName.substring(0, fullName.trim().indexOf(" "));
 
-        getActivity().getWindow().setSoftInputMode(
+        getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         chatMessages = new ArrayList<>();
 
         chatListView = (ListView) findViewById(R.id.chat_list_view);
-        listAdapter = new ChatListAdapter(chatMessages, this);
+
+        my_avatar_bitmap = UserApi.loadMyAvatar(getApplicationContext());
+        other_avatar_bitmap = UserApi.loadAvatarFromStorage(other_user_id, getApplicationContext());
+
+        listAdapter = new ChatListAdapter(chatMessages, my_avatar_bitmap, other_avatar_bitmap, this);
+
         chatListView.setAdapter(listAdapter);
 
         chatEditText1 = (EditText) findViewById(R.id.chat_edit_text1);
@@ -274,6 +284,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onDestroy(){
         super.onDestroy();
 
+
         Thread networkThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -287,7 +298,30 @@ public class ChatActivity extends AppCompatActivity {
         });
         networkThread.start();
 
+
         socket.off("delivery confirmation", onDeliveryConfirm);
+
+        // clean up bitmap to free memory
+        listAdapter.recycleBitmaps();
+        my_avatar_bitmap.recycle();
+        other_avatar_bitmap.recycle();
+        unbindDrawables(findViewById(R.id.chat_layout));
+        System.gc();
+    }
+    private void unbindDrawables(View view)
+    {
+        if (view.getBackground() != null)
+        {
+            view.getBackground().setCallback(null);
+        }
+        if (view instanceof ViewGroup && !(view instanceof AdapterView))
+        {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++)
+            {
+                unbindDrawables(((ViewGroup) view).getChildAt(i));
+            }
+            ((ViewGroup) view).removeAllViews();
+        }
     }
 
     @Override
@@ -342,7 +376,7 @@ public class ChatActivity extends AppCompatActivity {
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String id = args[0].toString();
@@ -358,7 +392,7 @@ public class ChatActivity extends AppCompatActivity {
     private Emitter.Listener onStopTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String id = args[0].toString();
@@ -514,12 +548,6 @@ public class ChatActivity extends AppCompatActivity {
 
         messageCount = chatMessages.size();
         last_message = messageText;
-    }
-
-
-    private Activity getActivity()
-    {
-        return this;
     }
 
     @Override

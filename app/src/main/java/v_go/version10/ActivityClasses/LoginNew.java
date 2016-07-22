@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import org.json.JSONObject;
+
 import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.Chat.model.UserType;
 import v_go.version10.R;
@@ -106,13 +108,16 @@ public class LoginNew extends AppCompatActivity{
                 try {
                     String phone_number = phone.getText().toString().trim();
                     String pwd = password.getText().toString();
-                    String result = UserApi.Login(phone_number, pwd, getApplicationContext()).getString("code");
-                    if(result.equals("1"))
+                    JSONObject result = UserApi.Login(phone_number, pwd, getApplicationContext());
+                    if(result.getString("code").equals("1"))
                     {
+                        String user_id = result.getString("user_id");
+
                         // if login succeeded save status to local and no more login next time
                         SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putBoolean("is_logged_in", true);
+                        editor.putString("user_id", user_id);
                         editor.putString("phone_number", phone_number);
                         editor.putString("password", pwd);
                         editor.apply();
@@ -121,7 +126,7 @@ public class LoginNew extends AppCompatActivity{
                         startActivity(main);
                         pDialog.dismiss();
                     }
-                    else if(result.equals("-3")){
+                    else if(result.getString("code").equals("-3")){
                         pDialog.dismiss();
                         runOnUiThread(new Runnable() {
                             @Override

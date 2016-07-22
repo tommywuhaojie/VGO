@@ -24,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import v_go.version10.ApiClasses.UserApi;
@@ -125,16 +126,22 @@ public class SignUp2 extends AppCompatActivity {
                 try {
                     if(registerResult.getString("code").matches("1")){
                         // login right after register succeeded
-                        JSONObject loginResult = UserApi.Login(phone_number, password, getApplicationContext());
+                        final JSONObject loginResult = UserApi.Login(phone_number, password, getApplicationContext());
                         if(loginResult.getString("code").matches("1")){
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-
+                                    String user_id = "";
+                                    try {
+                                        user_id = loginResult.getString("user_id");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
                                     // if login succeeded save status to local and no more login next time
                                     SharedPreferences settings = getApplicationContext().getSharedPreferences("cache", 0);
                                     SharedPreferences.Editor editor = settings.edit();
                                     editor.putBoolean("is_logged_in", true);
+                                    editor.putString("user_id", user_id);
                                     editor.apply();
 
                                     Intent intent = new Intent(SignUp2.this, SignUp3.class);

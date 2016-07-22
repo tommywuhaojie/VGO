@@ -1,6 +1,7 @@
 package v_go.version10.Chat;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,11 +26,15 @@ public class ChatListAdapter extends BaseAdapter {
 
     private ArrayList<ChatMessage> chatMessages;
     private Context context;
+    private Bitmap my_avatar_bitmap;
+    private Bitmap other_avatar_bitmap;
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
-    public ChatListAdapter(ArrayList<ChatMessage> chatMessages, Context context) {
+    public ChatListAdapter(ArrayList<ChatMessage> chatMessages, Bitmap my_avatar_bitmap, Bitmap other_avatar_bitmap, Context context) {
         this.chatMessages = chatMessages;
         this.context = context;
+        this.my_avatar_bitmap = my_avatar_bitmap;
+        this.other_avatar_bitmap = other_avatar_bitmap;
     }
 
 
@@ -71,8 +76,8 @@ public class ChatListAdapter extends BaseAdapter {
                 holder1 = (ViewHolder1) v.getTag();
 
             }
-            if(Global.other_avatar != null) {
-                holder1.avatar.setImageBitmap(Global.other_avatar);
+            if(other_avatar_bitmap != null) {
+                holder1.avatar.setImageBitmap(other_avatar_bitmap);
             }
 
             holder1.messageTextView.setText(message.getMessageText());
@@ -98,8 +103,8 @@ public class ChatListAdapter extends BaseAdapter {
 
             }
 
-            if(Global.my_avatar != null) {
-                holder2.avatar.setImageBitmap(Global.my_avatar);
+            if(my_avatar_bitmap != null) {
+                holder2.avatar.setImageBitmap(my_avatar_bitmap);
             }
             holder2.messageTextView.setText(message.getMessageText());
             holder2.timeTextView.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
@@ -110,11 +115,7 @@ public class ChatListAdapter extends BaseAdapter {
                 holder2.messageStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_single_tick));
 
             }
-
-
         }
-
-
         return v;
     }
 
@@ -141,5 +142,19 @@ public class ChatListAdapter extends BaseAdapter {
         public TextView messageTextView;
         public TextView timeTextView;
 
+    }
+    public void recycleBitmaps(){
+        if (my_avatar_bitmap != null) {
+            if(!my_avatar_bitmap.isRecycled()) {
+                my_avatar_bitmap.recycle();
+                my_avatar_bitmap = null;
+            }
+        }
+        if (other_avatar_bitmap != null) {
+            if(!other_avatar_bitmap.isRecycled()) {
+                other_avatar_bitmap.recycle();
+                other_avatar_bitmap = null;
+            }
+        }
     }
 }

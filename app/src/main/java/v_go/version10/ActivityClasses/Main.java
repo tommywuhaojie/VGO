@@ -3,10 +3,12 @@ package v_go.version10.ActivityClasses;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -27,6 +29,10 @@ import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -70,59 +76,30 @@ public class Main extends AppCompatActivity{
 
     // cached object to store current user's infomation
     private UserCache userCache = new UserCache();
+    public UserCache getUserCache(){
+        return userCache;
+    }
 
     // to receive notification from background service
     private BroadcastReceiver broadcastReceiver;
 
     public static FragmentActivity activity;
 
-    public UserCache getUserCache(){
-        return userCache;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
         Log.d("DEBUG", "Main onResume");
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         Log.d("DEBUG", "Main onPause");
-
-        // pause long polling
-        //stopService(new Intent(getBaseContext(), BackgroundService.class));
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Global.resetAll();
         Log.d("DEBUG", "Main onDestroy");
-    }
-
-    public void setTabHostVisibility(Boolean visible){
-        if(visible) {
-            mTabHost.getTabWidget().setVisibility(View.VISIBLE);
-        }else{
-            mTabHost.getTabWidget().setVisibility(View.GONE);
-        }
-
-    }
-
-    public void downloadCurrentUserAvatar(){
-        Thread networkThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final Bitmap bitmap = UserApi.DownloadAvatar();
-                if (bitmap != null) {
-                    Bitmap circleBitmap = Global.getCircularBitmap(bitmap);
-                    userCache.setAvatar(circleBitmap);
-                    Global.my_avatar = circleBitmap;
-                }
-            }
-        });
-        networkThread.start();
     }
 
     @Override
@@ -139,10 +116,6 @@ public class Main extends AppCompatActivity{
 
         // start socket io background service
         startService(new Intent(this, BackgroundService.class));
-
-        // download necessary user information in a different thread: avatar, name, etc...
-        downloadCurrentUserAvatar();
-        // TO DO: download user info
 
         // lists initialization
         notifStack = new Stack<>();
