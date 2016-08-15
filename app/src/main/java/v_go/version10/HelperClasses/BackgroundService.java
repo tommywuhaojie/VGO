@@ -78,8 +78,22 @@ public class BackgroundService extends Service {
         socket.on("server error", onServerError);
 
         notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // disconnect from server
+        socket.disconnect();
+        socket.off(Socket.EVENT_CONNECT, onConnect);
+        socket.off(Socket.EVENT_DISCONNECT, onDisconnect);
+        socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        socket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        socket.off("private message", onNewPrivateMessage);
+        socket.off("server error", onServerError);
+    }
+
     private Emitter.Listener onConnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -215,11 +229,5 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
 
-        // disconnect from server
-        socket.disconnect();
-    }
 }

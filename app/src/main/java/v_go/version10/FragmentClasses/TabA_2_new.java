@@ -407,7 +407,8 @@ public class TabA_2_new extends Fragment implements DatePickerDialog.OnDateSetLi
 
         int id = item.getItemId();
         if(id == android.R.id.home){
-            ((Main)getActivity()).popFragments();
+            Log.d("DEBUG", "f2 home");
+            getActivity().onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

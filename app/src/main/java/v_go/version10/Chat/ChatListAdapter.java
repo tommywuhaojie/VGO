@@ -10,15 +10,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import v_go.version10.Chat.model.ChatMessage;
 import v_go.version10.Chat.model.Status;
 import v_go.version10.Chat.model.UserType;
-import v_go.version10.HelperClasses.Global;
 import v_go.version10.R;
 
 
@@ -28,6 +25,7 @@ public class ChatListAdapter extends BaseAdapter {
     private Context context;
     private Bitmap my_avatar_bitmap;
     private Bitmap other_avatar_bitmap;
+
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm");
 
     public ChatListAdapter(ArrayList<ChatMessage> chatMessages, Bitmap my_avatar_bitmap, Bitmap other_avatar_bitmap, Context context) {
@@ -113,7 +111,8 @@ public class ChatListAdapter extends BaseAdapter {
                 holder2.messageStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_double_tick));
             } else if (message.getMessageStatus() == Status.SENT) {
                 holder2.messageStatus.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_single_tick));
-
+            } else if(message.getMessageStatus() == Status.PENDING){
+                holder2.messageStatus.setImageDrawable(null);
             }
         }
         return v;
