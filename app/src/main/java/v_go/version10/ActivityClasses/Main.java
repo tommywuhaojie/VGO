@@ -3,12 +3,10 @@ package v_go.version10.ActivityClasses;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -29,17 +27,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.util.HashMap;
 import java.util.Stack;
-
 import v_go.version10.ApiClasses.UserApi;
 import v_go.version10.FragmentClasses.TabA_1;
 import v_go.version10.FragmentClasses.TabB_1;
@@ -49,7 +38,6 @@ import v_go.version10.FragmentClasses.TabD_1;
 import v_go.version10.HelperClasses.Global;
 import v_go.version10.HelperClasses.Notification;
 import v_go.version10.HelperClasses.UserCache;
-import v_go.version10.PersistentCookieStore.SiCookieStore2;
 import v_go.version10.R;
 import v_go.version10.HelperClasses.BackgroundService;
 
@@ -492,7 +480,7 @@ public class Main extends AppCompatActivity{
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if(id == android.R.id.home){
-            onBackPressed();
+            //onBackPressed();
         }
 
         //noinspection SimplifiableIfStatement

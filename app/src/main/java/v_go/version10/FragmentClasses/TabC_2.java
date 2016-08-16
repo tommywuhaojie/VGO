@@ -257,7 +257,7 @@ public class TabC_2 extends Fragment   {
 
         int id = item.getItemId();
         if(id == android.R.id.home){
-            ((Main)getActivity()).popFragments();
+            getActivity().onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

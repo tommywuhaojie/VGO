@@ -39,6 +39,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -61,6 +63,7 @@ public class ChatFragment extends Fragment {
     private ListView chatListView;
     private EditText chatEditText1;
     private ArrayList<ChatMessage> chatMessages;
+    private HashMap<String, Integer> idToIndexHashMap = new HashMap<>();
     private ImageView enterChatView1;
     private ChatListAdapter listAdapter;
     private String other_user_id;
@@ -81,6 +84,9 @@ public class ChatFragment extends Fragment {
 
     public static String target_user_id = "";
     private boolean isThisInStack;
+
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private BroadcastReceiver broadcastReceiver;
 
 
     // on send
@@ -187,6 +193,7 @@ public class ChatFragment extends Fragment {
 
         // enable back button
         ((Main)getActivity()).enableBackButton(true);
+        setHasOptionsMenu(true);
 
         // setup actionbar title
         String fullName = getArguments().getString("full_name");
@@ -199,7 +206,7 @@ public class ChatFragment extends Fragment {
         first_name = fullName.substring(0, fullName.trim().indexOf(" "));
 
         getActivity().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         chatMessages = new ArrayList<>();
 
@@ -357,6 +364,11 @@ public class ChatFragment extends Fragment {
         socket.off("is typing", onTyping);
         socket.off("stop typing", onStopTyping);
 
+        // unregister broadcast receiver
+        if(mLocalBroadcastManager != null && broadcastReceiver != null){
+            mLocalBroadcastManager.unregisterReceiver(broadcastReceiver);
+        }
+
         // update contact row when go back
         if(messageCount == chatMessages.size()){
             TabC_1_new.updateContactRowInfo(last_message, last_send_time);
@@ -394,8 +406,18 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onDeliveryConfirm = new Emitter.Listener(){
         @Override
         public void call(final Object... args) {
-            Log.d("DEBUG", args[0].toString());
-            Log.d("DEBUG", "delivered");
+            Log.d("DEBUG", args[0].toString() + " delivered");
+
+            String message_id = args[0].toString();
+            int index = idToIndexHashMap.get(message_id);
+            chatMessages.get(index).setMessageStatus(Status.SENT);
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    listAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
     private Emitter.Listener onTyping = new Emitter.Listener() {
@@ -444,8 +466,8 @@ public class ChatFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction("private message");
 
-        LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
-        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(getActivity());
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
@@ -550,6 +572,13 @@ public class ChatFragment extends Fragment {
             otherUser.put("receiver_user_id", other_user_id);
             otherUser.put("message", messageText);
 
+            // delivery confirmation message_id
+            UUID uuid = UUID.randomUUID();
+            otherUser.put("message_id", uuid.toString());
+
+            idToIndexHashMap.put(uuid.toString(), chatMessages.size());
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -561,7 +590,7 @@ public class ChatFragment extends Fragment {
             return;
 
         final ChatMessage message = new ChatMessage();
-        message.setMessageStatus(Status.SENT);
+        message.setMessageStatus(Status.PENDING);
         message.setMessageText(messageText);
         message.setUserType(userType);
         Long time = new Date().getTime();
@@ -570,11 +599,9 @@ public class ChatFragment extends Fragment {
 
         chatMessages.add(message);
 
-        if(listAdapter!= null)
-            listAdapter.notifyDataSetChanged();
-        scrollToBottom();
+        listAdapter.notifyDataSetChanged();
 
-        message.setMessageStatus(Status.SENT);
+        scrollToBottom();
 
         messageCount = chatMessages.size();
         last_message = messageText;
@@ -590,10 +617,11 @@ public class ChatFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        Log.d("DEBUG", "selected " + id);
+        Log.d("DEBUG", "id " + id);
         if(id == android.R.id.home){
-            Log.d("DEBUG", "back icon press");
-            ((Main)getActivity()).popFragments();
+            Log.d("DEBUG", "home");
+            getActivity().onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
